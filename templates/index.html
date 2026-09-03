@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MachineVision OCR & SAP Integration</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    .bbox-highlight {
+      animation: pulse-ring 1.8s infinite;
+      border: 2px solid #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.25) !important;
+    }
+
+    /* Authentic Android Rugged Scanner Bezel */
+    .android-scanner-frame {
+      max-width: 440px;
+      margin: 1.5rem auto;
+      background: #020617;
+      border: 14px solid #1e293b;
+      border-radius: 46px;
+      box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85), 
+                  0 0 0 2px #334155,
+                  inset 0 2px 4px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Zebra Hardware Top Speaker & Light Sensor */
+    .zebra-hardware-top {
+      height: 24px;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .zebra-speaker-slit {
+      width: 48px;
+      height: 4px;
+      background: #0f172a;
+      border-radius: 9999px;
+    }
+    .zebra-camera-dot {
+      width: 8px;
+      height: 8px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 9999px;
+    }
+
+    /* Android Status Bar */
+    .android-status-bar {
+      height: 28px;
+      background: #0f172a;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #cbd5e1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Android System Navigation Bar (Bottom) */
+    .android-nav-bar {
+      height: 42px;
+      background: #090d16;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border-top: 1px solid #1e293b;
+      color: #64748b;
+    }
+
+    /* Zebra Iconic Scan Trigger Button */
+    .zebra-trigger-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      transition: all 0.15s ease;
+    }
+    .zebra-trigger-btn:active {
+      transform: scale(0.97);
+      background: linear-gradient(135deg, #d97706, #b45309);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- TOP GLOBAL HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+        <i class="fa-solid fa-microchip text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-base sm:text-lg tracking-tight text-white">MachineVision OCR</h1>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">8 Spinning Stages</span>
+          <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">SAP ERP Ready</span>
+        </div>
+        <p class="text-xs text-slate-400 hidden sm:block">Textile Mill Screen Capture &bull; Carding to Link Conner &bull; SAP CO11N</p>
+      </div>
+    </div>
+
+    <!-- VIEWPORT TOGGLES & ACTIONS -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      
+      <!-- MODE SWITCHER: WORKSTATION VS SCANNER VIEW -->
+      <div class="bg-slate-800 p-1 rounded-xl border border-slate-700 flex items-center gap-1 text-xs">
+        <button id="btn-mode-desktop" class="px-3 py-1.5 rounded-lg font-medium transition bg-blue-600 text-white shadow-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-desktop"></i> Workstation View
+        </button>
+        <button id="btn-mode-scanner" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5">
+          <i class="fa-solid fa-mobile-screen-button text-amber-400"></i> Scanner View
+        </button>
+      </div>
+
+      <!-- DOWNLOAD APK BUTTON -->
+      <button id="btn-download-apk" class="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-1.5 transition">
+        <i class="fa-brands fa-android text-sm"></i> Download APK
+      </button>
+
+      <!-- AUDIT LOG BUTTON -->
+      <button id="btn-view-audit" class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 bg-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Audit (<span id="audit-count">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- HIDDEN NATIVE INPUTS FOR FILE & CAMERA -->
+  <input type="file" id="file-input" accept="image/*" class="hidden">
+  <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+
+  <!-- ======================================================== -->
+  <!-- ROOT APPLICATION WRAPPER (Switches Desktop / Scanner)   -->
+  <!-- ======================================================== -->
+  <div id="app-viewport-wrapper">
+    
+    <!-- HARDWARE FRAME (Active only in Scanner View) -->
+    <div id="scanner-hardware-bezel" class="hidden">
+      <!-- TOP HARDWARE NOTCH -->
+      <div class="zebra-hardware-top">
+        <div class="zebra-speaker-slit"></div>
+        <div class="zebra-camera-dot"></div>
+      </div>
+
+      <!-- ANDROID STATUS BAR -->
+      <div class="android-status-bar select-none">
+        <div class="flex items-center gap-2">
+          <span id="android-clock" class="font-bold text-white">06:45</span>
+          <i class="fa-solid fa-barcode text-[10px] text-amber-400" title="Zebra DataWedge Active"></i>
+        </div>
+        <div class="flex items-center gap-2.5 text-xs">
+          <span class="text-[10px] text-slate-400">5G</span>
+          <i class="fa-solid fa-wifi text-[10px]"></i>
+          <span class="text-[10px] text-slate-300">98%</span>
+          <i class="fa-solid fa-battery-three-quarters text-emerald-400"></i>
+        </div>
+      </div>
+
+      <!-- ANDROID TOP APP BAR -->
+      <div class="bg-slate-900 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-barcode"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xs text-white">Zebra OCR Scanner</div>
+            <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online &bull; SAP Connected
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btn-scanner-torch" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs" title="Toggle Flashlight">
+            <i class="fa-solid fa-bolt"></i>
+          </button>
+          <button onclick="document.getElementById('camera-input').click()" class="w-7 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 flex items-center justify-center text-xs" title="Open Native Camera">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 transition-all duration-300" id="main-layout">
+      
+      <!-- ============================================== -->
+      <!-- CONTROLS & MACHINE SELECTOR SECTION           -->
+      <!-- ============================================== -->
+      <section class="mb-5 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl" id="selector-card">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-xs font-bold text-white">1</span>
+              <h2 class="font-semibold text-sm sm:text-base text-white">Production Machine Screen</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5 ml-8" id="selector-subtext">Select one of the 8 production stages or capture/upload a machine screen</p>
+          </div>
+
+          <!-- DYNAMIC ACTION BUTTONS (Switched based on View Mode) -->
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end" id="action-buttons-group">
+            
+            <!-- TEMPLATE SELECTOR OVERRIDE -->
+            <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+              <label for="template-select" class="font-medium text-slate-400">Template:</label>
+              <select id="template-select" class="bg-transparent text-blue-400 font-semibold outline-none cursor-pointer">
+                <option value="auto">Auto-Detect (Smart AI)</option>
+                <option value="carding">1. Carding Machine</option>
+                <option value="breaker_draw_frame">2. Breaker Draw Frame (Br. DF)</option>
+                <option value="lap_former">3. Lap Former</option>
+                <option value="comber">4. Comber</option>
+                <option value="finisher_draw_frame">5. Finisher Draw Frame (Fr. DF)</option>
+                <option value="speed_frame">6. Speed Frame (Roving Frame)</option>
+                <option value="ring_frame">7. Ring Frame (Spinning)</option>
+                <option value="link_conner">8. Link Conner (Autoconer 6)</option>
+              </select>
+            </div>
+
+            <!-- BUTTON: CAMERA PHOTO CAPTURE (Only in Scanner View) -->
+            <button id="btn-camera-capture" class="hidden px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-500/20 active:scale-95">
+              <i class="fa-solid fa-camera"></i> Camera Capture
+            </button>
+
+            <!-- BUTTON: UPLOAD PHOTO (Always visible in Workstation View & Scanner View) -->
+            <button id="btn-upload-photo" onclick="document.getElementById('file-input').click()" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-blue-500/20 active:scale-95">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- 8-STAGE HORIZONTAL MACHINE CAROUSEL -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="samples-container">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- SPLIT INSPECTOR: VIEWPORT + VERIFICATION FORM  -->
+      <!-- ============================================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start" id="split-container">
+        
+        <!-- LEFT COLUMN: IMAGE VIEWER WITH BOUNDING BOX OVERLAYS -->
+        <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col" id="image-panel">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-xs font-bold text-white">2</span>
+              <div>
+                <h3 class="font-semibold text-sm text-white">Machine Screen OCR Overlay</h3>
+                <p class="text-[11px] text-slate-400">Template: <span id="detected-template-badge" class="font-semibold text-blue-400">Auto Detecting...</span></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-shield-check text-[10px]"></i> <span id="overall-confidence">98% Conf.</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- IMAGE CANVAS CONTAINER -->
+          <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center group" id="canvas-wrapper">
+            <img id="screen-image" src="/samples/carding.jpg" alt="Machine Screen" class="w-full h-full object-contain select-none transition-transform duration-200">
+            
+            <!-- SVG BOUNDING BOX OVERLAY LAYER -->
+            <svg id="bbox-overlay" class="absolute inset-0 w-full h-full pointer-events-auto" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+              <!-- Bounding boxes injected via JS -->
+            </svg>
+
+            <!-- SCANNER LASER ANIMATION -->
+            <div id="scan-laser" class="hidden absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#38bdf8] animate-[bounce_2s_infinite]"></div>
+
+            <!-- FLOATING TOOLTIP ON HOVER -->
+            <div id="hover-tooltip" class="hidden absolute z-30 pointer-events-none px-3 py-1.5 rounded-lg bg-slate-900/95 border border-blue-500 text-xs shadow-2xl backdrop-blur">
+              <span id="tooltip-label" class="font-bold text-blue-400 block"></span>
+              <span id="tooltip-value" class="text-white font-mono"></span>
+              <span id="tooltip-conf" class="text-[10px] text-emerald-400 block"></span>
+            </div>
+          </div>
+
+          <!-- IN-SCANNER HARDWARE TRIGGER BAR (Only visible in Scanner View) -->
+          <div id="scanner-trigger-bar" class="hidden mt-3 p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+            <button onclick="triggerScannerCameraModal()" class="flex-1 py-3 px-4 zebra-trigger-btn rounded-xl text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+              <i class="fa-solid fa-barcode text-base"></i> Tap Hardware Scan Trigger
+            </button>
+            <button onclick="document.getElementById('camera-input').click()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold flex items-center gap-1.5" title="Take Snap with Native Camera">
+              <i class="fa-solid fa-camera"></i>
+            </button>
+            <button onclick="document.getElementById('file-input').click()" class="py-3 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5" title="Pick from Gallery">
+              <i class="fa-solid fa-folder-open"></i>
+            </button>
+          </div>
+
+          <div class="mt-2.5 flex items-center justify-between text-xs text-slate-400 px-1">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info text-blue-400"></i> Tap fields below or hover boxes to inspect calibration
+            </span>
+            <button id="btn-reextract" class="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1">
+              <i class="fa-solid fa-arrows-rotate"></i> Re-Scan
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: EXTRACTED FORM DATA & SAP INTEGRATION -->
+        <div class="lg:col-span-6 space-y-5" id="data-panel">
+          
+          <!-- CARD: MULTI-ROW TABLE VIEW (Shown for Speed Frame) -->
+          <div id="table-view-card" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+            <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-xs font-bold text-white">3</span>
+                <div>
+                  <h3 class="font-semibold text-sm text-white">Multi-Day Roving Performance Matrix</h3>
+                  <p class="text-[11px] text-slate-400">Tap any row below to load that shift into SAP</p>
+                </div>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">8 Shifts Extracted</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-mono border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400 text-[10px] uppercase">
+                    <th class="py-2 px-2">Date</th>
+                    <th class="py-2 px-2">Eff %</th>
+                    <th class="py-2 px-2">Stop</th>
+                    <th class="py-2 px-2">Doffs</th>
+                    <th class="py-2 px-2">Kgs</th>
+                    <th class="py-2 px-2">Hanks</th>
+                    <th class="py-2 px-2 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="matrix-table-body">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CARD: VALIDATION & FORM REVIEW -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl" id="form-card">
+            <div class="flex items-center justify-between mb-3.5 border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-xs font-bold text-white">3</span>
+                <div>
+                  <h3 class="font-semibold text-sm text-white">Operator Data Verification Form</h3>
+                  <p class="text-[11px] text-slate-400">Review &amp; correct extracted metrics before SAP posting</p>
+                </div>
+              </div>
+              <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono" id="form-field-count">Fields</span>
+            </div>
+
+            <!-- FORM GRID -->
+            <form id="extraction-form" class="space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="form-fields-container">
+                <!-- Dynamically populated fields with confidence tags -->
+              </div>
+            </form>
+
+            <!-- VALIDATION ALERTS -->
+            <div id="validation-warnings" class="mt-3.5 hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+              <div class="font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation"></i> Sanity Check Notice
+              </div>
+              <ul id="warning-list" class="list-disc list-inside space-y-0.5 text-amber-200"></ul>
+            </div>
+          </div>
+
+          <!-- CARD: SAP BAPI / ODATA PAYLOAD & SUBMISSION -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl" id="sap-card">
+            <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-600 text-xs font-bold text-white">4</span>
+                <div>
+                  <h3 class="font-semibold text-sm text-white">Push to SAP ERP (CO11N / OData)</h3>
+                  <p class="text-[11px] text-slate-400">Transaction <code class="text-emerald-400 font-mono">BAPI_PRODORDCONF_CREATE_TT</code></p>
+                </div>
+              </div>
+
+              <!-- TAB SWITCHER -->
+              <div class="flex items-center bg-slate-800 rounded-lg p-0.5 text-xs">
+                <button id="tab-sap-bapi" class="px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium">BAPI RFC</button>
+                <button id="tab-sap-odata" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium">S/4 OData</button>
+              </div>
+            </div>
+
+            <!-- SAP HEADER CONTROLS -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3.5 text-xs">
+              <div>
+                <label class="block text-slate-400 mb-1">Production Order</label>
+                <input type="text" id="sap-order-id" value="000010049281" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white focus:border-blue-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Operation No</label>
+                <input type="text" id="sap-operation" value="0010" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white focus:border-blue-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Work Center</label>
+                <input type="text" id="sap-work-center" value="CARD-01" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white focus:border-blue-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Plant</label>
+                <input type="text" id="sap-plant" value="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-white focus:border-blue-500 outline-none">
+              </div>
+            </div>
+
+            <!-- PAYLOAD PREVIEW ACCORDION -->
+            <div class="mb-3.5" id="sap-payload-preview-section">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+                <span>SAP Payload Preview:</span>
+                <button id="btn-copy-sap" class="text-blue-400 hover:text-blue-300 font-mono text-[11px] flex items-center gap-1">
+                  <i class="fa-regular fa-copy"></i> Copy JSON
+                </button>
+              </div>
+              <pre id="sap-payload-code" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] font-mono text-cyan-300 max-h-40 overflow-y-auto leading-relaxed"></pre>
+            </div>
+
+            <!-- ACTION BUTTON: SUBMIT TO SAP -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+              <button id="btn-submit-sap" class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition active:scale-[0.98]">
+                <i class="fa-solid fa-paper-plane"></i> Confirm &amp; Push to SAP System
+              </button>
+            </div>
+
+            <!-- SUCCESS RESULT CARD -->
+            <div id="sap-response-card" class="mt-3.5 hidden p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-check text-base"></i>
+                </div>
+                <div class="space-y-1 text-xs">
+                  <div class="font-bold text-white text-sm flex items-center gap-2">
+                    SAP Confirmation Successful
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[11px]" id="res-conf-no">CONF #10048291</span>
+                  </div>
+                  <p id="res-message" class="text-slate-300"></p>
+                  <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-emerald-500/20 font-mono text-[11px] text-slate-400">
+                    <div>Yield: <span id="res-yield" class="text-white font-semibold"></span></div>
+                    <div>Machine Work: <span id="res-work" class="text-white font-semibold"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- ANDROID BOTTOM NAVIGATION BAR (Only visible in Scanner View) -->
+    <div id="android-bottom-nav" class="hidden">
+      <div class="android-nav-bar select-none">
+        <button class="hover:text-white transition px-4 py-1" onclick="history.back()"><i class="fa-solid fa-caret-left text-lg"></i></button>
+        <button class="hover:text-white transition px-4 py-1" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i class="fa-regular fa-circle text-sm"></i></button>
+        <button class="hover:text-white transition px-4 py-1" onclick="document.getElementById('btn-view-audit').click()"><i class="fa-regular fa-square text-xs"></i></button>
+      </div>
+    </div>
+
+  </div> <!-- End #app-viewport-wrapper -->
+
+  <!-- ============================================== -->
+  <!-- MODAL: LIVE CAMERA VIEWFINDER MODAL            -->
+  <!-- ============================================== -->
+  <div id="camera-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="px-5 py-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-white font-bold text-sm">
+          <i class="fa-solid fa-camera text-amber-400"></i> Scanner Live Camera Viewfinder
+        </div>
+        <button onclick="closeScannerCameraModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+      <div class="relative bg-black aspect-[4/3] flex items-center justify-center overflow-hidden">
+        <video id="camera-stream" autoplay playsinline class="w-full h-full object-cover"></video>
+        <!-- Overlay viewfinder reticle -->
+        <div class="absolute inset-8 border-2 border-dashed border-amber-400/70 rounded-2xl pointer-events-none flex items-center justify-center">
+          <span class="text-amber-300/80 text-xs font-mono bg-black/60 px-3 py-1 rounded-full">Align Machine Screen inside Frame</span>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-950 flex items-center justify-around">
+        <button onclick="closeScannerCameraModal()" class="px-4 py-2 text-slate-400 hover:text-white text-xs font-semibold">
+          Cancel
+        </button>
+        <button id="btn-snap-photo" onclick="snapCameraPhoto()" class="w-14 h-14 rounded-full border-4 border-white bg-amber-500 hover:bg-amber-400 flex items-center justify-center text-slate-950 shadow-lg active:scale-95 transition">
+          <i class="fa-solid fa-camera text-xl"></i>
+        </button>
+        <button onclick="document.getElementById('camera-input').click(); closeScannerCameraModal();" class="px-4 py-2 text-amber-400 hover:text-amber-300 text-xs font-semibold">
+          Native Cam
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: DOWNLOAD APK / MOBILE APP PACKAGE       -->
+  <!-- ============================================== -->
+  <div id="apk-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+            <i class="fa-brands fa-android"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Download Scanner Mobile App / APK</h3>
+            <p class="text-xs text-slate-400">Deploy to Zebra TC21, TC26, TC52, TC57, TC53, TC58 Devices</p>
+          </div>
+        </div>
+        <button id="btn-close-apk" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 text-sm">
+        
+        <!-- OPTION 1: 1-CLICK PWA WEBAPK INSTALL (ZERO BUILD NEEDED) -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-950/50 to-slate-900 border border-blue-500/30">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-sm">Method 1: Instant Install on Zebra Device (Recommended)</h4>
+              <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                Open Chrome on your Zebra device at this server address (<code class="text-cyan-300 bg-slate-950 px-1.5 py-0.5 rounded font-mono">http://&lt;IP&gt;:5050</code>), tap the <strong>3-dots menu &rarr; "Install app"</strong> (or "Add to Home Screen"). 
+              </p>
+              <div class="mt-2 text-xs text-emerald-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check"></i> Android automatically generates a standalone <strong>WebAPK</strong> with full hardware camera access and offline cache!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPTION 2: DOWNLOAD FULL ANDROID STUDIO PROJECT (.ZIP) -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-slate-800 space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <i class="fa-solid fa-file-zipper"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm">Method 2: Native Android Kotlin Project (.ZIP)</h4>
+                <p class="text-xs text-slate-400 mt-0.5">Complete native Gradle project featuring CameraX, Zebra DataWedge API, and ML Kit On-Device Text Recognition.</p>
+              </div>
+            </div>
+            <a href="/static/MachineVision_Zebra_Scanner_Android_Project.zip" download="MachineVision_Zebra_Scanner_Android_Project.zip" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shrink-0 shadow-md">
+              <i class="fa-solid fa-download"></i> Download .ZIP
+            </a>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 space-y-1.5">
+            <div class="text-[11px] text-slate-500 uppercase font-semibold">How to build Debug APK:</div>
+            <div>1. Extract <code class="text-cyan-400">MachineVision_Zebra_Scanner_Android_Project.zip</code></div>
+            <div>2. Open in Android Studio or run: <code class="text-emerald-400">./gradlew assembleDebug</code></div>
+            <div>3. Sideload onto Zebra device: <code class="text-emerald-400">adb install app-debug.apk</code></div>
+          </div>
+        </div>
+
+        <!-- HARDWARE FEATURES SUPPORTED -->
+        <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+            <i class="fa-solid fa-barcode text-amber-400 text-base mb-1 block"></i>
+            <span class="font-semibold text-white block">Zebra DataWedge</span>
+            <span class="text-[10px] text-slate-400">Hardware Laser Scan</span>
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+            <i class="fa-solid fa-camera text-blue-400 text-base mb-1 block"></i>
+            <span class="font-semibold text-white block">CameraX + ML Kit</span>
+            <span class="text-[10px] text-slate-400">On-Device Screen OCR</span>
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+            <i class="fa-solid fa-server text-emerald-400 text-base mb-1 block"></i>
+            <span class="font-semibold text-white block">SAP BAPI / RFC</span>
+            <span class="text-[10px] text-slate-400">CO11N Production Yield</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AUDIT LOG MODAL                         -->
+  <!-- ============================================== -->
+  <div id="audit-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-clock-rotate-left text-blue-400 text-lg"></i>
+          <div>
+            <h3 class="font-bold text-white">SAP Confirmation Audit Trail</h3>
+            <p class="text-xs text-slate-400">Shift confirmations posted from Zebra Rugged Devices</p>
+          </div>
+        </div>
+        <button id="btn-close-audit" class="text-slate-400 hover:text-white text-lg px-2 py-1">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <table class="w-full text-left text-xs border-collapse font-mono">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 text-[11px] uppercase">
+              <th class="py-2.5 px-3">Timestamp</th>
+              <th class="py-2.5 px-3">SAP Conf #</th>
+              <th class="py-2.5 px-3">Machine / Work Center</th>
+              <th class="py-2.5 px-3">Yield</th>
+              <th class="py-2.5 px-3">Run Time</th>
+              <th class="py-2.5 px-3">Device / Operator</th>
+              <th class="py-2.5 px-3">Status</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
