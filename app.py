@@ -7,10 +7,20 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 
 from ocr_engine import MachineOCREngine
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
-app.config["UPLOAD_FOLDER"] = os.path.join(os.path.dirname(__file__), "uploads")
-app.config["SAMPLES_FOLDER"] = os.path.join(os.path.dirname(__file__), "samples")
-app.config["DB_FILE"] = os.path.join(os.path.dirname(__file__), "audit_trail.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+if IS_SERVERLESS:
+    UPLOAD_FOLDER = "/tmp/uploads"
+    DB_FILE = "/tmp/audit_trail.db"
+else:
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+    DB_FILE = os.path.join(BASE_DIR, "audit_trail.db")
+
+app = Flask(__name__, static_folder=os.path.join(BASE_DIR, "static"), template_folder=os.path.join(BASE_DIR, "templates"))
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["SAMPLES_FOLDER"] = os.path.join(BASE_DIR, "samples")
+app.config["DB_FILE"] = DB_FILE
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["SAMPLES_FOLDER"], exist_ok=True)

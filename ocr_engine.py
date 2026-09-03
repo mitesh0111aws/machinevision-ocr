@@ -17,8 +17,12 @@ import os
 import datetime
 from typing import Dict, Any, List, Optional
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 class MachineOCREngine:
-    def __init__(self, templates_file: str = "templates.json"):
+    def __init__(self, templates_file: Optional[str] = None):
+        if templates_file is None:
+            templates_file = os.path.join(BASE_DIR, "templates.json")
         self.templates_file = templates_file
         self.templates = self._load_templates()
 
