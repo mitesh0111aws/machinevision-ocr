@@ -477,24 +477,37 @@ function updateUserDisplayName() {
   }
 }
 
-function toggleUserDropdown(forceState) {
+function openUserDropdown() {
   const menu = document.getElementById("user-dropdown-menu");
   const chevron = document.getElementById("user-menu-chevron");
   const btn = document.getElementById("btn-user-menu");
   if (!menu) return;
+  updateUserDisplayName();
+  menu.classList.remove("hidden");
+  if (chevron) chevron.classList.add("rotate-180");
+  if (btn) btn.setAttribute("aria-expanded", "true");
+}
 
-  const isCurrentlyOpen = !menu.classList.contains("hidden");
-  const shouldOpen = typeof forceState === "boolean" ? forceState : !isCurrentlyOpen;
+function closeUserDropdown() {
+  const menu = document.getElementById("user-dropdown-menu");
+  const chevron = document.getElementById("user-menu-chevron");
+  const btn = document.getElementById("btn-user-menu");
+  if (!menu) return;
+  menu.classList.add("hidden");
+  if (chevron) chevron.classList.remove("rotate-180");
+  if (btn) btn.setAttribute("aria-expanded", "false");
+}
 
-  if (shouldOpen) {
-    updateUserDisplayName();
-    menu.classList.remove("hidden");
-    if (chevron) chevron.classList.add("rotate-180");
-    if (btn) btn.setAttribute("aria-expanded", "true");
+function toggleUserDropdown(event) {
+  if (event && event.stopPropagation) {
+    event.stopPropagation();
+  }
+  const menu = document.getElementById("user-dropdown-menu");
+  if (!menu) return;
+  if (menu.classList.contains("hidden")) {
+    openUserDropdown();
   } else {
-    menu.classList.add("hidden");
-    if (chevron) chevron.classList.remove("rotate-180");
-    if (btn) btn.setAttribute("aria-expanded", "false");
+    closeUserDropdown();
   }
 }
 
@@ -502,6 +515,8 @@ function toggleUserDropdown(forceState) {
 window.handleLoginSubmit = handleLoginSubmit;
 window.quickLogin = quickLogin;
 window.handleLogout = handleLogout;
+window.openUserDropdown = openUserDropdown;
+window.closeUserDropdown = closeUserDropdown;
 window.toggleUserDropdown = toggleUserDropdown;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.selectPlant = selectPlant;
@@ -649,17 +664,36 @@ window.closeAuditModal = closeAuditModal;
     btnCloseAudit.addEventListener("click", closeAuditModal);
   }
 
-  // User Profile Dropdown outside click & Escape dismiss
+  // User Profile Dropdown handlers
+  const btnUserMenu = document.getElementById("btn-user-menu");
+  if (btnUserMenu) {
+    btnUserMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleUserDropdown(e);
+    });
+  }
+
+  const userDropdownMenu = document.getElementById("user-dropdown-menu");
+  if (userDropdownMenu) {
+    userDropdownMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  // Outside click closes dropdown
   document.addEventListener("click", (e) => {
+    const menu = document.getElementById("user-dropdown-menu");
     const userPanel = document.getElementById("header-user-panel");
-    if (userPanel && !userPanel.contains(e.target)) {
-      toggleUserDropdown(false);
+    if (menu && !menu.classList.contains("hidden")) {
+      if (userPanel && !userPanel.contains(e.target)) {
+        closeUserDropdown();
+      }
     }
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      toggleUserDropdown(false);
+      closeUserDropdown();
     }
   });
 

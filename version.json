@@ -1,14 +1,27 @@
 {
   "app_name": "WelVision - AI Machine Vision & SAP Floor Portal",
-  "current_version": "2.3.0",
+  "current_version": "2.3.1",
   "release_date": "2026-09-08",
-  "git_tag": "v2.3.0",
+  "git_tag": "v2.3.1",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.3.1",
+      "date": "2026-09-08",
+      "title": "Bespoke WelVision SVG Logo & User Profile Dropdown Fix",
+      "tag": "v2.3.1",
+      "revert_command": "git checkout v2.3.1",
+      "changes": [
+        "Created and embedded a custom high-tech WelVision SVG logo featuring precision optical viewfinder brackets, cyan laser scanbeam, and neural textile iris.",
+        "Resolved User Profile dropdown clipping issue caused by header overflow-hidden; boosted dropdown z-index to z-[1000].",
+        "Added deterministic openUserDropdown, closeUserDropdown, and toggleUserDropdown event propagation handling.",
+        "Added official WelVision vector favicon (/static/welvision-logo.svg)."
+      ]
+    },
     {
       "version": "2.3.0",
       "date": "2026-09-08",
