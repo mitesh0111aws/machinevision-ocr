@@ -93,7 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn("Screen image error, falling back to active template sample");
       screenImage.src = `/samples/${currentTemplateId}.jpg`;
     };
+    screenImage.addEventListener("load", adjustOverlayPosition);
   }
+  window.addEventListener("resize", adjustOverlayPosition);
 
   loadSamples();
   setupEventListeners();
@@ -383,9 +385,13 @@ function renderScreenData(data) {
   // Update Geometry & Invariance Badge
   if (screenGeometryBadge && data.auto_calibration) {
     const cal = data.auto_calibration;
-    const rotText = cal.angle_normalized ? "Deskewed" : "0°";
-    const lightText = cal.lighting_normalized ? "Enhanced" : "Optimal";
-    screenGeometryBadge.textContent = `Auto-Norm: ${rotText} • ${lightText} • ${Math.round(cal.luminance)} Lum`;
+    if (cal.status_text) {
+      screenGeometryBadge.textContent = cal.status_text;
+    } else {
+      const rotText = cal.angle_normalized ? "Deskewed" : "0°";
+      const lightText = cal.lighting_normalized ? "Enhanced" : "Optimal";
+      screenGeometryBadge.textContent = `Auto-Norm: ${rotText} • ${lightText} • ${Math.round(cal.luminance)} Lum`;
+    }
   }
 
   // Show Fresh Data Banner if newly uploaded photo
@@ -457,8 +463,51 @@ function selectTableRow(date, eff, stopTime, doffs, kgs, hanks) {
   updateSapPreview();
 }
 
+// Adjust SVG overlay size and position to match rendered image bounds inside canvas-wrapper
+function adjustOverlayPosition() {
+  if (!screenImage || !bboxOverlay) return;
+  const container = document.getElementById("canvas-wrapper");
+  if (!container) return;
+
+  const contWidth = container.clientWidth;
+  const contHeight = container.clientHeight;
+  const natWidth = screenImage.naturalWidth;
+  const natHeight = screenImage.naturalHeight;
+
+  if (!natWidth || !natHeight || !contWidth || !contHeight) {
+    bboxOverlay.style.left = "0px";
+    bboxOverlay.style.top = "0px";
+    bboxOverlay.style.width = "100%";
+    bboxOverlay.style.height = "100%";
+    return;
+  }
+
+  const imgRatio = natWidth / natHeight;
+  const contRatio = contWidth / contHeight;
+
+  let renderWidth, renderHeight, leftOffset, topOffset;
+  if (imgRatio > contRatio) {
+    renderWidth = contWidth;
+    renderHeight = contWidth / imgRatio;
+    leftOffset = 0;
+    topOffset = (contHeight - renderHeight) / 2;
+  } else {
+    renderHeight = contHeight;
+    renderWidth = contHeight * imgRatio;
+    topOffset = 0;
+    leftOffset = (contWidth - renderWidth) / 2;
+  }
+
+  bboxOverlay.style.position = "absolute";
+  bboxOverlay.style.left = `${Math.round(leftOffset)}px`;
+  bboxOverlay.style.top = `${Math.round(topOffset)}px`;
+  bboxOverlay.style.width = `${Math.round(renderWidth)}px`;
+  bboxOverlay.style.height = `${Math.round(renderHeight)}px`;
+}
+
 // Render SVG Bounding Boxes Overlay
 function renderBoundingBoxes(fields) {
+  adjustOverlayPosition();
   bboxOverlay.innerHTML = "";
   fields.forEach(f => {
     const bbox = f.bbox;
@@ -853,16 +902,24 @@ async function handleFileUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  // 1. Instant local image preview via Data URL (ELIMINATES BLACK SCREEN 100%)
+  const isHeic = (file.name && file.name.toLowerCase().match(/\.(heic|heif)$/i)) || (file.type && file.type.toLowerCase().includes("heic"));
+  if (isHeic) {
+    currentClientImageUrl = null;
+    if (detectedTemplateBadge) detectedTemplateBadge.textContent = "Calibrating iPhone photo...";
+  }
+
+  // 1. Instant local image preview via Data URL for standard JPEG/PNG
   const reader = new FileReader();
   reader.onerror = () => console.warn("FileReader error");
   reader.onload = async (readEvent) => {
     const clientDataUrl = readEvent.target.result;
     
-    if (screenImage) {
-      screenImage.src = clientDataUrl;
+    if (!isHeic) {
+      if (screenImage) {
+        screenImage.src = clientDataUrl;
+      }
+      currentClientImageUrl = clientDataUrl;
     }
-    currentClientImageUrl = clientDataUrl;
 
     // 2. Sanitize filename: replace colons, spaces, and illegal characters
     const originalName = file.name || "screen_photo.jpg";
@@ -879,7 +936,7 @@ async function handleFileUpload(e) {
     }
 
     if (scanLaser) scanLaser.classList.remove("hidden");
-    if (detectedTemplateBadge) detectedTemplateBadge.textContent = "Processing " + getTemplateName(selectedTemplate) + "...";
+    if (detectedTemplateBadge) detectedTemplateBadge.textContent = "AI Scanning " + getTemplateName(selectedTemplate) + "...";
     
     try {
       const res = await fetch("/api/upload", {
@@ -888,6 +945,7 @@ async function handleFileUpload(e) {
       });
       
       const data = await res.json();
+      currentClientImageUrl = null; // Use server's standardized image
       if (data.status === "success") {
         activeImageFilename = data.filename;
         await extractScreenData(data.filename, data.template_hint || selectedTemplate);

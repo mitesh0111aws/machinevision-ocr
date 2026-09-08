@@ -191,12 +191,34 @@ def upload_file():
     
     # Clean and sanitize filename (removes colons, spaces, unicode)
     clean_raw = re.sub(r'[^a-zA-Z0-9._-]', '_', file.filename)
-    ext = os.path.splitext(clean_raw)[1] or ".jpg"
-    unique_filename = f"scan_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}{ext}"
+    raw_ext = os.path.splitext(clean_raw)[1].lower() or ".jpg"
+    unique_base = f"scan_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    unique_filename = f"{unique_base}{raw_ext}"
     dest_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
     
     try:
         file.save(dest_path)
+        # If uploaded file is iOS HEIC/HEIF or has EXIF orientation, standardize to high-quality JPEG
+        try:
+            from PIL import Image, ImageOps
+            import pillow_heif
+            pillow_heif.register_heif_opener()
+
+            if raw_ext in [".heic", ".heif"]:
+                jpg_filename = f"{unique_base}.jpg"
+                jpg_dest_path = os.path.join(app.config["UPLOAD_FOLDER"], jpg_filename)
+                with Image.open(dest_path) as im:
+                    im = ImageOps.exif_transpose(im)
+                    im.convert("RGB").save(jpg_dest_path, "JPEG", quality=95)
+                unique_filename = jpg_filename
+            else:
+                # Transpose EXIF orientation if needed
+                with Image.open(dest_path) as im:
+                    transposed = ImageOps.exif_transpose(im)
+                    if transposed is not im:
+                        transposed.save(dest_path, quality=95)
+        except Exception as conv_err:
+            print("Image normalization notice:", conv_err)
     except Exception as save_err:
         print("File save warning:", save_err)
 
