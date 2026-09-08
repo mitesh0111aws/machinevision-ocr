@@ -18,6 +18,12 @@ Open your browser at:
 **`http://127.0.0.1:5050`**
 
 ### 3. Features Included
+- **Eye-Friendly Industrial Theme**: Ergonomic Slate Dark Mode & Industrial Daylight Light Mode with 1-click toggle.
+- **Enterprise Static Authentication**: Shift Operator & Mill Admin login with 1-click quick-access demo chips.
+- **Plant & Department Hierarchy**: Plant 1000 (Welspun Anjar) & New Spinning (8 sequential machines).
+- **8 Value Chain Stages**: Carding, Breaker DF, Lap Former, Comber, Finisher DF, Speed Frame, Ring Frame, Link Conner.
+- **AI Auto-Calibrated OCR**: Angle, distance, and lighting invariant live computer vision extraction.
+- **SAP ERP Integration**: Automatic `BAPI_PRODORDCONF_CREATE_TT` and S/4HANA OData payload confirmation.
 - **Sample Screen Selector**: 1-click test with real machine photos (LMW Blue Screen, Electro-Jet Rovematic table, Siemens Simatic Panel).
 - **Photo Upload**: Upload any new machine photo taken from the factory floor.
 - **Visual Bounding Box Overlay**: Interactive Canvas/SVG showing exactly where each metric was located.
