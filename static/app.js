@@ -1,4 +1,10 @@
-// State Management
+// ================================================================
+// Production Machine Screen OCR & SAP Vision Integration App
+// Department: New Spinning (8-Stage Textile Value Chain)
+// Includes Dynamic Calibration, Invariant Bounding Boxes & PWA
+// ================================================================
+
+// Global State
 let currentData = null;
 let currentSapFormat = "bapi"; // "bapi" or "odata"
 let currentBapiPayload = null;
@@ -6,11 +12,22 @@ let currentOdataPayload = null;
 let activeImageFilename = "carding.jpg";
 let currentViewMode = "desktop"; // "desktop" or "scanner"
 let cameraStream = null;
+let currentClientImageUrl = null;
+let currentTemplateId = "carding";
+
+// Calibration State (Zoom, Pan, Rotation)
+let currentCalibration = {
+  zoom: 1.0,
+  offsetX: 0,
+  offsetY: 0,
+  rotation: 0
+};
 
 // DOM Elements
 const samplesContainer = document.getElementById("samples-container");
 const fileInput = document.getElementById("file-input");
 const cameraInput = document.getElementById("camera-input");
+const departmentSelect = document.getElementById("department-select");
 const templateSelect = document.getElementById("template-select");
 const screenImage = document.getElementById("screen-image");
 const bboxOverlay = document.getElementById("bbox-overlay");
@@ -41,7 +58,7 @@ const androidBottomNav = document.getElementById("android-bottom-nav");
 const scannerTriggerBar = document.getElementById("scanner-trigger-bar");
 const splitContainer = document.getElementById("split-container");
 
-// Modals
+// Modals & Extras
 const btnViewAudit = document.getElementById("btn-view-audit");
 const auditModal = document.getElementById("audit-modal");
 const btnCloseAudit = document.getElementById("btn-close-audit");
@@ -56,10 +73,22 @@ const cameraModal = document.getElementById("camera-modal");
 const cameraStreamVideo = document.getElementById("camera-stream");
 const btnScannerTorch = document.getElementById("btn-scanner-torch");
 
+// Calibration Controls
+const calibIndicator = document.getElementById("calib-indicator");
+const btnCalibZoomIn = document.getElementById("btn-calib-zoom-in");
+const btnCalibZoomOut = document.getElementById("btn-calib-zoom-out");
+const btnCalibPanLeft = document.getElementById("btn-calib-pan-left");
+const btnCalibPanRight = document.getElementById("btn-calib-pan-right");
+const btnCalibPanUp = document.getElementById("btn-calib-pan-up");
+const btnCalibPanDown = document.getElementById("btn-calib-pan-down");
+const btnCalibRotate = document.getElementById("btn-calib-rotate");
+const btnCalibReset = document.getElementById("btn-calib-reset");
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
   loadSamples();
   setupEventListeners();
+  setupCalibrationControls();
   loadAuditLogs();
   updateAndroidClock();
   setInterval(updateAndroidClock, 30000);
@@ -87,80 +116,109 @@ function updateAndroidClock() {
 // Setup All UI Event Listeners
 function setupEventListeners() {
   // File & Camera Upload Handlers
-  fileInput.addEventListener("change", handleFileUpload);
-  cameraInput.addEventListener("change", handleFileUpload);
+  if (fileInput) fileInput.addEventListener("change", handleFileUpload);
+  if (cameraInput) cameraInput.addEventListener("change", handleFileUpload);
 
   // Camera Capture Button in Scanner View
-  btnCameraCapture.addEventListener("click", triggerScannerCameraModal);
+  if (btnCameraCapture) btnCameraCapture.addEventListener("click", triggerScannerCameraModal);
+
+  // Department Dropdown
+  if (departmentSelect) {
+    departmentSelect.addEventListener("change", () => {
+      loadSamples();
+    });
+  }
 
   // Template Dropdown Override
-  templateSelect.addEventListener("change", () => {
-    const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
-    if (activeImageFilename) {
-      extractScreenData(activeImageFilename, selectedTemplate);
-    }
-  });
+  if (templateSelect) {
+    templateSelect.addEventListener("change", () => {
+      const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
+      currentTemplateId = selectedTemplate || currentTemplateId;
+      loadTemplateCalibration(currentTemplateId);
+      if (activeImageFilename) {
+        extractScreenData(activeImageFilename, selectedTemplate, currentClientImageUrl);
+      }
+    });
+  }
 
   // SAP Format Switcher
-  document.getElementById("tab-sap-bapi").addEventListener("click", () => {
-    currentSapFormat = "bapi";
-    document.getElementById("tab-sap-bapi").className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
-    document.getElementById("tab-sap-odata").className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
-    renderSapPayload();
-  });
+  const tabBapi = document.getElementById("tab-sap-bapi");
+  const tabOdata = document.getElementById("tab-sap-odata");
+  if (tabBapi && tabOdata) {
+    tabBapi.addEventListener("click", () => {
+      currentSapFormat = "bapi";
+      tabBapi.className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
+      tabOdata.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
+      renderSapPayload();
+    });
 
-  document.getElementById("tab-sap-odata").addEventListener("click", () => {
-    currentSapFormat = "odata";
-    document.getElementById("tab-sap-odata").className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
-    document.getElementById("tab-sap-bapi").className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
-    renderSapPayload();
-  });
+    tabOdata.addEventListener("click", () => {
+      currentSapFormat = "odata";
+      tabOdata.className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
+      tabBapi.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
+      renderSapPayload();
+    });
+  }
 
   // Re-extract button
-  document.getElementById("btn-reextract").addEventListener("click", () => {
-    const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
-    extractScreenData(activeImageFilename, selectedTemplate);
-  });
+  const btnReextract = document.getElementById("btn-reextract");
+  if (btnReextract) {
+    btnReextract.addEventListener("click", () => {
+      const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
+      extractScreenData(activeImageFilename, selectedTemplate, currentClientImageUrl);
+    });
+  }
 
   // Copy SAP JSON
-  document.getElementById("btn-copy-sap").addEventListener("click", () => {
-    const jsonStr = sapPayloadCode.textContent;
-    navigator.clipboard.writeText(jsonStr).then(() => {
-      const originalText = document.getElementById("btn-copy-sap").innerHTML;
-      document.getElementById("btn-copy-sap").innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`;
-      setTimeout(() => {
-        document.getElementById("btn-copy-sap").innerHTML = originalText;
-      }, 1500);
+  const btnCopySap = document.getElementById("btn-copy-sap");
+  if (btnCopySap) {
+    btnCopySap.addEventListener("click", () => {
+      const jsonStr = sapPayloadCode.textContent;
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        const originalText = btnCopySap.innerHTML;
+        btnCopySap.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`;
+        setTimeout(() => {
+          btnCopySap.innerHTML = originalText;
+        }, 1500);
+      });
     });
-  });
+  }
 
   // Submit to SAP
-  btnSubmitSap.addEventListener("click", submitConfirmationToSAP);
+  if (btnSubmitSap) btnSubmitSap.addEventListener("click", submitConfirmationToSAP);
 
   // View Mode Toggles: Workstation View vs Scanner View
-  btnModeDesktop.addEventListener("click", () => setViewMode("desktop"));
-  btnModeScanner.addEventListener("click", () => setViewMode("scanner"));
+  if (btnModeDesktop) btnModeDesktop.addEventListener("click", () => setViewMode("desktop"));
+  if (btnModeScanner) btnModeScanner.addEventListener("click", () => setViewMode("scanner"));
 
   // Audit Log Modal
-  btnViewAudit.addEventListener("click", () => {
-    auditModal.classList.remove("hidden");
-    auditModal.classList.add("flex");
-    loadAuditLogs();
-  });
-  btnCloseAudit.addEventListener("click", () => {
-    auditModal.classList.add("hidden");
-    auditModal.classList.remove("flex");
-  });
+  if (btnViewAudit) {
+    btnViewAudit.addEventListener("click", () => {
+      auditModal.classList.remove("hidden");
+      auditModal.classList.add("flex");
+      loadAuditLogs();
+    });
+  }
+  if (btnCloseAudit) {
+    btnCloseAudit.addEventListener("click", () => {
+      auditModal.classList.add("hidden");
+      auditModal.classList.remove("flex");
+    });
+  }
 
   // Download APK Modal
-  btnDownloadApk.addEventListener("click", () => {
-    apkModal.classList.remove("hidden");
-    apkModal.classList.add("flex");
-  });
-  btnCloseApk.addEventListener("click", () => {
-    apkModal.classList.add("hidden");
-    apkModal.classList.remove("flex");
-  });
+  if (btnDownloadApk) {
+    btnDownloadApk.addEventListener("click", () => {
+      apkModal.classList.remove("hidden");
+      apkModal.classList.add("flex");
+    });
+  }
+  if (btnCloseApk) {
+    btnCloseApk.addEventListener("click", () => {
+      apkModal.classList.add("hidden");
+      apkModal.classList.remove("flex");
+    });
+  }
 
   // Torch simulation
   let torchOn = false;
@@ -175,11 +233,150 @@ function setupEventListeners() {
 
   // SAP Header Inputs change listeners
   ["sap-order-id", "sap-operation", "sap-work-center", "sap-plant"].forEach(id => {
-    document.getElementById(id).addEventListener("input", updateSapPreview);
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updateSapPreview);
   });
 }
 
-// Load Machine Samples Catalog (All 8 Stages)
+// ================================================================
+// SCREEN CALIBRATION & INVARIANCE ENGINE
+// ================================================================
+function setupCalibrationControls() {
+  if (btnCalibZoomIn) {
+    btnCalibZoomIn.addEventListener("click", () => {
+      currentCalibration.zoom = Math.round(Math.min(2.5, currentCalibration.zoom + 0.05) * 100) / 100;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibZoomOut) {
+    btnCalibZoomOut.addEventListener("click", () => {
+      currentCalibration.zoom = Math.round(Math.max(0.4, currentCalibration.zoom - 0.05) * 100) / 100;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibPanLeft) {
+    btnCalibPanLeft.addEventListener("click", () => {
+      currentCalibration.offsetX -= 15;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibPanRight) {
+    btnCalibPanRight.addEventListener("click", () => {
+      currentCalibration.offsetX += 15;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibPanUp) {
+    btnCalibPanUp.addEventListener("click", () => {
+      currentCalibration.offsetY -= 15;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibPanDown) {
+    btnCalibPanDown.addEventListener("click", () => {
+      currentCalibration.offsetY += 15;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibRotate) {
+    btnCalibRotate.addEventListener("click", () => {
+      currentCalibration.rotation = (currentCalibration.rotation + 90) % 360;
+      screenImage.style.transform = currentCalibration.rotation === 0 ? "none" : `rotate(${currentCalibration.rotation}deg)`;
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+
+  if (btnCalibReset) {
+    btnCalibReset.addEventListener("click", () => {
+      currentCalibration = { zoom: 1.0, offsetX: 0, offsetY: 0, rotation: 0 };
+      screenImage.style.transform = "none";
+      updateCalibrationUI();
+      saveTemplateCalibration(currentTemplateId);
+    });
+  }
+}
+
+function updateCalibrationUI() {
+  if (calibIndicator) {
+    const zoomPct = Math.round(currentCalibration.zoom * 100);
+    calibIndicator.textContent = `Zoom: ${zoomPct}% | Offset: (${Math.round(currentCalibration.offsetX)}, ${Math.round(currentCalibration.offsetY)}) | Rot: ${currentCalibration.rotation}°`;
+  }
+  renderCalibratedBoxes();
+}
+
+function renderCalibratedBoxes() {
+  if (!currentData || !currentData.fields) return;
+
+  const cx = 500.0;
+  const cy = 500.0;
+  const z = currentCalibration.zoom;
+  const ox = currentCalibration.offsetX;
+  const oy = currentCalibration.offsetY;
+
+  currentData.fields.forEach(f => {
+    const raw = f.raw_bbox || f.bbox;
+    if (!raw) return;
+
+    const nx = (raw.x - cx) * z + cx + ox;
+    const ny = (raw.y - cy) * z + cy + oy;
+    const nw = raw.w * z;
+    const nh = raw.h * z;
+
+    f.bbox = {
+      x: Math.max(0, Math.min(1000 - nw, nx)),
+      y: Math.max(0, Math.min(1000 - nh, ny)),
+      w: nw,
+      h: nh
+    };
+  });
+
+  renderBoundingBoxes(currentData.fields);
+}
+
+function saveTemplateCalibration(templateId) {
+  if (!templateId) return;
+  try {
+    localStorage.setItem(`calib_${templateId}`, JSON.stringify(currentCalibration));
+  } catch (e) {}
+}
+
+function loadTemplateCalibration(templateId) {
+  if (!templateId) return;
+  try {
+    const saved = localStorage.getItem(`calib_${templateId}`);
+    if (saved) {
+      currentCalibration = JSON.parse(saved);
+      if (currentCalibration.rotation) {
+        screenImage.style.transform = `rotate(${currentCalibration.rotation}deg)`;
+      } else {
+        screenImage.style.transform = "none";
+      }
+      updateCalibrationUI();
+      return;
+    }
+  } catch (e) {}
+
+  currentCalibration = { zoom: 1.0, offsetX: 0, offsetY: 0, rotation: 0 };
+  screenImage.style.transform = "none";
+  updateCalibrationUI();
+}
+
+// ================================================================
+// LOAD SAMPLES & EXTRACTION
+// ================================================================
 async function loadSamples() {
   try {
     const res = await fetch("/api/samples");
@@ -216,6 +413,9 @@ async function loadSamples() {
 // Handle Machine Sample Selection
 function selectSample(filename, templateId) {
   activeImageFilename = filename;
+  currentTemplateId = templateId || "carding";
+  currentClientImageUrl = null; // reset custom client data URL
+
   document.querySelectorAll(".sample-card").forEach(el => {
     el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
     el.classList.add("border-slate-800");
@@ -231,42 +431,62 @@ function selectSample(filename, templateId) {
     templateSelect.value = templateId || "auto";
   }
 
+  loadTemplateCalibration(currentTemplateId);
   extractScreenData(filename, templateId);
 }
 
 // Extract Screen Data via Backend Vision Engine
-async function extractScreenData(filename, templateId = null) {
-  scanLaser.classList.remove("hidden");
-  detectedTemplateBadge.textContent = "Scanning...";
-  overallConfidence.textContent = "...";
+async function extractScreenData(filename, templateId = null, clientImageUrl = null) {
+  if (scanLaser) scanLaser.classList.remove("hidden");
+  if (detectedTemplateBadge) detectedTemplateBadge.textContent = "Scanning...";
+  if (overallConfidence) overallConfidence.textContent = "...";
+
+  const resolvedTemplate = templateId || currentTemplateId;
+  if (clientImageUrl) {
+    currentClientImageUrl = clientImageUrl;
+  }
 
   try {
     const res = await fetch("/api/extract", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename, template_id: templateId })
+      body: JSON.stringify({
+        filename,
+        template_id: resolvedTemplate,
+        image_url: currentClientImageUrl,
+        calibration: currentCalibration
+      })
     });
 
     const json = await res.json();
     if (json.status === "success") {
       currentData = json.data;
+      currentTemplateId = currentData.template_id;
       renderScreenData(currentData);
       updateSapPreview();
     } else {
-      alert("Error analyzing screen: " + json.message);
+      console.warn("Extraction notice:", json.message);
     }
   } catch (err) {
     console.error("Extraction error:", err);
   } finally {
-    setTimeout(() => {
-      scanLaser.classList.add("hidden");
-    }, 600);
+    if (scanLaser) {
+      setTimeout(() => scanLaser.classList.add("hidden"), 500);
+    }
   }
 }
 
 // Render Extracted Data on UI
 function renderScreenData(data) {
-  screenImage.src = `${data.image_url}?t=${new Date().getTime()}`;
+  // Prevent black screen: Do not append ?t= to base64 Data URLs!
+  if (data.image_url) {
+    if (data.image_url.startsWith("data:") || data.image_url.startsWith("blob:")) {
+      screenImage.src = data.image_url;
+    } else {
+      screenImage.src = `${data.image_url}?t=${new Date().getTime()}`;
+    }
+  }
+
   detectedTemplateBadge.textContent = data.template_name || data.template_id;
   overallConfidence.textContent = `${Math.round(data.overall_confidence * 100)}% Conf.`;
   formFieldCount.textContent = `${data.fields.length} Fields`;
@@ -288,7 +508,7 @@ function renderScreenData(data) {
   }
 
   // Render SVG Bounding Boxes
-  renderBoundingBoxes(data.fields);
+  renderCalibratedBoxes();
 
   // Render Form Fields
   renderFormFields(data.fields);
@@ -382,18 +602,18 @@ function renderBoundingBoxes(fields) {
   });
 }
 
-// Tooltip Helpers
+// Show Tooltip on Bounding Box Hover
 function showTooltip(e, field) {
+  const containerRect = document.getElementById("canvas-wrapper").getBoundingClientRect();
+  const mouseX = e.clientX - containerRect.left;
+  const mouseY = e.clientY - containerRect.top;
+
   tooltipLabel.textContent = field.label;
-  tooltipValue.textContent = `${field.value} ${field.unit || ""}`;
-  tooltipConf.textContent = `Confidence: ${Math.round(field.confidence * 100)}%`;
+  tooltipValue.textContent = `${field.value} ${field.unit || ""}`.trim();
+  tooltipConf.textContent = `Confidence: ${Math.round(field.confidence * 100)}% • ${field.sap_field || "SAP"}`;
 
-  const wrapperRect = document.getElementById("canvas-wrapper").getBoundingClientRect();
-  const x = e.clientX - wrapperRect.left + 15;
-  const y = e.clientY - wrapperRect.top + 15;
-
-  hoverTooltip.style.left = `${Math.min(x, wrapperRect.width - 150)}px`;
-  hoverTooltip.style.top = `${Math.min(y, wrapperRect.height - 70)}px`;
+  hoverTooltip.style.left = `${Math.min(mouseX + 12, containerRect.width - 160)}px`;
+  hoverTooltip.style.top = `${Math.max(mouseY - 45, 10)}px`;
   hoverTooltip.classList.remove("hidden");
 }
 
@@ -401,53 +621,56 @@ function hideTooltip() {
   hoverTooltip.classList.add("hidden");
 }
 
-// Render Form Fields
+// Render Form Fields in Two Responsive Columns
 function renderFormFields(fields) {
-  formFieldsContainer.innerHTML = fields.map(f => {
-    const isRequired = f.required ? '<span class="text-red-400">*</span>' : '';
-    const confColor = f.confidence > 0.90 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+  formFieldsContainer.innerHTML = "";
 
-    return `
-      <div id="form-group-${f.key}" 
-           class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 transition flex flex-col justify-between hover:border-slate-700">
-        <div class="flex items-center justify-between mb-1">
-          <label class="text-slate-300 font-medium text-[11px] truncate flex items-center gap-1" title="${f.label}">
-            ${f.label} ${isRequired}
-          </label>
-          <span class="px-1.5 py-0.2 rounded font-mono text-[9px] border ${confColor}">
-            ${Math.round(f.confidence * 100)}%
-          </span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <input type="text" 
-                 id="input-${f.key}" 
-                 value="${f.value || ''}" 
-                 data-key="${f.key}"
-                 onfocus="highlightBBox('${f.key}')" 
-                 onblur="unhighlightBBox('${f.key}')"
-                 oninput="handleFieldEdit('${f.key}', this.value)"
-                 class="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none">
-          ${f.unit ? `<span class="text-slate-400 text-[10px] font-mono shrink-0">${f.unit}</span>` : ''}
-        </div>
+  fields.forEach(f => {
+    const isRequired = f.required ? `<span class="text-rose-400">*</span>` : "";
+    const badgeColor = f.status === "VALID" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" : "text-amber-400 border-amber-500/20 bg-amber-500/10";
+    
+    const fieldCard = document.createElement("div");
+    fieldCard.id = `form-group-${f.key}`;
+    fieldCard.className = "bg-slate-950/80 border border-slate-800/80 hover:border-slate-700 rounded-xl p-3 transition duration-150 flex flex-col justify-between";
+
+    fieldCard.innerHTML = `
+      <div class="flex items-center justify-between mb-1.5">
+        <label for="input-${f.key}" class="text-xs font-semibold text-slate-300 flex items-center gap-1 truncate">
+          ${f.label} ${isRequired}
+        </label>
+        <span class="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded border ${badgeColor}">
+          ${f.sap_field || "FIELD"}
+        </span>
+      </div>
+      <div class="relative flex items-center">
+        <input type="text" id="input-${f.key}" value="${f.value || ''}" 
+               class="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white font-mono text-xs rounded-lg px-2.5 py-1.5 outline-none transition pr-12">
+        <span class="absolute right-2 text-[11px] text-slate-500 font-medium select-none pointer-events-none">
+          ${f.unit || ""}
+        </span>
+      </div>
+      <div class="flex items-center justify-between mt-1.5 text-[10px] text-slate-500">
+        <span>Conf: <strong class="text-slate-400">${Math.round(f.confidence * 100)}%</strong></span>
+        <span class="truncate max-w-[120px] text-slate-400">${f.category}</span>
       </div>
     `;
-  }).join("");
-}
 
-// Handle inline field corrections by operator
-function handleFieldEdit(key, newValue) {
-  if (!currentData) return;
-  const field = currentData.fields.find(f => f.key === key);
-  if (field) {
-    field.value = newValue;
-    if (field.type === "duration") {
-      field.decimal_hours = normalizeDuration(newValue);
-      field.numeric_value = field.decimal_hours;
-    } else if (["number", "integer", "percentage"].includes(field.type)) {
-      field.numeric_value = parseFloat(newValue.replace(",", ".")) || 0.0;
-    }
-    updateSapPreview();
-  }
+    const input = fieldCard.querySelector(`#input-${f.key}`);
+    input.addEventListener("input", (e) => {
+      f.value = e.target.value;
+      if (f.type === "number" || f.type === "integer" || f.type === "percentage") {
+        f.numeric_value = parseFloat(e.target.value.replace(",", ".")) || 0.0;
+      } else if (f.type === "duration") {
+        f.decimal_hours = normalizeDuration(e.target.value);
+      }
+      updateSapPreview();
+    });
+
+    input.addEventListener("focus", () => highlightBBox(f.key));
+    input.addEventListener("blur", () => unhighlightBBox(f.key));
+
+    formFieldsContainer.appendChild(fieldCard);
+  });
 }
 
 function normalizeDuration(val) {
@@ -556,8 +779,6 @@ async function submitConfirmationToSAP() {
       document.getElementById("res-work").textContent = sapRes.ACTUAL_MACHINE_HOURS;
       sapResponseCard.classList.remove("hidden");
       loadAuditLogs();
-      
-      // Feedback: scroll to confirmation
       sapResponseCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   } catch (err) {
@@ -603,52 +824,39 @@ function setViewMode(mode) {
   currentViewMode = mode;
 
   if (mode === "scanner") {
-    // 1. Header Button Styles
     btnModeScanner.className = "px-3 py-1.5 rounded-lg font-bold transition bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 flex items-center gap-1.5";
     btnModeDesktop.className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
 
-    // 2. Wrap into Android Rugged Device Frame
     appViewportWrapper.className = "android-scanner-frame";
     scannerHardwareBezel.classList.remove("hidden");
     androidBottomNav.classList.remove("hidden");
     scannerTriggerBar.classList.remove("hidden");
     
-    // 3. Compact mobile layout inside phone frame
     mainLayout.className = "w-full p-3.5 space-y-4";
     splitContainer.className = "flex flex-col gap-4";
     samplesContainer.className = "grid grid-cols-2 gap-2";
 
-    // 4. ACTION BUTTON VISIBILITY FOR SCANNER VIEW:
-    // Both Camera Photo Capture AND Upload Photo are visible in Scanner View!
     btnCameraCapture.classList.remove("hidden");
     btnUploadPhoto.classList.remove("hidden");
     document.getElementById("selector-subtext").textContent = "Zebra Rugged Scanner &bull; Tap Camera or Upload to extract screen";
-
   } else {
-    // WORKSTATION VIEW (Desktop)
-    // 1. Header Button Styles
     btnModeDesktop.className = "px-3 py-1.5 rounded-lg font-bold transition bg-blue-600 text-white shadow-md shadow-blue-500/20 flex items-center gap-1.5";
     btnModeScanner.className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
 
-    // 2. Remove mobile frame
     appViewportWrapper.className = "";
     scannerHardwareBezel.classList.add("hidden");
     androidBottomNav.classList.add("hidden");
     scannerTriggerBar.classList.add("hidden");
 
-    // 3. Wide Workstation layout
     mainLayout.className = "max-w-7xl mx-auto p-4 sm:p-6 transition-all duration-300";
     splitContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-5 items-start";
     samplesContainer.className = "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2";
 
-    // 4. ACTION BUTTON VISIBILITY FOR WORKSTATION VIEW:
-    // In Workstation View: ONLY Upload Photo is visible (Camera Capture is hidden)
     btnCameraCapture.classList.add("hidden");
     btnUploadPhoto.classList.remove("hidden");
     document.getElementById("selector-subtext").textContent = "Select one of the 8 production stages or upload a screen photo";
   }
 
-  // Update active card highlight if selected
   if (currentData) {
     const card = document.getElementById(`sample-card-${currentData.template_id}`);
     if (card) {
@@ -676,10 +884,9 @@ async function triggerScannerCameraModal() {
       cameraModal.classList.add("flex");
       return;
     } catch (err) {
-      console.warn("WebRTC camera not available or denied, falling back to native file input:", err);
+      console.warn("WebRTC camera not available, falling back to native file input:", err);
     }
   }
-  // Fallback to native Android camera intent
   cameraInput.click();
 }
 
@@ -701,20 +908,26 @@ function snapCameraPhoto() {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(cameraStreamVideo, 0, 0, canvas.width, canvas.height);
 
+  const clientDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  currentClientImageUrl = clientDataUrl;
+  screenImage.src = clientDataUrl;
+
   canvas.toBlob(async (blob) => {
     closeScannerCameraModal();
     if (!blob) return;
 
-    const formData = new FormData();
     const filename = `snap_${Date.now()}.jpg`;
-    formData.append("file", blob, filename);
-    const selectedTemplate = templateSelect.value === "auto" ? "" : templateSelect.value;
+    const safeFile = new File([blob], filename, { type: "image/jpeg" });
+    const formData = new FormData();
+    formData.append("file", safeFile);
+    
+    const selectedTemplate = (templateSelect && templateSelect.value !== "auto") ? templateSelect.value : currentTemplateId;
     if (selectedTemplate) {
       formData.append("template_id", selectedTemplate);
     }
 
     try {
-      scanLaser.classList.remove("hidden");
+      if (scanLaser) scanLaser.classList.remove("hidden");
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData
@@ -722,45 +935,81 @@ function snapCameraPhoto() {
       const data = await res.json();
       if (data.status === "success") {
         activeImageFilename = data.filename;
-        extractScreenData(data.filename, data.template_hint || selectedTemplate);
+        extractScreenData(data.filename, data.template_hint || selectedTemplate, clientDataUrl);
+      } else {
+        extractScreenData(filename, selectedTemplate, clientDataUrl);
       }
     } catch (err) {
-      alert("Error uploading snapped photo: " + err.message);
+      console.warn("Camera upload error, extracting via client image:", err);
+      extractScreenData(filename, selectedTemplate, clientDataUrl);
     } finally {
-      scanLaser.classList.add("hidden");
+      if (scanLaser) scanLaser.classList.add("hidden");
     }
-  }, "image/jpeg", 0.95);
+  }, "image/jpeg", 0.92);
 }
 
-// Universal File Upload Handler
+// ================================================================
+// UNIVERSAL FILE UPLOAD HANDLER (Zero Black Screen, Safe Filenames)
+// ================================================================
 async function handleFileUpload(e) {
-  const file = e.target.files[0];
+  const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
-  const selectedTemplate = templateSelect.value === "auto" ? "" : templateSelect.value;
-  if (selectedTemplate) {
-    formData.append("template_id", selectedTemplate);
-  }
-
-  scanLaser.classList.remove("hidden");
-  try {
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-    if (data.status === "success") {
-      activeImageFilename = data.filename;
-      extractScreenData(data.filename, data.template_hint || selectedTemplate);
-    } else {
-      alert("Upload failed: " + data.error);
+  // 1. Immediately read file as Data URL to preview instantly (ELIMINATES BLACK SCREEN 100%)
+  const reader = new FileReader();
+  reader.onerror = () => console.warn("FileReader error");
+  reader.onload = async (readEvent) => {
+    const clientDataUrl = readEvent.target.result;
+    
+    // Instant screen preview
+    if (screenImage) {
+      screenImage.src = clientDataUrl;
     }
-  } catch (err) {
-    alert("Upload failed: " + err.message);
-  } finally {
+    currentClientImageUrl = clientDataUrl;
+
+    // 2. Sanitize filename: replace colons, spaces, and illegal characters
+    const originalName = file.name || "screen_photo.jpg";
+    const cleanName = originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const safeFile = new File([file], cleanName, { type: file.type || "image/jpeg" });
+
+    // 3. Prepare FormData
+    const formData = new FormData();
+    formData.append("file", safeFile);
+    
+    const selectedTemplate = (templateSelect && templateSelect.value !== "auto") ? templateSelect.value : currentTemplateId;
+    if (selectedTemplate) {
+      formData.append("template_id", selectedTemplate);
+    }
+
+    if (scanLaser) scanLaser.classList.remove("hidden");
+    
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+      
+      const data = await res.json();
+      if (data.status === "success") {
+        activeImageFilename = data.filename;
+        await extractScreenData(data.filename, data.template_hint || selectedTemplate, clientDataUrl);
+      } else {
+        // Fallback to direct extraction using client image
+        console.warn("Upload response:", data);
+        await extractScreenData(cleanName, selectedTemplate, clientDataUrl);
+      }
+    } catch (err) {
+      console.warn("Upload fetch failed, falling back to direct extraction:", err);
+      await extractScreenData(cleanName, selectedTemplate, clientDataUrl);
+    } finally {
+      if (scanLaser) scanLaser.classList.add("hidden");
+    }
+  };
+
+  reader.readAsDataURL(file);
+
+  // Safely clear input value to allow selecting same file again
+  try {
     e.target.value = "";
-    scanLaser.classList.add("hidden");
-  }
+  } catch (targetErr) {}
 }

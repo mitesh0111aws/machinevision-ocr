@@ -225,6 +225,15 @@
           <!-- DYNAMIC ACTION BUTTONS (Switched based on View Mode) -->
           <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end" id="action-buttons-group">
             
+            <!-- DEPARTMENT SELECTOR -->
+            <div class="flex items-center gap-1.5 text-xs text-slate-300 bg-slate-950 px-3 py-2 rounded-xl border border-indigo-500/30">
+              <i class="fa-solid fa-industry text-indigo-400"></i>
+              <label for="department-select" class="font-medium text-slate-400">Dept:</label>
+              <select id="department-select" class="bg-transparent text-indigo-300 font-bold outline-none cursor-pointer">
+                <option value="new_spinning">New Spinning (8 Machines)</option>
+              </select>
+            </div>
+
             <!-- TEMPLATE SELECTOR OVERRIDE -->
             <div class="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
               <label for="template-select" class="font-medium text-slate-400">Template:</label>
@@ -280,6 +289,47 @@
               </span>
             </div>
           </div>
+
+          <!-- INTERACTIVE SCREEN CALIBRATION TOOLBAR -->
+          <div class="bg-slate-950/90 p-2 rounded-xl border border-slate-800 mb-2 flex flex-wrap items-center justify-between gap-1.5 text-xs" id="calibration-toolbar">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-300 font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-amber-400"></i> Screen Calibration
+              </span>
+              <span id="calib-indicator" class="font-mono text-[10px] text-cyan-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                Zoom: 100% | Offset: (0, 0)
+              </span>
+            </div>
+
+            <div class="flex items-center gap-1 flex-wrap">
+              <!-- Zoom Controls -->
+              <button id="btn-calib-zoom-out" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs flex items-center gap-1 transition" title="Zoom Out (Compensates Close-Up Photos)">
+                <i class="fa-solid fa-magnifying-glass-minus text-amber-400"></i> Zoom -
+              </button>
+              <button id="btn-calib-zoom-in" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs flex items-center gap-1 transition" title="Zoom In (Compensates Wide Distance Photos)">
+                <i class="fa-solid fa-magnifying-glass-plus text-amber-400"></i> Zoom +
+              </button>
+
+              <!-- Pan Direction Controls -->
+              <div class="flex items-center bg-slate-900 rounded border border-slate-800 p-0.5">
+                <button id="btn-calib-pan-left" class="p-1 hover:bg-slate-800 text-slate-300 rounded text-[11px]" title="Shift Left"><i class="fa-solid fa-arrow-left"></i></button>
+                <button id="btn-calib-pan-right" class="p-1 hover:bg-slate-800 text-slate-300 rounded text-[11px]" title="Shift Right"><i class="fa-solid fa-arrow-right"></i></button>
+                <button id="btn-calib-pan-up" class="p-1 hover:bg-slate-800 text-slate-300 rounded text-[11px]" title="Shift Up"><i class="fa-solid fa-arrow-up"></i></button>
+                <button id="btn-calib-pan-down" class="p-1 hover:bg-slate-800 text-slate-300 rounded text-[11px]" title="Shift Down"><i class="fa-solid fa-arrow-down"></i></button>
+              </div>
+
+              <!-- Rotate / Straighten -->
+              <button id="btn-calib-rotate" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs flex items-center gap-1 transition" title="Rotate 90 Degrees">
+                <i class="fa-solid fa-rotate-right text-cyan-400"></i> 90°
+              </button>
+
+              <!-- Reset Calibration -->
+              <button id="btn-calib-reset" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-xs flex items-center gap-1 transition" title="Reset Calibration">
+                <i class="fa-solid fa-arrows-rotate"></i> Reset
+              </button>
+            </div>
+          </div>
+
 
           <!-- IMAGE CANVAS CONTAINER -->
           <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center group" id="canvas-wrapper">

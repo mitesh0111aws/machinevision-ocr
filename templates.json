@@ -1,13 +1,41 @@
 {
+  "departments": {
+    "new_spinning": {
+      "id": "new_spinning",
+      "name": "New Spinning",
+      "code": "SPIN-NEW",
+      "plant": "1000",
+      "description": "Textile Preparation, Spinning & Winding Stages",
+      "machine_ids": [
+        "carding",
+        "breaker_draw_frame",
+        "lap_former",
+        "comber",
+        "finisher_draw_frame",
+        "speed_frame",
+        "ring_frame",
+        "link_conner"
+      ]
+    }
+  },
   "templates": {
     "carding": {
       "id": "carding",
       "name": "1. Carding Machine",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Carding",
       "manufacturer": "LMW / Trutzschler",
       "screen_type": "Touch HMI (Faults & Delivery)",
       "default_plant": "1000",
       "default_work_center": "CARD-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 50, "y": 120, "w": 900, "h": 760}
+      },
       "fields": [
         {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 100, "y": 240, "w": 120, "h": 40}, "unit": ""},
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 240, "w": 160, "h": 40}, "unit": ""},
@@ -28,11 +56,20 @@
     "breaker_draw_frame": {
       "id": "breaker_draw_frame",
       "name": "2. Breaker Draw Frame (Br. DF)",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Breaker Drawing",
       "manufacturer": "LMW / Rieter",
       "screen_type": "Touch HMI (Stoppages & Speed)",
       "default_plant": "1000",
       "default_work_center": "BR-DF-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 60, "y": 120, "w": 880, "h": 760}
+      },
       "fields": [
         {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 235, "w": 115, "h": 40}, "unit": ""},
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 235, "w": 180, "h": 40}, "unit": ""},
@@ -50,11 +87,20 @@
     "lap_former": {
       "id": "lap_former",
       "name": "3. Lap Former",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Lap Forming",
       "manufacturer": "LMW / Marzoli",
       "screen_type": "Amber Touch HMI (Creel & Calender)",
       "default_plant": "1000",
       "default_work_center": "LAP-FORM-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 40, "y": 60, "w": 920, "h": 860}
+      },
       "fields": [
         {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 200, "w": 120, "h": 40}, "unit": ""},
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 200, "w": 180, "h": 40}, "unit": ""},
@@ -76,11 +122,20 @@
     "comber": {
       "id": "comber",
       "name": "4. Comber",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Combing",
       "manufacturer": "LMW / Rieter",
       "screen_type": "Touch HMI (Draft, Suction, Lap)",
       "default_plant": "1000",
       "default_work_center": "COMB-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 40, "y": 80, "w": 920, "h": 840}
+      },
       "fields": [
         {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 48, "y": 195, "w": 115, "h": 50}, "unit": ""},
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 195, "w": 180, "h": 50}, "unit": ""},
@@ -102,11 +157,20 @@
     "finisher_draw_frame": {
       "id": "finisher_draw_frame",
       "name": "5. Finisher Draw Frame (Fr. DF)",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Finisher Drawing",
       "manufacturer": "LMW / Rieter",
       "screen_type": "Touch HMI (Stoppages & Breakdowns)",
       "default_plant": "1000",
       "default_work_center": "FR-DF-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 60, "y": 80, "w": 880, "h": 800}
+      },
       "fields": [
         {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 235, "w": 115, "h": 40}, "unit": ""},
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 235, "w": 180, "h": 40}, "unit": ""},
@@ -124,12 +188,21 @@
     "speed_frame": {
       "id": "speed_frame",
       "name": "6. Speed Frame (Roving Frame)",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Roving / Simplex",
       "manufacturer": "Electro-Jet / Marzoli",
       "screen_type": "Multi-Day Performance Table (ADR)",
       "default_plant": "1000",
       "default_work_center": "SPD-FR-01",
       "is_table": true,
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 70, "y": 80, "w": 860, "h": 860}
+      },
       "fields": [
         {"key": "shift_date", "label": "Production Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 88, "y": 288, "w": 85, "h": 32}, "unit": ""},
         {"key": "machine_efficiency", "label": "Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 175, "y": 288, "w": 35, "h": 32}, "unit": "%"},
@@ -146,11 +219,20 @@
     "ring_frame": {
       "id": "ring_frame",
       "name": "7. Ring Frame (Spinning)",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Ring Spinning",
       "manufacturer": "Siemens Simatic Touch",
       "screen_type": "Touch Panel (Shift Production Grid)",
       "default_plant": "1000",
       "default_work_center": "RING-FR-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 240, "y": 230, "w": 520, "h": 540}
+      },
       "fields": [
         {"key": "shift", "label": "Shift", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 265, "y": 360, "w": 140, "h": 90}, "unit": ""},
         {"key": "shift_date", "label": "Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 415, "y": 360, "w": 150, "h": 90}, "unit": ""},
@@ -167,11 +249,20 @@
     "link_conner": {
       "id": "link_conner",
       "name": "8. Link Conner (Autoconer 6)",
+      "department_id": "new_spinning",
+      "department_name": "New Spinning",
       "process_stage": "Winding / Autoconer",
       "manufacturer": "Saurer Schlafhorst",
       "screen_type": "Autoconer 6 Group Details HMI",
       "default_plant": "1000",
       "default_work_center": "LINK-CON-01",
+      "calibration": {
+        "zoom": 1.0,
+        "offset_x": 0,
+        "offset_y": 0,
+        "rotation": 0,
+        "screen_bounds": {"x": 30, "y": 40, "w": 940, "h": 920}
+      },
       "fields": [
         {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 750, "y": 915, "w": 150, "h": 25}, "unit": ""},
         {"key": "group_name", "label": "Winding Group", "category": "Header", "type": "string", "sap_field": "GROUP_NAME", "required": false, "bbox": {"x": 45, "y": 305, "w": 135, "h": 40}, "unit": ""},

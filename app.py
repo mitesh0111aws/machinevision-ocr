@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import sqlite3
 import datetime
@@ -32,6 +33,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS sap_confirmations (
             id TEXT PRIMARY KEY,
             created_at TEXT,
+            department TEXT,
             machine_template TEXT,
             work_center TEXT,
             plant TEXT,
@@ -48,6 +50,13 @@ def init_db():
             device_id TEXT
         )
     """)
+    cursor.execute("PRAGMA table_info(sap_confirmations)")
+    existing_cols = [c[1] for c in cursor.fetchall()]
+    if "department" not in existing_cols:
+        try:
+            cursor.execute("ALTER TABLE sap_confirmations ADD COLUMN department TEXT DEFAULT 'New Spinning'")
+        except Exception as e:
+            pass
     conn.commit()
     conn.close()
 
@@ -58,10 +67,18 @@ engine = MachineOCREngine()
 def index():
     return render_template("index.html")
 
+@app.route("/api/departments", methods=["GET"])
+def get_departments():
+    return jsonify({
+        "status": "success",
+        "departments": engine.get_departments()
+    })
+
 @app.route("/api/templates", methods=["GET"])
 def get_templates():
     return jsonify({
         "status": "success",
+        "departments": engine.get_departments(),
         "templates": engine.templates
     })
 
@@ -73,13 +90,17 @@ def get_samples():
             "title": "1. Carding Machine",
             "subtitle": "Shift 1 • 172.18 Kg • 53.14 Hanks • 88.52% Eff",
             "template_id": "carding",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 1: Carding"
         },
         {
             "filename": "breaker_br._draw_frame.jpg",
-            "title": "2. Breaker Draw Frame",
+            "title": "2. Breaker Draw Frame (Br. DF)",
             "subtitle": "Shift 1 • 489.5 Kg • 151.1 Hanks • 10 Doffs",
             "template_id": "breaker_draw_frame",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 2: Breaker DF"
         },
         {
@@ -87,6 +108,8 @@ def get_samples():
             "title": "3. Lap Former",
             "subtitle": "Shift 1 • 612.8 Kg • 36 Doffs • 42.94% Eff",
             "template_id": "lap_former",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 3: Lap Former"
         },
         {
@@ -94,20 +117,26 @@ def get_samples():
             "title": "4. Comber",
             "subtitle": "Shift 1 • 197.05 Kg • 60.8 Hanks • 95.38% Eff",
             "template_id": "comber",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 4: Combing"
         },
         {
             "filename": "finisher_fr._draw_frame.jpg",
-            "title": "5. Finisher Draw Frame",
+            "title": "5. Finisher Draw Frame (Fr. DF)",
             "subtitle": "Shift 1 • 432.4 Kg • 119.17 Hanks • 23 Doffs",
             "template_id": "finisher_draw_frame",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 5: Finisher DF"
         },
         {
             "filename": "speed_frame.jpg",
-            "title": "6. Speed Frame (Roving)",
+            "title": "6. Speed Frame (Roving Frame)",
             "subtitle": "Roving Frame Multi-Day Matrix (8 Shifts)",
             "template_id": "speed_frame",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 6: Roving Frame"
         },
         {
@@ -115,6 +144,8 @@ def get_samples():
             "title": "7. Ring Frame (Spinning)",
             "subtitle": "Shift 1 • 6.0 Hanks • 5.14 hrs • 34.0g/spindle",
             "template_id": "ring_frame",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 7: Ring Spinning"
         },
         {
@@ -122,6 +153,8 @@ def get_samples():
             "title": "8. Link Conner (Autoconer 6)",
             "subtitle": "81.50 Kg • 44 Doffs • 68.7% Eff • Saurer",
             "template_id": "link_conner",
+            "department_id": "new_spinning",
+            "department_name": "New Spinning",
             "category": "Stage 8: Autoconer"
         }
     ]
@@ -134,7 +167,11 @@ def get_samples():
                 "url": f"/samples/{item['filename']}",
                 **item
             })
-    return jsonify({"samples": sample_files})
+    return jsonify({
+        "status": "success",
+        "current_department": "new_spinning",
+        "samples": sample_files
+    })
 
 @app.route("/samples/<path:filename>")
 def serve_sample(filename):
@@ -149,13 +186,20 @@ def upload_file():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
     file = request.files["file"]
-    if file.filename == "":
+    if not file or file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
     
-    ext = os.path.splitext(file.filename)[1] or ".jpg"
+    # Clean and sanitize filename (removes colons, spaces, unicode)
+    clean_raw = re.sub(r'[^a-zA-Z0-9._-]', '_', file.filename)
+    ext = os.path.splitext(clean_raw)[1] or ".jpg"
     unique_filename = f"scan_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}{ext}"
     dest_path = os.path.join(app.config["UPLOAD_FOLDER"], unique_filename)
-    file.save(dest_path)
+    
+    try:
+        file.save(dest_path)
+    except Exception as save_err:
+        print("File save warning:", save_err)
+
     template_hint = request.form.get("template_id")
     
     return jsonify({
@@ -170,12 +214,22 @@ def extract_data():
     data = request.json or {}
     filename = data.get("filename", "carding.jpg")
     template_id = data.get("template_id")
+    calibration = data.get("calibration")
+    client_image_url = data.get("image_url") # Preserves client-side Data URL
     
     try:
         base_dirs = [app.config["UPLOAD_FOLDER"], app.config["SAMPLES_FOLDER"]]
-        result = engine.extract_screen_data(filename, template_id=template_id, base_dirs=base_dirs)
+        result = engine.extract_screen_data(
+            filename,
+            template_id=template_id,
+            base_dirs=base_dirs,
+            calibration=calibration
+        )
         
-        if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"], filename)):
+        # Determine image URL: If frontend provided a valid Data URL, use it directly (eliminates 404s)
+        if client_image_url and client_image_url.startswith("data:image/"):
+            result["image_url"] = client_image_url
+        elif os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"], filename)):
             result["image_url"] = f"/uploads/{filename}"
         elif os.path.exists(os.path.join(app.config["SAMPLES_FOLDER"], filename)):
             result["image_url"] = f"/samples/{filename}"
@@ -215,13 +269,15 @@ def submit_to_sap():
     conf_no = f"100{int(datetime.datetime.now().timestamp()) % 1000000:06d}"
     doc_no = f"500{int(datetime.datetime.now().timestamp()) % 1000000:06d}"
     
+    dept = extracted_data.get("department_name", "New Spinning")
+    
     sap_response = {
         "RETURN": [
             {
                 "TYPE": "S",
                 "ID": "RU",
                 "NUMBER": "010",
-                "MESSAGE": f"Confirmation {conf_no} successfully saved for Order {ticket['ORDERID']} Operation {ticket['OPERATION']}",
+                "MESSAGE": f"Confirmation {conf_no} successfully saved for [{dept}] Order {ticket['ORDERID']} Operation {ticket['OPERATION']}",
                 "LOG_NO": "",
                 "LOG_MSG_NO": "000000",
                 "MESSAGE_V1": conf_no,
@@ -230,6 +286,7 @@ def submit_to_sap():
         ],
         "CONFIRMATION_NUMBER": conf_no,
         "MATERIAL_DOCUMENT": doc_no,
+        "DEPARTMENT": dept,
         "ORDER_ID": ticket["ORDERID"],
         "OPERATION": ticket["OPERATION"],
         "WORK_CENTER": ticket["WORK_CNTR"],
@@ -244,11 +301,12 @@ def submit_to_sap():
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO sap_confirmations 
-            (id, created_at, machine_template, work_center, plant, order_id, operation, yield_qty, yield_unit, run_time_hours, idle_time_hours, sap_conf_no, status, sap_response, operator_id, device_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, created_at, department, machine_template, work_center, plant, order_id, operation, yield_qty, yield_unit, run_time_hours, idle_time_hours, sap_conf_no, status, sap_response, operator_id, device_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             str(uuid.uuid4()),
             datetime.datetime.now().isoformat(),
+            dept,
             extracted_data.get("template_name", "Unknown Template"),
             ticket["WORK_CNTR"],
             ticket["PLANT"],
@@ -267,7 +325,7 @@ def submit_to_sap():
         conn.commit()
         conn.close()
     except Exception as db_err:
-        print("Audit DB error:", db_err)
+        print("Audit DB notice:", db_err)
         
     return jsonify({
         "status": "success",
@@ -276,19 +334,26 @@ def submit_to_sap():
 
 @app.route("/api/audit-log", methods=["GET"])
 def get_audit_log():
-    conn = sqlite3.connect(app.config["DB_FILE"])
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM sap_confirmations ORDER BY created_at DESC LIMIT 20")
-    rows = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return jsonify({"audit_logs": rows})
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sap_confirmations ORDER BY created_at DESC LIMIT 25")
+        rows = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return jsonify({"audit_logs": rows})
+    except Exception:
+        return jsonify({"audit_logs": []})
 
 @app.route("/api/download-apk")
 @app.route("/download-apk")
 def download_apk():
-    return send_from_directory(app.static_folder, "MachineVision_Zebra_Scanner_Android_Project.zip", as_attachment=True, download_name="MachineVision_Zebra_Scanner_Android_Project.zip")
-
+    return send_from_directory(
+        app.static_folder,
+        "MachineVision_Zebra_Scanner_Android_Project.zip",
+        as_attachment=True,
+        download_name="MachineVision_Zebra_Scanner_Android_Project.zip"
+    )
 
 if __name__ == "__main__":
     print("Starting Industrial Machine Screen OCR & SAP Server on http://127.0.0.1:5050")
