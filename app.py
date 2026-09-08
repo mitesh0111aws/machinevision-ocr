@@ -684,9 +684,9 @@ def get_version():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify({
-        "current_version": "2.2.0",
+        "current_version": "2.3.0",
         "release_date": "2026-09-08",
-        "app_name": "MachineVision OCR & SAP Floor Portal"
+        "app_name": "WelVision - AI Machine Vision & SAP Floor Portal"
     })
 
 @app.route("/api/calibration/profile/<template_id>", methods=["GET"])
@@ -901,5 +901,5 @@ def seed_initial_scans():
 seed_initial_scans()
 
 if __name__ == "__main__":
-    print("Starting Industrial Machine Screen OCR & SAP Server on http://127.0.0.1:5050")
+    print("Starting WelVision AI Machine Vision & SAP Server on http://127.0.0.1:5050")
     app.run(host="0.0.0.0", port=5050, debug=True)

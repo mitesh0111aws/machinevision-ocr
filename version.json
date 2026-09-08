@@ -1,14 +1,27 @@
 {
-  "app_name": "MachineVision OCR & SAP Floor Portal",
-  "current_version": "2.2.0",
+  "app_name": "WelVision - AI Machine Vision & SAP Floor Portal",
+  "current_version": "2.3.0",
   "release_date": "2026-09-08",
-  "git_tag": "v2.2.0",
+  "git_tag": "v2.3.0",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.3.0",
+      "date": "2026-09-08",
+      "title": "Official Brand Adoption: WelVision - Welspun AI Machine Vision & SAP Floor Portal",
+      "tag": "v2.3.0",
+      "revert_command": "git checkout v2.3.0",
+      "changes": [
+        "Officially adopted the WelVision brand identity, harmonizing with Welspun digital manufacturing solutions WelTrak and WelPrevent.",
+        "Renamed application header, brand identity chip, and sign-in portal to WelVision with dedicated optical icon and styling.",
+        "Updated web manifest, PWA identity, and Android package naming to WelVision.",
+        "Synchronized version endpoints and SAP floor portal metadata to WelVision (v2.3.0)."
+      ]
+    },
     {
       "version": "2.2.0",
       "date": "2026-09-08",

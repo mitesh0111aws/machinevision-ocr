@@ -1,6 +1,6 @@
 {
-  "name": "MachineVision Zebra Scanner",
-  "short_name": "MV Scanner",
+  "name": "WelVision - AI Machine Vision & SAP Floor Portal",
+  "short_name": "WelVision",
   "start_url": "/?mode=scanner",
   "display": "standalone",
   "background_color": "#0f172a",

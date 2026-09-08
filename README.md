@@ -1,6 +1,6 @@
-# Production Machine Screen OCR & SAP Integration
+# WelVision - AI Machine Vision & SAP Floor Portal
 
-An end-to-end industrial solution for capturing photos of machine HMI screens (e.g. LMW Spinning Touch Screens, Siemens Simatic Panels, Electro-Jet Rovematic ADR), extracting key operational metrics via Computer Vision/OCR, validating data with operator feedback, and confirming production tickets into SAP ERP (ECC & S/4HANA).
+**WelVision** is Welspun's enterprise industrial solution for capturing photos of machine HMI screens (e.g. LMW Spinning Touch Screens, Siemens Simatic Panels, Electro-Jet Rovematic ADR), extracting key operational metrics via Computer Vision/OCR, validating data with operator feedback, and confirming production tickets directly into SAP ERP (ECC & S/4HANA). Complementary to **WelTrak** (Traceability) and **WelPrevent** (Maintenance).
 
 ---
 
