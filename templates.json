@@ -5,7 +5,7 @@
       "name": "New Spinning",
       "code": "SPIN-NEW",
       "plant": "1000",
-      "description": "Textile Preparation, Spinning & Winding Stages",
+      "description": "8-Stage Value Chain from Carding to Link Conner",
       "machine_ids": [
         "carding",
         "breaker_draw_frame",
@@ -16,6 +16,22 @@
         "ring_frame",
         "link_conner"
       ]
+    },
+    "warping": {
+      "id": "warping",
+      "name": "Warping",
+      "code": "WARP-01",
+      "plant": "1000",
+      "description": "High-Speed Sectional & Direct Warping Lines",
+      "machine_ids": []
+    },
+    "weaving": {
+      "id": "weaving",
+      "name": "Weaving",
+      "code": "WEAV-01",
+      "plant": "1000",
+      "description": "Air-Jet & Rapier Terry & Bed Sheet Looms",
+      "machine_ids": []
     }
   },
   "templates": {

@@ -50,18 +50,100 @@ def init_db():
             device_id TEXT
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scanned_records (
+            id TEXT PRIMARY KEY,
+            created_at TEXT,
+            scan_date TEXT,
+            plant_id TEXT,
+            plant_name TEXT,
+            department_id TEXT,
+            department_name TEXT,
+            machine_template TEXT,
+            machine_name TEXT,
+            image_filename TEXT,
+            image_url TEXT,
+            operator_id TEXT,
+            operator_name TEXT,
+            operator_role TEXT,
+            overall_confidence REAL,
+            extracted_data TEXT,
+            summary_yield TEXT,
+            summary_runtime TEXT,
+            summary_idletime TEXT,
+            summary_efficiency TEXT,
+            summary_doffs TEXT,
+            summary_hanks TEXT,
+            sap_status TEXT DEFAULT 'Scanned'
+        )
+    """)
     cursor.execute("PRAGMA table_info(sap_confirmations)")
     existing_cols = [c[1] for c in cursor.fetchall()]
     if "department" not in existing_cols:
         try:
             cursor.execute("ALTER TABLE sap_confirmations ADD COLUMN department TEXT DEFAULT 'New Spinning'")
-        except Exception as e:
+        except Exception:
             pass
     conn.commit()
     conn.close()
 
 init_db()
 engine = MachineOCREngine()
+
+def record_scan_event(result, filename, image_url, operator_id="operator", operator_name="Shift Operator", operator_role="Operator", plant_id="1000", plant_name="Bed Sheet Plant Anjar", dept_id="new_spinning", dept_name="New Spinning"):
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        cursor = conn.cursor()
+        record_id = f"scn_{uuid.uuid4().hex[:12]}"
+        now = datetime.datetime.now()
+        created_at = now.isoformat()
+        scan_date = now.strftime("%Y-%m-%d")
+
+        fields = result.get("fields", [])
+        field_map = {f.get("key"): f.get("value") for f in fields}
+
+        summary_yield = str(field_map.get("production_kgs", field_map.get("total_production_kg", "")))
+        summary_runtime = str(field_map.get("run_time", field_map.get("running_hours", "")))
+        summary_idletime = str(field_map.get("idle_time", field_map.get("stoppage_hours", "")))
+        summary_efficiency = str(field_map.get("machine_efficiency", field_map.get("efficiency", "")))
+        summary_doffs = str(field_map.get("doffs", field_map.get("doff_count", "")))
+        summary_hanks = str(field_map.get("hanks", ""))
+
+        cursor.execute("""
+            INSERT INTO scanned_records 
+            (id, created_at, scan_date, plant_id, plant_name, department_id, department_name, machine_template, machine_name, image_filename, image_url, operator_id, operator_name, operator_role, overall_confidence, extracted_data, summary_yield, summary_runtime, summary_idletime, summary_efficiency, summary_doffs, summary_hanks, sap_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            record_id,
+            created_at,
+            scan_date,
+            str(plant_id),
+            str(plant_name),
+            str(dept_id),
+            str(dept_name),
+            str(result.get("template_id", "")),
+            str(result.get("template_name", "")),
+            str(filename),
+            str(image_url),
+            str(operator_id).lower(),
+            str(operator_name),
+            str(operator_role),
+            float(result.get("overall_confidence", 0.95)),
+            json.dumps(result),
+            summary_yield,
+            summary_runtime,
+            summary_idletime,
+            summary_efficiency,
+            summary_doffs,
+            summary_hanks,
+            "Scanned"
+        ))
+        conn.commit()
+        conn.close()
+        return record_id
+    except Exception as err:
+        print("Record scan event error:", err)
+        return None
 
 @app.route("/")
 def index():
@@ -109,28 +191,28 @@ def get_plants():
             {
                 "id": "1000",
                 "code": "PLANT-1000",
-                "name": "Plant 1000 - Main Spinning Mill (Welspun Anjar Complex)",
+                "name": "Bed Sheet Plant Anjar",
                 "location": "Anjar, Gujarat",
                 "status": "Active",
-                "badge": "Primary Unit",
-                "departments": ["new_spinning", "blowroom", "winding"]
+                "badge": "Bed Sheet Unit",
+                "departments": ["new_spinning", "warping", "weaving"]
             },
             {
                 "id": "2000",
                 "code": "PLANT-2000",
-                "name": "Plant 2000 - Unit 2 Synthetic & Blended Yarns",
+                "name": "Terry Towel Plant Anjar",
                 "location": "Anjar, Gujarat",
                 "status": "Connected",
-                "badge": "Active Lines",
-                "departments": ["new_spinning"]
+                "badge": "Terry Towel Unit",
+                "departments": ["new_spinning", "warping", "weaving"]
             },
             {
                 "id": "3000",
                 "code": "PLANT-3000",
-                "name": "Plant 3000 - Vapi Spinning & Technical Textiles",
+                "name": "Terry Towel Plant Vapi",
                 "location": "Vapi, Gujarat",
                 "status": "Standby",
-                "badge": "Standby",
+                "badge": "Vapi Complex",
                 "departments": ["new_spinning"]
             }
         ]
@@ -327,6 +409,29 @@ def extract_data():
             result["image_url"] = f"/samples/{filename}"
         else:
             result["image_url"] = f"/samples/{filename}"
+
+        # Automatic Database Recording for Scan History & Audit
+        operator_id = data.get("operator_id", "operator")
+        operator_name = data.get("operator_name", "Shift Operator")
+        operator_role = data.get("operator_role", "Operator")
+        plant_id = data.get("plant_id", "1000")
+        plant_name = data.get("plant_name", "Bed Sheet Plant Anjar")
+        dept_id = data.get("department_id", "new_spinning")
+        dept_name = data.get("department_name", "New Spinning")
+
+        record_id = record_scan_event(
+            result,
+            filename=filename,
+            image_url=result["image_url"],
+            operator_id=operator_id,
+            operator_name=operator_name,
+            operator_role=operator_role,
+            plant_id=plant_id,
+            plant_name=plant_name,
+            dept_id=dept_id,
+            dept_name=dept_name
+        )
+        result["scan_record_id"] = record_id
             
         return jsonify({"status": "success", "data": result})
     except Exception as e:
@@ -414,6 +519,18 @@ def submit_to_sap():
             ticket.get("PERS_NO", "OPR-8420"),
             "ZEBRA-TC52-094"
         ))
+
+        # Update latest matching scan record to 'Confirmed in SAP'
+        cursor.execute("""
+            UPDATE scanned_records
+            SET sap_status = 'Confirmed in SAP'
+            WHERE id = (
+                SELECT id FROM scanned_records
+                WHERE machine_template = ?
+                ORDER BY created_at DESC LIMIT 1
+            )
+        """, (extracted_data.get("template_id", ""),))
+
         conn.commit()
         conn.close()
     except Exception as db_err:
@@ -423,6 +540,101 @@ def submit_to_sap():
         "status": "success",
         "sap_response": sap_response
     })
+
+@app.route("/api/scans", methods=["GET"])
+def get_scans():
+    req_operator_id = request.args.get("operator_id", "").strip().lower()
+    req_role = request.args.get("role", "Operator").strip()
+
+    filter_dept = request.args.get("department", "all").strip().lower()
+    filter_machine = request.args.get("machine", "all").strip().lower()
+    filter_date = request.args.get("date", "all").strip()
+    filter_search = request.args.get("search", "").strip().lower()
+    filter_operator = request.args.get("filter_operator", "all").strip().lower()
+
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        query = "SELECT * FROM scanned_records WHERE 1=1"
+        params = []
+
+        # RBAC: Operators can ONLY view their own records
+        if req_role.lower() == "operator":
+            query += " AND LOWER(operator_id) = ?"
+            params.append(req_operator_id or "operator")
+        elif filter_operator and filter_operator != "all":
+            # Admin can filter by any specific operator
+            query += " AND LOWER(operator_id) = ?"
+            params.append(filter_operator)
+
+        # Department filter
+        if filter_dept and filter_dept != "all":
+            query += " AND (LOWER(department_id) = ? OR LOWER(department_name) LIKE ?)"
+            params.extend([filter_dept, f"%{filter_dept}%"])
+
+        # Machine filter
+        if filter_machine and filter_machine != "all":
+            query += " AND (LOWER(machine_template) = ? OR LOWER(machine_name) LIKE ?)"
+            params.extend([filter_machine, f"%{filter_machine}%"])
+
+        # Date filter
+        if filter_date and filter_date != "all":
+            if filter_date == "today":
+                today_str = datetime.date.today().strftime("%Y-%m-%d")
+                query += " AND scan_date = ?"
+                params.append(today_str)
+            else:
+                query += " AND scan_date LIKE ?"
+                params.append(f"{filter_date}%")
+
+        # Free search
+        if filter_search:
+            query += " AND (LOWER(machine_name) LIKE ? OR LOWER(summary_yield) LIKE ? OR LOWER(image_filename) LIKE ?)"
+            params.extend([f"%{filter_search}%", f"%{filter_search}%", f"%{filter_search}%"])
+
+        query += " ORDER BY created_at DESC LIMIT 100"
+        cursor.execute(query, params)
+        rows = [dict(row) for row in cursor.fetchall()]
+
+        for r in rows:
+            if r.get("extracted_data"):
+                try:
+                    r["extracted_data"] = json.loads(r["extracted_data"])
+                except Exception:
+                    pass
+
+        conn.close()
+        return jsonify({
+            "status": "success",
+            "total": len(rows),
+            "records": rows,
+            "role_applied": req_role
+        })
+    except Exception as err:
+        return jsonify({"status": "error", "message": str(err), "records": []}), 500
+
+@app.route("/api/scans/<record_id>", methods=["GET"])
+def get_scan_detail(record_id):
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM scanned_records WHERE id = ?", (record_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            rec = dict(row)
+            if rec.get("extracted_data"):
+                try:
+                    rec["extracted_data"] = json.loads(rec["extracted_data"])
+                except Exception:
+                    pass
+            return jsonify({"status": "success", "record": rec})
+        return jsonify({"status": "error", "message": "Record not found"}), 404
+    except Exception as err:
+        return jsonify({"status": "error", "message": str(err)}), 500
 
 @app.route("/api/audit-log", methods=["GET"])
 def get_audit_log():
@@ -446,6 +658,85 @@ def download_apk():
         as_attachment=True,
         download_name="MachineVision_Zebra_Scanner_Android_Project.zip"
     )
+
+def seed_initial_scans():
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM scanned_records")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            samples = [
+                {
+                    "template": "carding", "name": "1. Carding Machine", "file": "carding.jpg",
+                    "operator": "operator", "op_name": "Shift Operator - Line 1", "role": "Operator",
+                    "yield": "172.18 Kg", "runtime": "17:21", "idle": "01:55", "eff": "88.52%", "doffs": "4", "hanks": "53.14",
+                    "status": "Confirmed in SAP", "date_offset": 0
+                },
+                {
+                    "template": "breaker_draw_frame", "name": "2. Breaker Draw Frame (Br. DF)", "file": "breaker_br._draw_frame.jpg",
+                    "operator": "operator", "op_name": "Shift Operator - Line 1", "role": "Operator",
+                    "yield": "498.5 Kg", "runtime": "02:27", "idle": "00:40", "eff": "78.19%", "doffs": "10", "hanks": "153.90",
+                    "status": "Confirmed in SAP", "date_offset": 0
+                },
+                {
+                    "template": "comber", "name": "4. Comber", "file": "comber.jpg",
+                    "operator": "operator", "op_name": "Shift Operator - Line 1", "role": "Operator",
+                    "yield": "86.455 Kg", "runtime": "02:09", "idle": "00:53", "eff": "97.24%", "doffs": "4", "hanks": "26.677",
+                    "status": "Scanned", "date_offset": 1
+                },
+                {
+                    "template": "lap_former", "name": "3. Lap Former", "file": "lap_former.jpg",
+                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator",
+                    "yield": "612.8 Kg", "runtime": "03:40", "idle": "04:52", "eff": "42.94%", "doffs": "36", "hanks": "--",
+                    "status": "Confirmed in SAP", "date_offset": 1
+                },
+                {
+                    "template": "finisher_draw_frame", "name": "5. Finisher Draw Frame (Fr. DF)", "file": "finisher_fr._draw_frame.jpg",
+                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator",
+                    "yield": "432.4 Kg", "runtime": "06:12", "idle": "01:48", "eff": "77.50%", "doffs": "23", "hanks": "119.17",
+                    "status": "Scanned", "date_offset": 2
+                },
+                {
+                    "template": "ring_frame", "name": "7. Ring Frame (Spinning)", "file": "ring_frame.jpg",
+                    "operator": "supervisor", "op_name": "Spinning Supervisor", "role": "Supervisor",
+                    "yield": "285.40 Kg", "runtime": "07:30", "idle": "00:30", "eff": "93.75%", "doffs": "6", "hanks": "88.20",
+                    "status": "Confirmed in SAP", "date_offset": 3
+                }
+            ]
+            now = datetime.datetime.now()
+            for s in samples:
+                rec_date = (now - datetime.timedelta(days=s["date_offset"])).strftime("%Y-%m-%d")
+                rec_time = (now - datetime.timedelta(days=s["date_offset"], hours=2)).isoformat()
+                rec_id = f"scn_{uuid.uuid4().hex[:12]}"
+                mock_data = {
+                    "template_id": s["template"],
+                    "template_name": s["name"],
+                    "fields": [
+                        {"key": "production_kgs", "label": "Production Output", "value": s["yield"]},
+                        {"key": "run_time", "label": "Run Time", "value": s["runtime"]},
+                        {"key": "idle_time", "label": "Idle Time", "value": s["idle"]},
+                        {"key": "machine_efficiency", "label": "Machine Efficiency", "value": s["eff"]},
+                        {"key": "doffs", "label": "Doffs", "value": s["doffs"]},
+                        {"key": "hanks", "label": "Hanks", "value": s["hanks"]}
+                    ]
+                }
+                cursor.execute("""
+                    INSERT INTO scanned_records
+                    (id, created_at, scan_date, plant_id, plant_name, department_id, department_name, machine_template, machine_name, image_filename, image_url, operator_id, operator_name, operator_role, overall_confidence, extracted_data, summary_yield, summary_runtime, summary_idletime, summary_efficiency, summary_doffs, summary_hanks, sap_status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    rec_id, rec_time, rec_date, "1000", "Bed Sheet Plant Anjar", "new_spinning", "New Spinning",
+                    s["template"], s["name"], s["file"], f"/samples/{s['file']}",
+                    s["operator"], s["op_name"], s["role"], 0.98, json.dumps(mock_data),
+                    s["yield"], s["runtime"], s["idle"], s["eff"], s["doffs"], s["hanks"], s["status"]
+                ))
+            conn.commit()
+        conn.close()
+    except Exception as err:
+        print("Seed scans notice:", err)
+
+seed_initial_scans()
 
 if __name__ == "__main__":
     print("Starting Industrial Machine Screen OCR & SAP Server on http://127.0.0.1:5050")

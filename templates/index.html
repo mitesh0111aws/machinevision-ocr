@@ -167,7 +167,7 @@
       <div id="header-context-badge" class="hidden items-center gap-2 text-xs bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
         <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-medium">
           <i class="fa-solid fa-industry text-indigo-500"></i>
-          <span id="current-plant-badge" class="font-bold">Plant 1000</span>
+          <span id="current-plant-badge" class="font-bold">Bed Sheet Plant Anjar</span>
           <span class="text-slate-400">&bull;</span>
           <span id="current-dept-badge" class="text-indigo-600 dark:text-indigo-400 font-semibold">New Spinning</span>
         </div>
@@ -187,6 +187,11 @@
             <i class="fa-solid fa-mobile-screen-button text-amber-500"></i> Scanner
           </button>
         </div>
+
+        <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
+        <button id="btn-view-scans" onclick="openScansModal()" class="px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-solid fa-images text-indigo-500"></i> Scan Logs (<span class="scans-count-badge">0</span>)
+        </button>
 
         <!-- DOWNLOAD APK BUTTON -->
         <button id="btn-download-apk" class="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1.5 transition">
@@ -338,9 +343,14 @@
           </p>
         </div>
 
-        <button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-2 transition shrink-0">
-          <i class="fa-solid fa-right-from-bracket text-rose-500"></i> Switch User
-        </button>
+        <div class="flex items-center gap-2.5 flex-wrap shrink-0">
+          <button onclick="openScansModal()" class="px-3.5 py-2 rounded-xl border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center gap-2 transition shadow-sm">
+            <i class="fa-solid fa-images text-indigo-500"></i> Scan Logs (<span class="scans-count-badge">0</span>)
+          </button>
+          <button onclick="handleLogout()" class="px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-2 transition">
+            <i class="fa-solid fa-right-from-bracket text-rose-500"></i> Switch User
+          </button>
+        </div>
       </div>
 
       <!-- STEP 1: SELECT PLANT LOCATION -->
@@ -352,8 +362,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="plant-cards-container">
           
-          <!-- PLANT 1000 (PRIMARY) -->
-          <div onclick="selectPlant('1000', 'Plant 1000 - Main Spinning Mill (Welspun Anjar)')" 
+          <!-- PLANT 1000: BED SHEET PLANT ANJAR (PRIMARY) -->
+          <div onclick="selectPlant('1000', 'Bed Sheet Plant Anjar')" 
                id="card-plant-1000" 
                class="plant-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/30 shadow-md">
             <div class="flex items-start justify-between gap-2 mb-3">
@@ -364,8 +374,8 @@
                 Primary Unit
               </span>
             </div>
-            <div class="font-bold text-slate-900 dark:text-white text-base">Plant 1000</div>
-            <div class="text-xs font-medium text-indigo-600 dark:text-indigo-300 mt-0.5">Main Spinning Complex</div>
+            <div class="font-bold text-slate-900 dark:text-white text-base">Bed Sheet Plant Anjar</div>
+            <div class="text-xs font-medium text-indigo-600 dark:text-indigo-300 mt-0.5">Welspun Anjar &bull; Plant 1000</div>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Welspun Anjar, Gujarat &bull; 8 Value-Chain Lines &bull; SAP Connected</p>
             <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
@@ -375,8 +385,8 @@
             </div>
           </div>
 
-          <!-- PLANT 2000 -->
-          <div onclick="selectPlant('2000', 'Plant 2000 - Unit 2 Synthetic &amp; Blended Yarns')" 
+          <!-- PLANT 2000: TERRY TOWEL PLANT ANJAR -->
+          <div onclick="selectPlant('2000', 'Terry Towel Plant Anjar')" 
                id="card-plant-2000" 
                class="plant-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
             <div class="flex items-start justify-between gap-2 mb-3">
@@ -387,17 +397,17 @@
                 Connected
               </span>
             </div>
-            <div class="font-bold text-slate-900 dark:text-white text-base">Plant 2000</div>
-            <div class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">Synthetic &amp; Blended Unit</div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Welspun Anjar Unit 2 &bull; Ring &amp; Rotor Spinning</p>
+            <div class="font-bold text-slate-900 dark:text-white text-base">Terry Towel Plant Anjar</div>
+            <div class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">Welspun Anjar Unit 2 &bull; Plant 2000</div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Welspun Anjar, Gujarat &bull; Terry Towel Spinning &amp; Weaving</p>
             <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="text-slate-500 dark:text-slate-400">Lines Active</span>
               <i class="fa-regular fa-circle text-slate-400 text-lg plant-check"></i>
             </div>
           </div>
 
-          <!-- PLANT 3000 -->
-          <div onclick="selectPlant('3000', 'Plant 3000 - Vapi Spinning &amp; Technical Textiles')" 
+          <!-- PLANT 3000: TERRY TOWEL PLANT VAPI -->
+          <div onclick="selectPlant('3000', 'Terry Towel Plant Vapi')" 
                id="card-plant-3000" 
                class="plant-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
             <div class="flex items-start justify-between gap-2 mb-3">
@@ -408,9 +418,9 @@
                 Standby
               </span>
             </div>
-            <div class="font-bold text-slate-900 dark:text-white text-base">Plant 3000</div>
-            <div class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">Vapi Spinning Facility</div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Vapi, Gujarat &bull; Terry Towel &amp; Technical Yarn</p>
+            <div class="font-bold text-slate-900 dark:text-white text-base">Terry Towel Plant Vapi</div>
+            <div class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">Welspun Vapi &bull; Plant 3000</div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Vapi, Gujarat &bull; Terry Towel &amp; Technical Textiles</p>
             <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="text-slate-500 dark:text-slate-400">Standby Mode</span>
               <i class="fa-regular fa-circle text-slate-400 text-lg plant-check"></i>
@@ -454,30 +464,38 @@
             </div>
           </div>
 
-          <!-- DEPT 2: BLOWROOM & PREP (COMING SOON) -->
-          <div class="rounded-2xl p-5 border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/40 opacity-75">
+          <!-- DEPT 2: WARPING -->
+          <div onclick="selectDepartment('warping', 'Warping')" 
+               id="card-dept-warping" 
+               class="dept-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
             <div class="flex items-start justify-between gap-2 mb-2">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
-                Phase 2
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                Ready
               </span>
-              <i class="fa-solid fa-lock text-slate-400"></i>
+              <i class="fa-regular fa-circle text-slate-400 text-lg dept-check"></i>
             </div>
-            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-lg">Blowroom &amp; Mixing</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">Bale Plucker, Uniclean, Pre-Separator &amp; Chute Feeds.</p>
-            <div class="text-[11px] text-slate-400 italic">Department onboarding in progress.</div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-lg">Warping</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">High-Speed Sectional &amp; Direct Warping Lines &bull; Beam Prep.</p>
+            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-blue-500"></i> Department Ready
+            </div>
           </div>
 
-          <!-- DEPT 3: WINDING & PACKING (COMING SOON) -->
-          <div class="rounded-2xl p-5 border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/40 opacity-75">
+          <!-- DEPT 3: WEAVING -->
+          <div onclick="selectDepartment('weaving', 'Weaving')" 
+               id="card-dept-weaving" 
+               class="dept-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
             <div class="flex items-start justify-between gap-2 mb-2">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
-                Phase 2
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                Ready
               </span>
-              <i class="fa-solid fa-lock text-slate-400"></i>
+              <i class="fa-regular fa-circle text-slate-400 text-lg dept-check"></i>
             </div>
-            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-lg">Winding &amp; Packing</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">Automatic Cone Winder, Yarn Conditioning (YCP) &amp; Palletizing.</p>
-            <div class="text-[11px] text-slate-400 italic">Department onboarding in progress.</div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-lg">Weaving</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">Air-Jet &amp; Rapier Terry &amp; Bed Sheet Looms &bull; Cloth Roll Tracking.</p>
+            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-purple-500"></i> Department Ready
+            </div>
           </div>
 
         </div>
@@ -489,7 +507,7 @@
           <div class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Active Selection</div>
           <div class="font-bold text-slate-900 dark:text-white text-base sm:text-lg flex items-center gap-2 mt-0.5">
             <i class="fa-solid fa-check-circle text-emerald-500"></i>
-            <span id="selected-summary-plant">Plant 1000</span>
+            <span id="selected-summary-plant">Bed Sheet Plant Anjar</span>
             <span class="text-slate-400">&bull;</span>
             <span id="selected-summary-dept" class="text-indigo-600 dark:text-indigo-400">New Spinning (8 Machines)</span>
           </div>
@@ -583,6 +601,8 @@
                 <label for="department-select" class="font-medium text-slate-500 dark:text-slate-400">Dept:</label>
                 <select id="department-select" class="bg-transparent text-indigo-600 dark:text-indigo-300 font-bold outline-none cursor-pointer">
                   <option value="new_spinning">New Spinning (8 Machines)</option>
+                  <option value="warping">Warping</option>
+                  <option value="weaving">Weaving</option>
                 </select>
               </div>
 
@@ -1023,6 +1043,305 @@
           </tbody>
         </table>
       </div>
+    </div>
+  <!-- ============================================== -->
+  <!-- MODAL: SCANNED RECORDS & IMAGE ARCHIVE EXPLORER-->
+  <!-- ============================================== -->
+  <div id="scans-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- MODAL HEADER -->
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-images"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg">Scanned Data &amp; Image Archive</h3>
+              <span id="scans-rbac-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                Role: Operator (Own Records)
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Trace captured machine display photos against extracted data &bull; Department-wise, Machine-wise &amp; Date-wise
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="fetchScans()" title="Refresh records" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrows-rotate text-indigo-500"></i> Refresh
+          </button>
+          <button onclick="closeScansModal()" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center text-lg transition leading-none">
+            &times;
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTER & SEARCH TOOLBAR -->
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-950/40 space-y-3">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
+          
+          <!-- SEARCH FILTER -->
+          <div class="lg:col-span-3 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <input type="text" id="scans-filter-search" placeholder="Search yield, machine, operator..." 
+              class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <!-- DEPARTMENT FILTER -->
+          <div class="lg:col-span-2">
+            <select id="scans-filter-dept" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="all">All Departments</option>
+              <option value="new_spinning">New Spinning</option>
+              <option value="warping">Warping</option>
+              <option value="weaving">Weaving</option>
+            </select>
+          </div>
+
+          <!-- MACHINE FILTER -->
+          <div class="lg:col-span-2">
+            <select id="scans-filter-machine" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="all">All Machines</option>
+              <option value="carding">1. Carding</option>
+              <option value="breaker_draw_frame">2. Breaker DF</option>
+              <option value="lap_former">3. Lap Former</option>
+              <option value="comber">4. Comber</option>
+              <option value="finisher_draw_frame">5. Finisher DF</option>
+              <option value="speed_frame">6. Speed Frame</option>
+              <option value="ring_frame">7. Ring Frame</option>
+              <option value="link_conner">8. Link Conner</option>
+            </select>
+          </div>
+
+          <!-- DATE FILTER -->
+          <div class="lg:col-span-2">
+            <input type="date" id="scans-filter-date" 
+              class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono">
+          </div>
+
+          <!-- OPERATOR FILTER (ADMIN / SUPERVISOR ONLY) -->
+          <div id="scans-operator-filter-wrap" class="lg:col-span-2">
+            <select id="scans-filter-operator" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+              <option value="all">All Operators</option>
+              <option value="operator">Rajesh Sharma (OP-1042)</option>
+              <option value="supervisor">Spinning Supervisor</option>
+              <option value="admin">Mitesh Bambhaniya (Admin)</option>
+            </select>
+          </div>
+
+          <!-- RESET BUTTON -->
+          <div class="lg:col-span-1 flex justify-end">
+            <button onclick="resetScansFilters()" title="Reset all filters" class="w-full py-2 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold transition text-center">
+              Clear
+            </button>
+          </div>
+
+        </div>
+
+        <!-- SUMMARY COUNTERS BAR -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs font-mono">
+          <div class="bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Total Records</span>
+            <span id="scans-stat-total" class="font-bold text-slate-900 dark:text-white text-sm">0</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Avg Confidence</span>
+            <span id="scans-stat-conf" class="font-bold text-emerald-500 text-sm">--</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">SAP Confirmed</span>
+            <span id="scans-stat-confirmed" class="font-bold text-blue-500 text-sm">0</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Total Yield</span>
+            <span id="scans-stat-yield" class="font-bold text-purple-500 text-sm">0 Kg</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SCANNED RECORDS TABLE -->
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] uppercase font-semibold">
+                <th class="py-3 px-3">Captured Screen</th>
+                <th class="py-3 px-3">Scan Date &amp; Time</th>
+                <th class="py-3 px-3">Plant &amp; Dept</th>
+                <th class="py-3 px-3">Machine</th>
+                <th class="py-3 px-3">Operator</th>
+                <th class="py-3 px-3">Detected Yield</th>
+                <th class="py-3 px-3">Run &bull; Idle</th>
+                <th class="py-3 px-3">AI Confidence</th>
+                <th class="py-3 px-3">SAP Status</th>
+                <th class="py-3 px-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="scans-table-body" class="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="scans-empty-state" class="hidden py-12 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 flex items-center justify-center text-2xl mx-auto mb-3">
+            <i class="fa-solid fa-photo-film"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm">No Scanned Records Found</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+            No image scans match your current filter criteria. Try resetting the filters or capture new machine screens.
+          </p>
+          <button onclick="resetScansFilters()" class="mt-3 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SIDE-BY-SIDE IMAGE & DATA INSPECTOR     -->
+  <!-- ============================================== -->
+  <div id="scan-detail-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- INSPECTOR HEADER -->
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white flex items-center justify-center text-lg shadow-sm">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg" id="scan-detail-machine-title">Machine Screen Inspection</h3>
+              <span id="scan-detail-sap-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                Confirmed in SAP
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono" id="scan-detail-timestamp">
+              Captured: -- &bull; Record ID: --
+            </p>
+          </div>
+        </div>
+
+        <button onclick="closeScanDetailModal()" class="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center text-lg transition leading-none">
+          &times;
+        </button>
+      </div>
+
+      <!-- INSPECTOR SPLIT BODY: IMAGE ON LEFT, DETECTED DATA ON RIGHT -->
+      <div class="p-5 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- LEFT: ORIGINAL CAPTURED MACHINE PHOTO -->
+        <div class="lg:col-span-6 flex flex-col space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-camera text-indigo-500"></i> Original Machine Screen Photo
+            </span>
+            <a id="scan-detail-image-link" href="#" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Full Resolution
+            </a>
+          </div>
+
+          <div class="relative rounded-2xl bg-black border border-slate-200 dark:border-slate-800 p-2 flex items-center justify-center min-h-[300px] overflow-hidden shadow-inner group">
+            <img id="scan-detail-image" src="" alt="Captured Machine Screen" class="max-h-[420px] w-auto max-w-full object-contain rounded-xl transition duration-200">
+            <div class="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 px-2.5 py-1 rounded-lg text-[10px] text-slate-300 font-mono">
+              <span id="scan-detail-filename">machine_screen.jpg</span>
+            </div>
+          </div>
+
+          <!-- PHOTO METADATA CHIPS -->
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <span class="text-slate-400 block text-[10px] uppercase font-sans">Plant &amp; Location</span>
+              <span id="scan-detail-plant" class="font-bold text-slate-800 dark:text-slate-200">Bed Sheet Plant Anjar</span>
+            </div>
+            <div class="bg-slate-100 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <span class="text-slate-400 block text-[10px] uppercase font-sans">Department</span>
+              <span id="scan-detail-dept" class="font-bold text-indigo-600 dark:text-indigo-400">New Spinning</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: EXTRACTED OCR DATA & VERIFICATION -->
+        <div class="lg:col-span-6 flex flex-col space-y-4">
+          
+          <!-- TOP SUMMARY STATS -->
+          <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Logged By</span>
+              <span id="scan-detail-operator" class="font-bold text-xs text-slate-800 dark:text-slate-200 font-mono">Rajesh Sharma (OP-1042)</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">AI Extraction Confidence</span>
+              <span id="scan-detail-confidence" class="font-bold text-xs text-emerald-500 font-mono">98.4%</span>
+            </div>
+            
+            <!-- KEY METRICS GRID -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 dark:border-slate-700/60 text-center font-mono">
+              <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-[10px] text-slate-400 block font-sans">Yield</span>
+                <span id="scan-detail-yield" class="font-bold text-emerald-500 text-xs sm:text-sm">--</span>
+              </div>
+              <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-[10px] text-slate-400 block font-sans">Run Time</span>
+                <span id="scan-detail-runtime" class="font-bold text-cyan-400 text-xs sm:text-sm">--</span>
+              </div>
+              <div class="bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-700">
+                <span class="text-[10px] text-slate-400 block font-sans">Efficiency</span>
+                <span id="scan-detail-eff" class="font-bold text-amber-500 text-xs sm:text-sm">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DETAILED ALL-FIELDS TABLE -->
+          <div class="flex-1 flex flex-col space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-list-check text-emerald-500"></i> All Extracted OCR Fields
+              </span>
+              <span id="scan-detail-field-count" class="text-[11px] font-mono text-slate-400">6 fields detected</span>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 flex-1 max-h-[250px] overflow-y-auto">
+              <table class="w-full text-left text-xs border-collapse font-mono">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[10px] uppercase bg-slate-50 dark:bg-slate-800/40">
+                    <th class="py-2 px-3">Field Label</th>
+                    <th class="py-2 px-3">Detected OCR Value</th>
+                    <th class="py-2 px-3">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody id="scan-detail-fields-body" class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- INSPECTOR FOOTER -->
+      <div class="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between text-xs">
+        <div class="text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-mono">
+          <i class="fa-solid fa-shield-halved text-indigo-500"></i>
+          <span>Tamper-evident audit logged to SQLite</span>
+        </div>
+        <button onclick="closeScanDetailModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition">
+          Close Inspector
+        </button>
+      </div>
+
     </div>
   </div>
 

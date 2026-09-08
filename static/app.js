@@ -18,7 +18,7 @@ let currentTemplateId = "carding";
 
 // Session & Hierarchy State
 let currentUser = JSON.parse(localStorage.getItem("mv_user") || "null");
-let currentPlant = JSON.parse(localStorage.getItem("mv_plant") || '{"id":"1000","name":"Plant 1000 - Main Spinning Mill (Welspun Anjar)"}');
+let currentPlant = JSON.parse(localStorage.getItem("mv_plant") || '{"id":"1000","name":"Bed Sheet Plant Anjar"}');
 let currentDepartment = JSON.parse(localStorage.getItem("mv_dept") || '{"id":"new_spinning","name":"New Spinning (8 Machines)"}');
 let currentAppView = "login";
 
@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSamples();
   setupEventListeners();
   loadAuditLogs();
+  updateScansCountBadge();
   updateAndroidClock();
   setInterval(updateAndroidClock, 30000);
 
@@ -321,8 +322,15 @@ function togglePasswordVisibility() {
 // ================================================================
 // PLANT & DEPARTMENT SELECTION HIERARCHY
 // ================================================================
+const PLANT_DISPLAY_NAMES = {
+  "1000": "Bed Sheet Plant Anjar",
+  "2000": "Terry Towel Plant Anjar",
+  "3000": "Terry Towel Plant Vapi"
+};
+
 function selectPlant(id, name) {
-  currentPlant = { id, name };
+  const resolvedName = name || PLANT_DISPLAY_NAMES[id] || `Plant ${id}`;
+  currentPlant = { id, name: resolvedName };
   localStorage.setItem("mv_plant", JSON.stringify(currentPlant));
 
   document.querySelectorAll(".plant-card").forEach(card => {
@@ -341,7 +349,7 @@ function selectPlant(id, name) {
   }
 
   const summaryPlant = document.getElementById("selected-summary-plant");
-  if (summaryPlant) summaryPlant.textContent = `Plant ${id}`;
+  if (summaryPlant) summaryPlant.textContent = resolvedName;
 
   const sapPlantInput = document.getElementById("sap-plant");
   if (sapPlantInput) {
@@ -351,11 +359,32 @@ function selectPlant(id, name) {
 }
 
 function selectDepartment(id, name) {
-  currentDepartment = { id, name };
+  const deptNames = {
+    "new_spinning": "New Spinning (8 Machines)",
+    "warping": "Warping",
+    "weaving": "Weaving"
+  };
+  const resolvedName = name || deptNames[id] || id;
+  currentDepartment = { id, name: resolvedName };
   localStorage.setItem("mv_dept", JSON.stringify(currentDepartment));
 
+  document.querySelectorAll(".dept-card").forEach(card => {
+    card.classList.remove("border-indigo-600", "bg-indigo-50/50", "dark:bg-indigo-950/30", "shadow-md");
+    card.classList.add("border-slate-200", "dark:border-slate-700", "bg-white", "dark:bg-slate-800/80");
+    const check = card.querySelector(".dept-check");
+    if (check) check.className = "fa-regular fa-circle text-slate-400 text-lg dept-check";
+  });
+
+  const activeCard = document.getElementById(`card-dept-${id}`);
+  if (activeCard) {
+    activeCard.classList.remove("border-slate-200", "dark:border-slate-700", "bg-white", "dark:bg-slate-800/80");
+    activeCard.classList.add("border-indigo-600", "bg-indigo-50/50", "dark:bg-indigo-950/30", "shadow-md");
+    const check = activeCard.querySelector(".dept-check");
+    if (check) check.className = "fa-solid fa-check-circle text-indigo-600 dark:text-indigo-400 text-lg dept-check";
+  }
+
   const summaryDept = document.getElementById("selected-summary-dept");
-  if (summaryDept) summaryDept.textContent = name;
+  if (summaryDept) summaryDept.textContent = resolvedName;
 
   if (departmentSelect) {
     departmentSelect.value = id;
@@ -369,8 +398,12 @@ function launchWorkstation() {
 function updatePlantDeptBadges() {
   const plantBadge = document.getElementById("current-plant-badge");
   const deptBadge = document.getElementById("current-dept-badge");
-  if (plantBadge && currentPlant) plantBadge.textContent = `Plant ${currentPlant.id}`;
-  if (deptBadge && currentDepartment) deptBadge.textContent = currentDepartment.id === "new_spinning" ? "New Spinning" : currentDepartment.name;
+  if (plantBadge && currentPlant) {
+    plantBadge.textContent = PLANT_DISPLAY_NAMES[currentPlant.id] || currentPlant.name || `Plant ${currentPlant.id}`;
+  }
+  if (deptBadge && currentDepartment) {
+    deptBadge.textContent = currentDepartment.id === "new_spinning" ? "New Spinning" : (currentDepartment.name || currentDepartment.id);
+  }
 
   const sapPlantInput = document.getElementById("sap-plant");
   if (sapPlantInput && currentPlant) {
@@ -395,6 +428,12 @@ window.selectPlant = selectPlant;
 window.selectDepartment = selectDepartment;
 window.launchWorkstation = launchWorkstation;
 window.showView = showView;
+window.openScansModal = openScansModal;
+window.closeScansModal = closeScansModal;
+window.resetScansFilters = resetScansFilters;
+window.fetchScans = fetchScans;
+window.openScanDetailModal = openScanDetailModal;
+window.closeScanDetailModal = closeScanDetailModal;
 
 // Update Android Clock
 function updateAndroidClock() {
@@ -534,6 +573,22 @@ function setupEventListeners() {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", updateSapPreview);
   });
+
+  // Scanned Records Explorer Filters
+  const searchInput = document.getElementById("scans-filter-search");
+  if (searchInput) searchInput.addEventListener("input", debounce(fetchScans, 300));
+
+  const deptFilter = document.getElementById("scans-filter-dept");
+  if (deptFilter) deptFilter.addEventListener("change", fetchScans);
+
+  const machineFilter = document.getElementById("scans-filter-machine");
+  if (machineFilter) machineFilter.addEventListener("change", fetchScans);
+
+  const dateFilter = document.getElementById("scans-filter-date");
+  if (dateFilter) dateFilter.addEventListener("change", fetchScans);
+
+  const operatorFilter = document.getElementById("scans-filter-operator");
+  if (operatorFilter) operatorFilter.addEventListener("change", fetchScans);
 }
 
 // ================================================================
@@ -618,13 +673,20 @@ async function extractScreenData(filename, templateId = null) {
   const resolvedTemplate = templateId || currentTemplateId;
 
   try {
-    // Note: Send ONLY lightweight filename and template_id. Never send giant base64 payloads over JSON!
+    // Send filename, template_id, plus active user and plant/department metadata for database logging
     const res = await fetch("/api/extract", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         filename: filename,
-        template_id: resolvedTemplate
+        template_id: resolvedTemplate,
+        operator_id: (currentUser && currentUser.username) ? currentUser.username : "operator",
+        operator_name: (currentUser && currentUser.name) ? currentUser.name : "Shift Operator",
+        operator_role: (currentUser && currentUser.role) ? currentUser.role : "Operator",
+        plant_id: (currentPlant && currentPlant.id) ? currentPlant.id : "1000",
+        plant_name: (currentPlant && currentPlant.name) ? currentPlant.name : "Bed Sheet Plant Anjar",
+        department_id: (currentDepartment && currentDepartment.id) ? currentDepartment.id : "new_spinning",
+        department_name: (currentDepartment && currentDepartment.name) ? currentDepartment.name : "New Spinning"
       })
     });
 
@@ -638,6 +700,7 @@ async function extractScreenData(filename, templateId = null) {
       currentTemplateId = currentData.template_id;
       renderScreenData(currentData);
       updateSapPreview();
+      updateScansCountBadge();
     } else {
       console.warn("Extraction returned error:", json.message);
       if (detectedTemplateBadge) detectedTemplateBadge.textContent = getTemplateName(resolvedTemplate);
@@ -1040,6 +1103,7 @@ async function submitConfirmationToSAP() {
       document.getElementById("res-work").textContent = sapRes.ACTUAL_MACHINE_HOURS;
       sapResponseCard.classList.remove("hidden");
       loadAuditLogs();
+      updateScansCountBadge();
       sapResponseCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   } catch (err) {
@@ -1076,6 +1140,376 @@ async function loadAuditLogs() {
   } catch (err) {
     console.error("Failed to load audit logs:", err);
   }
+}
+
+// ================================================================
+// SCANNED RECORDS & IMAGE ARCHIVE EXPLORER (RBAC + MULTI-FILTER)
+// ================================================================
+let cachedScansList = [];
+
+function openScansModal() {
+  const modal = document.getElementById("scans-modal");
+  if (!modal) return;
+
+  const rbacBadge = document.getElementById("scans-rbac-badge");
+  const operatorFilterWrap = document.getElementById("scans-operator-filter-wrap");
+  const isOperator = (!currentUser || !currentUser.role || currentUser.role.toLowerCase() === "operator");
+
+  if (rbacBadge) {
+    if (isOperator) {
+      rbacBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+      const opName = (currentUser && (currentUser.name || currentUser.username)) || "Operator";
+      rbacBadge.textContent = `Role: Operator (${opName} - Own Records Only)`;
+    } else {
+      rbacBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20";
+      rbacBadge.textContent = `Role: ${currentUser ? currentUser.role : "Admin"} (Global View - All Departments & Operators)`;
+    }
+  }
+
+  if (operatorFilterWrap) {
+    operatorFilterWrap.style.display = isOperator ? "none" : "block";
+  }
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+  fetchScans();
+}
+
+function closeScansModal() {
+  const modal = document.getElementById("scans-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+
+function resetScansFilters() {
+  const searchInput = document.getElementById("scans-filter-search");
+  const deptSelect = document.getElementById("scans-filter-dept");
+  const machineSelect = document.getElementById("scans-filter-machine");
+  const dateInput = document.getElementById("scans-filter-date");
+  const operatorSelect = document.getElementById("scans-filter-operator");
+
+  if (searchInput) searchInput.value = "";
+  if (deptSelect) deptSelect.value = "all";
+  if (machineSelect) machineSelect.value = "all";
+  if (dateInput) dateInput.value = "";
+  if (operatorSelect) operatorSelect.value = "all";
+
+  fetchScans();
+}
+
+async function fetchScans() {
+  const searchInput = document.getElementById("scans-filter-search");
+  const deptSelect = document.getElementById("scans-filter-dept");
+  const machineSelect = document.getElementById("scans-filter-machine");
+  const dateInput = document.getElementById("scans-filter-date");
+  const operatorSelect = document.getElementById("scans-filter-operator");
+
+  const search = searchInput ? searchInput.value.trim() : "";
+  const dept = deptSelect ? deptSelect.value : "all";
+  const machine = machineSelect ? machineSelect.value : "all";
+  const date = dateInput ? dateInput.value : "all";
+  const filterOp = (operatorSelect && operatorSelect.value) ? operatorSelect.value : "all";
+
+  const operatorId = (currentUser && currentUser.username) ? currentUser.username : "operator";
+  const role = (currentUser && currentUser.role) ? currentUser.role : "Operator";
+
+  const params = new URLSearchParams({
+    operator_id: operatorId,
+    role: role,
+    department: dept || "all",
+    machine: machine || "all",
+    date: date || "all",
+    search: search,
+    filter_operator: filterOp || "all"
+  });
+
+  const tbody = document.getElementById("scans-table-body");
+  const emptyState = document.getElementById("scans-empty-state");
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="10" class="py-8 text-center text-slate-400 font-mono"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Querying Scanned Records Archive...</td></tr>`;
+  }
+
+  try {
+    const res = await fetch(`/api/scans?${params.toString()}`);
+    const json = await res.json();
+    if (json.status === "success") {
+      cachedScansList = json.records || [];
+      renderScansTable(cachedScansList);
+      updateScansSummaryStats(cachedScansList);
+      updateAllScansBadges(cachedScansList.length);
+    } else {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="py-8 text-center text-rose-500 font-mono">Error: ${json.message}</td></tr>`;
+    }
+  } catch (err) {
+    console.error("Failed to fetch scans:", err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="10" class="py-8 text-center text-rose-500 font-mono">Failed to connect to database: ${err.message}</td></tr>`;
+  }
+}
+
+function updateScansSummaryStats(records) {
+  const statTotal = document.getElementById("scans-stat-total");
+  const statConf = document.getElementById("scans-stat-conf");
+  const statConfirmed = document.getElementById("scans-stat-confirmed");
+  const statYield = document.getElementById("scans-stat-yield");
+
+  if (!records || records.length === 0) {
+    if (statTotal) statTotal.textContent = "0";
+    if (statConf) statConf.textContent = "--";
+    if (statConfirmed) statConfirmed.textContent = "0";
+    if (statYield) statYield.textContent = "0 Kg";
+    return;
+  }
+
+  if (statTotal) statTotal.textContent = records.length;
+
+  let totalConf = 0;
+  let confirmedCount = 0;
+  let totalYieldNum = 0;
+
+  records.forEach(r => {
+    const confVal = typeof r.overall_confidence === "number" ? r.overall_confidence : parseFloat(r.overall_confidence || 0);
+    totalConf += (confVal > 1 ? confVal : confVal * 100);
+    if (r.sap_status && r.sap_status.toLowerCase().includes("confirmed")) {
+      confirmedCount++;
+    }
+    const yieldMatch = String(r.summary_yield || "").match(/[\d.]+/);
+    if (yieldMatch) {
+      totalYieldNum += parseFloat(yieldMatch[0]);
+    }
+  });
+
+  const avgConf = (totalConf / records.length).toFixed(1);
+  if (statConf) statConf.textContent = `${avgConf}%`;
+  if (statConfirmed) statConfirmed.textContent = `${confirmedCount} / ${records.length}`;
+  if (statYield) statYield.textContent = `${totalYieldNum.toFixed(1)} Kg`;
+}
+
+function renderScansTable(records) {
+  const tbody = document.getElementById("scans-table-body");
+  const emptyState = document.getElementById("scans-empty-state");
+  if (!tbody) return;
+
+  if (!records || records.length === 0) {
+    tbody.innerHTML = "";
+    if (emptyState) emptyState.classList.remove("hidden");
+    return;
+  }
+
+  if (emptyState) emptyState.classList.add("hidden");
+
+  tbody.innerHTML = records.map(r => {
+    const scanTime = r.created_at ? new Date(r.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "--";
+    const isConfirmed = r.sap_status && r.sap_status.toLowerCase().includes("confirmed");
+    const statusPill = isConfirmed
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap"><i class="fa-solid fa-circle-check mr-1"></i>Confirmed</span>`
+      : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap"><i class="fa-regular fa-clock mr-1"></i>Scanned</span>`;
+
+    const confScore = typeof r.overall_confidence === "number" 
+      ? (r.overall_confidence > 1 ? r.overall_confidence.toFixed(1) : (r.overall_confidence * 100).toFixed(1))
+      : "98.2";
+
+    const imgSrc = r.image_url || `/samples/${r.image_filename || "carding.jpg"}`;
+
+    return `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+        <!-- IMAGE THUMBNAIL -->
+        <td class="py-2.5 px-3">
+          <div onclick="openScanDetailModal('${r.id}')" class="w-12 h-12 rounded-xl bg-black border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer shadow-sm relative group hover:ring-2 hover:ring-indigo-500 transition">
+            <img src="${imgSrc}" onerror="this.src='/samples/carding.jpg'" alt="${r.machine_name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] transition">
+              <i class="fa-solid fa-magnifying-glass-plus"></i>
+            </div>
+          </div>
+        </td>
+
+        <!-- TIMESTAMP -->
+        <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap">
+          <div>${scanTime}</div>
+          <div class="text-[10px] text-slate-400">${r.scan_date || ""}</div>
+        </td>
+
+        <!-- PLANT & DEPT -->
+        <td class="py-2.5 px-3">
+          <div class="font-bold text-slate-800 dark:text-slate-200">${r.plant_name || "Bed Sheet Plant Anjar"}</div>
+          <div class="text-[11px] text-indigo-600 dark:text-indigo-400">${r.department_name || "New Spinning"}</div>
+        </td>
+
+        <!-- MACHINE -->
+        <td class="py-2.5 px-3">
+          <div class="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+            <i class="fa-solid fa-gear text-[10px] text-slate-400"></i>
+            <span>${r.machine_name || r.machine_template}</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400">ID: ${r.machine_template}</span>
+        </td>
+
+        <!-- OPERATOR -->
+        <td class="py-2.5 px-3">
+          <div class="font-medium text-slate-800 dark:text-slate-200">${r.operator_name || r.operator_id}</div>
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">${r.operator_role || "Operator"}</span>
+        </td>
+
+        <!-- YIELD -->
+        <td class="py-2.5 px-3 font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+          ${r.summary_yield || "--"}
+        </td>
+
+        <!-- RUN & IDLE -->
+        <td class="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
+          <span class="text-cyan-600 dark:text-cyan-400">${r.summary_runtime || "--"}</span>
+          <span class="text-slate-400">&bull;</span>
+          <span class="text-amber-500">${r.summary_idletime || "--"}</span>
+        </td>
+
+        <!-- AI CONFIDENCE -->
+        <td class="py-2.5 px-3">
+          <div class="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <i class="fa-solid fa-bolt text-[10px]"></i>
+            <span>${confScore}%</span>
+          </div>
+        </td>
+
+        <!-- SAP STATUS -->
+        <td class="py-2.5 px-3 whitespace-nowrap">
+          ${statusPill}
+        </td>
+
+        <!-- ACTION -->
+        <td class="py-2.5 px-3 text-right whitespace-nowrap">
+          <button onclick="openScanDetailModal('${r.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 font-semibold text-xs border border-indigo-200 dark:border-indigo-800 transition flex items-center gap-1.5 ml-auto">
+            <i class="fa-solid fa-eye text-[11px]"></i>
+            <span>Inspect</span>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function openScanDetailModal(recordId) {
+  const modal = document.getElementById("scan-detail-modal");
+  if (!modal) return;
+
+  try {
+    const res = await fetch(`/api/scans/${recordId}`);
+    const json = await res.json();
+    if (json.status !== "success" || !json.record) {
+      alert("Could not load scan record details: " + (json.message || "Unknown error"));
+      return;
+    }
+
+    const rec = json.record;
+
+    // Header & Info
+    const titleEl = document.getElementById("scan-detail-machine-title");
+    const timeEl = document.getElementById("scan-detail-timestamp");
+    const sapBadge = document.getElementById("scan-detail-sap-badge");
+
+    if (titleEl) titleEl.textContent = rec.machine_name || rec.machine_template;
+    if (timeEl) timeEl.textContent = `Captured: ${new Date(rec.created_at).toLocaleString()} • Record ID: ${rec.id}`;
+    if (sapBadge) {
+      const isConfirmed = rec.sap_status && rec.sap_status.toLowerCase().includes("confirmed");
+      sapBadge.className = isConfirmed
+        ? "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+        : "px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
+      sapBadge.textContent = rec.sap_status || "Scanned";
+    }
+
+    // Image
+    const imgEl = document.getElementById("scan-detail-image");
+    const imgLink = document.getElementById("scan-detail-image-link");
+    const filenameEl = document.getElementById("scan-detail-filename");
+    const plantEl = document.getElementById("scan-detail-plant");
+    const deptEl = document.getElementById("scan-detail-dept");
+
+    const fullImgUrl = rec.image_url || `/samples/${rec.image_filename || "carding.jpg"}`;
+    if (imgEl) {
+      imgEl.src = fullImgUrl;
+      imgEl.onerror = () => { imgEl.src = "/samples/carding.jpg"; };
+    }
+    if (imgLink) imgLink.href = fullImgUrl;
+    if (filenameEl) filenameEl.textContent = rec.image_filename || "machine_screen.jpg";
+    if (plantEl) plantEl.textContent = rec.plant_name || "Bed Sheet Plant Anjar";
+    if (deptEl) deptEl.textContent = rec.department_name || "New Spinning";
+
+    // Operator & Stats
+    const operatorEl = document.getElementById("scan-detail-operator");
+    const confEl = document.getElementById("scan-detail-confidence");
+    const yieldEl = document.getElementById("scan-detail-yield");
+    const runtimeEl = document.getElementById("scan-detail-runtime");
+    const effEl = document.getElementById("scan-detail-eff");
+
+    if (operatorEl) operatorEl.textContent = `${rec.operator_name || rec.operator_id} (${rec.operator_id})`;
+    const confNum = typeof rec.overall_confidence === "number" ? (rec.overall_confidence > 1 ? rec.overall_confidence.toFixed(1) : (rec.overall_confidence * 100).toFixed(1)) : "98.4";
+    if (confEl) confEl.textContent = `${confNum}% Conf.`;
+    if (yieldEl) yieldEl.textContent = rec.summary_yield || "--";
+    if (runtimeEl) runtimeEl.textContent = rec.summary_runtime || "--";
+    if (effEl) effEl.textContent = rec.summary_efficiency || "--";
+
+    // Populate All Extracted Fields Table
+    const fieldsBody = document.getElementById("scan-detail-fields-body");
+    const countEl = document.getElementById("scan-detail-field-count");
+    
+    let fieldsList = [];
+    if (rec.extracted_data && rec.extracted_data.fields && Array.isArray(rec.extracted_data.fields)) {
+      fieldsList = rec.extracted_data.fields;
+    }
+
+    if (countEl) countEl.textContent = `${fieldsList.length} fields detected`;
+
+    if (fieldsBody) {
+      if (fieldsList.length === 0) {
+        fieldsBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-400">No individual field breakdown stored.</td></tr>`;
+      } else {
+        fieldsBody.innerHTML = fieldsList.map(f => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="py-2 px-3 text-slate-700 dark:text-slate-300 font-sans font-medium">${f.label || f.key}</td>
+            <td class="py-2 px-3 font-bold text-slate-900 dark:text-white">${f.value} ${f.unit || ""}</td>
+            <td class="py-2 px-3 text-emerald-500 font-semibold">${f.confidence ? (f.confidence * 100).toFixed(0) + "%" : "98%"}</td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  } catch (err) {
+    alert("Error loading scan detail: " + err.message);
+  }
+}
+
+function closeScanDetailModal() {
+  const modal = document.getElementById("scan-detail-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
+
+function updateAllScansBadges(count) {
+  document.querySelectorAll(".scans-count-badge").forEach(badge => {
+    badge.textContent = count;
+  });
+}
+
+async function updateScansCountBadge() {
+  const operatorId = (currentUser && currentUser.username) ? currentUser.username : "operator";
+  const role = (currentUser && currentUser.role) ? currentUser.role : "Operator";
+  try {
+    const res = await fetch(`/api/scans?operator_id=${operatorId}&role=${role}`);
+    const json = await res.json();
+    if (json.status === "success") {
+      updateAllScansBadges(json.total || 0);
+    }
+  } catch (e) {}
+}
+
+function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func.apply(this, args), delay);
+  };
 }
 
 // ================================================================
