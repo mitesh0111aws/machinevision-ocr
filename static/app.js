@@ -1,10 +1,10 @@
 // ================================================================
 // Production Machine Screen OCR & SAP Vision Integration App
 // Department: New Spinning (8-Stage Textile Value Chain)
-// Includes Dynamic Calibration, Invariant Bounding Boxes & PWA
+// Automated Angle, Distance & Lighting Invariant Screen Calibration
 // ================================================================
 
-// Global State
+// Global Application State
 let currentData = null;
 let currentSapFormat = "bapi"; // "bapi" or "odata"
 let currentBapiPayload = null;
@@ -14,14 +14,6 @@ let currentViewMode = "desktop"; // "desktop" or "scanner"
 let cameraStream = null;
 let currentClientImageUrl = null;
 let currentTemplateId = "carding";
-
-// Calibration State (Zoom, Pan, Rotation)
-let currentCalibration = {
-  zoom: 1.0,
-  offsetX: 0,
-  offsetY: 0,
-  rotation: 0
-};
 
 // DOM Elements
 const samplesContainer = document.getElementById("samples-container");
@@ -73,22 +65,23 @@ const cameraModal = document.getElementById("camera-modal");
 const cameraStreamVideo = document.getElementById("camera-stream");
 const btnScannerTorch = document.getElementById("btn-scanner-torch");
 
-// Calibration Controls
-const calibIndicator = document.getElementById("calib-indicator");
-const btnCalibZoomIn = document.getElementById("btn-calib-zoom-in");
-const btnCalibZoomOut = document.getElementById("btn-calib-zoom-out");
-const btnCalibPanLeft = document.getElementById("btn-calib-pan-left");
-const btnCalibPanRight = document.getElementById("btn-calib-pan-right");
-const btnCalibPanUp = document.getElementById("btn-calib-pan-up");
-const btnCalibPanDown = document.getElementById("btn-calib-pan-down");
-const btnCalibRotate = document.getElementById("btn-calib-rotate");
-const btnCalibReset = document.getElementById("btn-calib-reset");
+// Fresh Data Notification Elements
+const freshDataBanner = document.getElementById("fresh-data-banner");
+const freshDataTime = document.getElementById("fresh-data-time");
+const screenGeometryBadge = document.getElementById("screen-geometry-badge");
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
+  // Prevent any black screen from broken image URLs
+  if (screenImage) {
+    screenImage.onerror = () => {
+      console.warn("Screen image failed to load, falling back to active template sample");
+      screenImage.src = `/samples/${currentTemplateId}.jpg`;
+    };
+  }
+
   loadSamples();
   setupEventListeners();
-  setupCalibrationControls();
   loadAuditLogs();
   updateAndroidClock();
   setInterval(updateAndroidClock, 30000);
@@ -134,7 +127,6 @@ function setupEventListeners() {
     templateSelect.addEventListener("change", () => {
       const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
       currentTemplateId = selectedTemplate || currentTemplateId;
-      loadTemplateCalibration(currentTemplateId);
       if (activeImageFilename) {
         extractScreenData(activeImageFilename, selectedTemplate, currentClientImageUrl);
       }
@@ -239,142 +231,6 @@ function setupEventListeners() {
 }
 
 // ================================================================
-// SCREEN CALIBRATION & INVARIANCE ENGINE
-// ================================================================
-function setupCalibrationControls() {
-  if (btnCalibZoomIn) {
-    btnCalibZoomIn.addEventListener("click", () => {
-      currentCalibration.zoom = Math.round(Math.min(2.5, currentCalibration.zoom + 0.05) * 100) / 100;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibZoomOut) {
-    btnCalibZoomOut.addEventListener("click", () => {
-      currentCalibration.zoom = Math.round(Math.max(0.4, currentCalibration.zoom - 0.05) * 100) / 100;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibPanLeft) {
-    btnCalibPanLeft.addEventListener("click", () => {
-      currentCalibration.offsetX -= 15;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibPanRight) {
-    btnCalibPanRight.addEventListener("click", () => {
-      currentCalibration.offsetX += 15;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibPanUp) {
-    btnCalibPanUp.addEventListener("click", () => {
-      currentCalibration.offsetY -= 15;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibPanDown) {
-    btnCalibPanDown.addEventListener("click", () => {
-      currentCalibration.offsetY += 15;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibRotate) {
-    btnCalibRotate.addEventListener("click", () => {
-      currentCalibration.rotation = (currentCalibration.rotation + 90) % 360;
-      screenImage.style.transform = currentCalibration.rotation === 0 ? "none" : `rotate(${currentCalibration.rotation}deg)`;
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-
-  if (btnCalibReset) {
-    btnCalibReset.addEventListener("click", () => {
-      currentCalibration = { zoom: 1.0, offsetX: 0, offsetY: 0, rotation: 0 };
-      screenImage.style.transform = "none";
-      updateCalibrationUI();
-      saveTemplateCalibration(currentTemplateId);
-    });
-  }
-}
-
-function updateCalibrationUI() {
-  if (calibIndicator) {
-    const zoomPct = Math.round(currentCalibration.zoom * 100);
-    calibIndicator.textContent = `Zoom: ${zoomPct}% | Offset: (${Math.round(currentCalibration.offsetX)}, ${Math.round(currentCalibration.offsetY)}) | Rot: ${currentCalibration.rotation}°`;
-  }
-  renderCalibratedBoxes();
-}
-
-function renderCalibratedBoxes() {
-  if (!currentData || !currentData.fields) return;
-
-  const cx = 500.0;
-  const cy = 500.0;
-  const z = currentCalibration.zoom;
-  const ox = currentCalibration.offsetX;
-  const oy = currentCalibration.offsetY;
-
-  currentData.fields.forEach(f => {
-    const raw = f.raw_bbox || f.bbox;
-    if (!raw) return;
-
-    const nx = (raw.x - cx) * z + cx + ox;
-    const ny = (raw.y - cy) * z + cy + oy;
-    const nw = raw.w * z;
-    const nh = raw.h * z;
-
-    f.bbox = {
-      x: Math.max(0, Math.min(1000 - nw, nx)),
-      y: Math.max(0, Math.min(1000 - nh, ny)),
-      w: nw,
-      h: nh
-    };
-  });
-
-  renderBoundingBoxes(currentData.fields);
-}
-
-function saveTemplateCalibration(templateId) {
-  if (!templateId) return;
-  try {
-    localStorage.setItem(`calib_${templateId}`, JSON.stringify(currentCalibration));
-  } catch (e) {}
-}
-
-function loadTemplateCalibration(templateId) {
-  if (!templateId) return;
-  try {
-    const saved = localStorage.getItem(`calib_${templateId}`);
-    if (saved) {
-      currentCalibration = JSON.parse(saved);
-      if (currentCalibration.rotation) {
-        screenImage.style.transform = `rotate(${currentCalibration.rotation}deg)`;
-      } else {
-        screenImage.style.transform = "none";
-      }
-      updateCalibrationUI();
-      return;
-    }
-  } catch (e) {}
-
-  currentCalibration = { zoom: 1.0, offsetX: 0, offsetY: 0, rotation: 0 };
-  screenImage.style.transform = "none";
-  updateCalibrationUI();
-}
-
-// ================================================================
 // LOAD SAMPLES & EXTRACTION
 // ================================================================
 async function loadSamples() {
@@ -414,7 +270,7 @@ async function loadSamples() {
 function selectSample(filename, templateId) {
   activeImageFilename = filename;
   currentTemplateId = templateId || "carding";
-  currentClientImageUrl = null; // reset custom client data URL
+  currentClientImageUrl = null; // Clear custom client image when switching sample cards
 
   document.querySelectorAll(".sample-card").forEach(el => {
     el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
@@ -431,7 +287,6 @@ function selectSample(filename, templateId) {
     templateSelect.value = templateId || "auto";
   }
 
-  loadTemplateCalibration(currentTemplateId);
   extractScreenData(filename, templateId);
 }
 
@@ -453,8 +308,7 @@ async function extractScreenData(filename, templateId = null, clientImageUrl = n
       body: JSON.stringify({
         filename,
         template_id: resolvedTemplate,
-        image_url: currentClientImageUrl,
-        calibration: currentCalibration
+        image_url: currentClientImageUrl
       })
     });
 
@@ -471,15 +325,17 @@ async function extractScreenData(filename, templateId = null, clientImageUrl = n
     console.error("Extraction error:", err);
   } finally {
     if (scanLaser) {
-      setTimeout(() => scanLaser.classList.add("hidden"), 500);
+      setTimeout(() => scanLaser.classList.add("hidden"), 400);
     }
   }
 }
 
 // Render Extracted Data on UI
 function renderScreenData(data) {
-  // Prevent black screen: Do not append ?t= to base64 Data URLs!
-  if (data.image_url) {
+  // 1. Prevent black screens 100%: Prefer client Data URL directly
+  if (currentClientImageUrl) {
+    screenImage.src = currentClientImageUrl;
+  } else if (data.image_url) {
     if (data.image_url.startsWith("data:") || data.image_url.startsWith("blob:")) {
       screenImage.src = data.image_url;
     } else {
@@ -499,6 +355,23 @@ function renderScreenData(data) {
     document.getElementById("sap-plant").value = data.default_plant;
   }
 
+  // Update Geometry & Invariance Badge
+  if (screenGeometryBadge && data.auto_calibration) {
+    const cal = data.auto_calibration;
+    const rotText = cal.angle_normalized ? "Deskewed" : "0°";
+    const lightText = cal.lighting_normalized ? "Enhanced" : "Optimal";
+    screenGeometryBadge.textContent = `Auto-Norm: ${rotText} • ${lightText} • ${Math.round(cal.luminance)} Lum`;
+  }
+
+  // Show Fresh Data Banner if newly uploaded photo
+  if (data.refreshed && freshDataBanner && freshDataTime) {
+    freshDataBanner.classList.remove("hidden");
+    freshDataTime.textContent = new Date().toLocaleTimeString();
+    setTimeout(() => {
+      if (freshDataBanner) freshDataBanner.classList.add("hidden");
+    }, 9000);
+  }
+
   // Handle Multi-Row Matrix Table (for Speed Frame / Rovematic ADR)
   if (data.is_table && data.table_rows && data.table_rows.length > 0) {
     tableViewCard.classList.remove("hidden");
@@ -507,8 +380,8 @@ function renderScreenData(data) {
     tableViewCard.classList.add("hidden");
   }
 
-  // Render SVG Bounding Boxes
-  renderCalibratedBoxes();
+  // Render SVG Bounding Boxes (Auto-calibrated to screen display boundaries)
+  renderBoundingBoxes(data.fields);
 
   // Render Form Fields
   renderFormFields(data.fields);
@@ -949,13 +822,13 @@ function snapCameraPhoto() {
 }
 
 // ================================================================
-// UNIVERSAL FILE UPLOAD HANDLER (Zero Black Screen, Safe Filenames)
+// UNIVERSAL FILE UPLOAD HANDLER (Zero Black Screen, Dynamic Refresh)
 // ================================================================
 async function handleFileUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  // 1. Immediately read file as Data URL to preview instantly (ELIMINATES BLACK SCREEN 100%)
+  // 1. Instantly read file as Data URL to preview immediately (ELIMINATES BLACK SCREEN 100%)
   const reader = new FileReader();
   reader.onerror = () => console.warn("FileReader error");
   reader.onload = async (readEvent) => {
