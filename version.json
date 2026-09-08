@@ -1,14 +1,28 @@
 {
   "app_name": "MachineVision OCR & SAP Floor Portal",
-  "current_version": "2.1.1",
+  "current_version": "2.1.2",
   "release_date": "2026-09-08",
-  "git_tag": "v2.1.1",
+  "git_tag": "v2.1.2",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.1.2",
+      "date": "2026-09-08",
+      "title": "Pixel-Perfect Card Baseline Alignment, Anti-Truncation 8-Stage Grid & Zero-Overflow Header",
+      "tag": "v2.1.2",
+      "revert_command": "git checkout v2.1.2",
+      "changes": [
+        "Eliminated the 20px vertical offset on Card 3 by switching #data-panel from space-y-5 to flex-col gap-5 and adding native hidden attribute to #table-view-card.",
+        "Equalized Card 2 and Card 3 headers to exact h-[48px] with matching borders, and status ribbons to exact h-[38px].",
+        "Upgraded 8-machine stages to responsive grid (grid-cols-2 md:grid-cols-4 2xl:grid-cols-8 gap-3) with dedicated STAGE_META titles and metrics to prevent all text truncation (...).",
+        "Compacted AI calibration ribbon text (Tilt +32° • CLAHE 2.2 • Lab) to prevent multi-line ribbon expansion.",
+        "Added body overflow-x-hidden and responsive header breakpoints to eliminate horizontal scrollbars on laptop screens."
+      ]
+    },
     {
       "version": "2.1.1",
       "date": "2026-09-08",

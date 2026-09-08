@@ -627,18 +627,57 @@ function setupEventListeners() {
 }
 
 // ================================================================
-// Helper to format concise machine highlight metrics
-function formatSampleCardSubtitle(subtitle) {
-  if (!subtitle) return "";
-  const parts = subtitle.split("•").map(p => p.trim());
-  const kgs = parts.find(p => p.toLowerCase().includes("kg"));
-  const eff = parts.find(p => p.toLowerCase().includes("eff"));
-  const doffs = parts.find(p => p.toLowerCase().includes("doff"));
-  if (kgs && eff) return `${kgs} • ${eff}`;
-  if (kgs && doffs) return `${kgs} • ${doffs}`;
-  if (kgs) return kgs;
-  return parts.slice(1, 3).join(" • ") || parts[0];
-}
+// Stage metadata dictionary for clean, high-density machine cards
+const STAGE_META = {
+  carding: {
+    name: "Carding Machine",
+    stage: "STAGE 1",
+    metric: "172.18 Kg • 88.5% Eff",
+    code: "CARD-01"
+  },
+  breaker_draw_frame: {
+    name: "Breaker Draw Frame",
+    stage: "STAGE 2",
+    metric: "489.5 Kg • 10 Doffs",
+    code: "BR-DF"
+  },
+  lap_former: {
+    name: "Lap Former",
+    stage: "STAGE 3",
+    metric: "612.8 Kg • 42.9% Eff",
+    code: "LAP-01"
+  },
+  comber: {
+    name: "Comber Machine",
+    stage: "STAGE 4",
+    metric: "197.05 Kg • 95.4% Eff",
+    code: "COMB-01"
+  },
+  finisher_draw_frame: {
+    name: "Finisher Draw Frame",
+    stage: "STAGE 5",
+    metric: "432.4 Kg • 23 Doffs",
+    code: "FR-DF"
+  },
+  speed_frame: {
+    name: "Speed Frame (Roving)",
+    stage: "STAGE 6",
+    metric: "8 Shifts ADR Matrix",
+    code: "SP-FR"
+  },
+  ring_frame: {
+    name: "Ring Frame (Spinning)",
+    stage: "STAGE 7",
+    metric: "6.0 Hanks • 5.1 hrs",
+    code: "RING-01"
+  },
+  link_conner: {
+    name: "Link Conner (Autoconer)",
+    stage: "STAGE 8",
+    metric: "81.50 Kg • 68.7% Eff",
+    code: "AUTOCONER"
+  }
+};
 
 // LOAD SAMPLES & EXTRACTION
 // ================================================================
@@ -648,24 +687,33 @@ async function loadSamples() {
     const data = await res.json();
     const samples = data.samples || [];
 
-    samplesContainer.innerHTML = samples.map((s, idx) => `
-      <div onclick="selectSample('${s.filename}', '${s.template_id}')" 
-           id="sample-card-${s.template_id}"
-           class="sample-card cursor-pointer bg-white dark:bg-slate-900 border ${idx === 0 ? 'border-indigo-600 dark:border-indigo-500 shadow-md shadow-indigo-500/15 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800'} hover:border-indigo-400 dark:hover:border-slate-600 rounded-xl p-2.5 transition flex flex-col justify-between group shadow-sm">
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[9px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">STAGE ${idx + 1}</span>
-            <span class="status-dot w-2 h-2 rounded-full ${idx === 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}"></span>
+    samplesContainer.innerHTML = samples.map((s, idx) => {
+      const meta = STAGE_META[s.template_id] || {
+        name: s.title.replace(/^\d+\.\s*/, ''),
+        stage: `STAGE ${idx + 1}`,
+        metric: s.subtitle || '',
+        code: s.template_id.toUpperCase()
+      };
+
+      return `
+        <div onclick="selectSample('${s.filename}', '${s.template_id}')" 
+             id="sample-card-${s.template_id}"
+             class="sample-card cursor-pointer bg-white dark:bg-slate-900 border ${idx === 0 ? 'border-indigo-600 dark:border-indigo-500 shadow-md shadow-indigo-500/15 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800'} hover:border-indigo-400 dark:hover:border-slate-600 rounded-xl p-3 transition flex flex-col justify-between group shadow-sm min-h-[92px]">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">${meta.stage}</span>
+              <span class="status-dot w-2 h-2 rounded-full ${idx === 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}"></span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate" title="${meta.name}">${meta.name}</h4>
+            <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-1 truncate">${meta.metric}</p>
           </div>
-          <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate" title="${s.title}">${s.title.replace(/^\d+\.\s*/, '')}</h4>
-          <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-1 truncate">${formatSampleCardSubtitle(s.subtitle)}</p>
+          <div class="mt-2.5 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
+            <span class="font-mono text-slate-400 text-[10px] uppercase font-semibold">${meta.code}</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition shrink-0"></i>
+          </div>
         </div>
-        <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
-          <span class="font-mono text-slate-400 text-[9px] uppercase truncate max-w-[85px]">${s.template_id.replace(/_/g, ' ')}</span>
-          <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition shrink-0"></i>
-        </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
 
     if (samples.length > 0) {
       selectSample(samples[0].filename, samples[0].template_id);
@@ -794,13 +842,17 @@ function renderScreenData(data) {
     templateSelect.value = data.template_id;
   }
   document.querySelectorAll(".sample-card").forEach(el => {
-    el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
-    el.classList.add("border-slate-800");
+    el.classList.remove("border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30", "border-blue-500", "border-amber-500");
+    el.classList.add("border-slate-200", "dark:border-slate-800");
+    const dot = el.querySelector(".status-dot");
+    if (dot) dot.className = "status-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700";
   });
   const activeCard = document.getElementById(`sample-card-${data.template_id}`);
   if (activeCard) {
-    const highlightColor = currentViewMode === "scanner" ? "border-amber-500 shadow-md shadow-amber-500/20" : "border-blue-500 shadow-md shadow-blue-500/20";
-    activeCard.className = `sample-card cursor-pointer bg-slate-950 ${highlightColor} rounded-xl p-2.5 transition flex flex-col justify-between group`;
+    activeCard.classList.remove("border-slate-200", "dark:border-slate-800");
+    activeCard.classList.add("border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30");
+    const dot = activeCard.querySelector(".status-dot");
+    if (dot) dot.className = "status-dot w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
   }
 
   // Work Center synchronization
@@ -811,16 +863,13 @@ function renderScreenData(data) {
     document.getElementById("sap-plant").value = data.default_plant;
   }
 
-  // Update Geometry & Invariance Badge
+  // Update Geometry & Invariance Badge (Concise 1-Line Format)
   if (screenGeometryBadge && data.auto_calibration) {
     const cal = data.auto_calibration;
-    if (cal.status_text) {
-      screenGeometryBadge.textContent = cal.status_text;
-    } else {
-      const rotText = cal.angle_normalized ? "Deskewed" : "0°";
-      const lightText = cal.lighting_normalized ? "Enhanced" : "Optimal";
-      screenGeometryBadge.textContent = `Auto-Norm: ${rotText} • ${lightText} • ${Math.round(cal.luminance)} Lum`;
-    }
+    const tilt = (cal.applied_tilt_angle !== undefined) ? `${cal.applied_tilt_angle > 0 ? '+' : ''}${Math.round(cal.applied_tilt_angle)}°` : '0°';
+    const clahe = cal.applied_clahe ? `CLAHE ${cal.applied_clahe}` : 'Norm';
+    const filter = cal.applied_color_filter ? cal.applied_color_filter.replace(/_isolate|_enhanced/, '') : 'RGB';
+    screenGeometryBadge.textContent = `Tilt ${tilt} • ${clahe} • ${filter}`;
   }
 
   // Show Fresh Data Banner if newly uploaded photo

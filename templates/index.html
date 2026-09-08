@@ -138,42 +138,42 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-200 selection:bg-indigo-500 selection:text-white flex flex-col">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans antialiased transition-colors duration-200 selection:bg-indigo-500 selection:text-white flex flex-col w-full overflow-x-hidden">
 
   <!-- ======================================================== -->
   <!-- TOP GLOBAL HEADER (Adapts to Active View)                -->
   <!-- ======================================================== -->
-  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur sticky top-0 z-40 shadow-sm transition-colors w-full">
-    <div class="max-w-[1536px] mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-3 w-full">
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur sticky top-0 z-40 shadow-sm transition-colors w-full overflow-hidden">
+    <div class="max-w-[1536px] mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2 w-full">
       
       <!-- LEFT: BRAND & APP IDENTITY -->
-      <div class="flex items-center gap-2.5 shrink-0">
+      <div class="flex items-center gap-2 shrink-0">
         <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
           <i class="fa-solid fa-microchip text-base"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <h1 class="font-bold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white leading-none">MachineVision OCR</h1>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden sm:inline-block">8 Spinning Stages</span>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hidden md:inline-block">SAP Ready</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden md:inline-block">8 Spinning Stages</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hidden lg:inline-block">SAP Ready</span>
           </div>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden xl:block mt-0.5">Industrial Textile Screen Capture &bull; Carding to Link Conner &bull; SAP CO11N</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden 2xl:block mt-0.5">Industrial Textile Screen Capture &bull; Carding to Link Conner &bull; SAP CO11N</p>
         </div>
       </div>
 
-      <!-- RIGHT: CONTROLS & USER CONTEXT (NEVER WRAPS ON DESKTOP) -->
+      <!-- RIGHT: CONTROLS & USER CONTEXT (NEVER WRAPS & NEVER OVERFLOWS) -->
       <div class="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0 flex-nowrap">
         
         <!-- HIERARCHY BADGE (Only in Workstation View) -->
         <div id="header-context-badge" class="hidden items-center gap-1.5 text-xs bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
           <div class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 font-medium">
             <i class="fa-solid fa-industry text-indigo-500 text-xs"></i>
-            <span id="current-plant-badge" class="font-bold max-w-[120px] sm:max-w-[180px] truncate">Bed Sheet Plant Anjar</span>
-            <span class="text-slate-400">&bull;</span>
-            <span id="current-dept-badge" class="text-indigo-600 dark:text-indigo-400 font-semibold max-w-[110px] sm:max-w-none truncate">New Spinning</span>
+            <span id="current-plant-badge" class="font-bold max-w-[100px] lg:max-w-[160px] truncate">Bed Sheet Plant Anjar</span>
+            <span class="text-slate-400 hidden sm:inline">&bull;</span>
+            <span id="current-dept-badge" class="text-indigo-600 dark:text-indigo-400 font-semibold max-w-[90px] lg:max-w-none truncate hidden sm:inline">New Spinning</span>
           </div>
           <button id="btn-change-dept" title="Switch Plant / Department" class="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-300 font-semibold text-[10px] border border-indigo-200 dark:border-indigo-800 transition flex items-center gap-1 shrink-0">
-            <i class="fa-solid fa-repeat text-[9px]"></i> Switch
+            <i class="fa-solid fa-repeat text-[9px]"></i> <span class="hidden md:inline">Switch</span>
           </button>
         </div>
 
@@ -188,13 +188,13 @@
           <!-- VERSION BADGE (Click to View Release History & Rollback Info) -->
           <button onclick="openVersionModal()" title="View Version & Release History" class="px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1 transition shadow-sm shrink-0">
             <i class="fa-solid fa-code-branch text-[11px] text-indigo-500"></i>
-            <span id="app-version-badge">v2.1.1</span>
+            <span id="app-version-badge">v2.1.2</span>
           </button>
 
           <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
           <button id="btn-view-scans" onclick="openScansModal()" title="Scanned Data & Image History Explorer" class="px-2.5 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm shrink-0">
             <i class="fa-solid fa-images text-indigo-500"></i>
-            <span class="hidden lg:inline">Logs</span> (<span class="scans-count-badge">0</span>)
+            <span class="hidden xl:inline">Logs</span> (<span class="scans-count-badge">0</span>)
           </button>
 
           <!-- AI OPTICAL CALIBRATION STUDIO BUTTON -->
@@ -206,7 +206,7 @@
           <!-- DOWNLOAD APK BUTTON -->
           <button id="btn-download-apk" title="Download Android APK for Zebra Scanners" class="px-2.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1 transition shrink-0">
             <i class="fa-brands fa-android text-sm"></i>
-            <span class="hidden xl:inline">APK</span>
+            <span class="hidden 2xl:inline">APK</span>
           </button>
 
           <!-- AUDIT LOG BUTTON -->
@@ -226,7 +226,7 @@
         <div id="header-user-panel" class="hidden items-center gap-1.5 shrink-0 flex-nowrap">
           <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shrink-0">
             <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-            <span id="header-username" class="font-semibold text-slate-700 dark:text-slate-200 max-w-[110px] truncate">Operator</span>
+            <span id="header-username" class="font-semibold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">Operator</span>
           </div>
           <button id="btn-logout-header" title="Sign Out" class="px-2.5 py-1.5 rounded-xl border border-rose-300/40 dark:border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-1 transition shrink-0">
             <i class="fa-solid fa-right-from-bracket"></i>
@@ -610,7 +610,7 @@
           </div>
 
           <!-- 8-STAGE HORIZONTAL MACHINE GRID -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2.5" id="samples-container">
+          <div class="grid grid-cols-2 md:grid-cols-4 2xl:grid-cols-8 gap-3" id="samples-container">
             <!-- Dynamically populated via JS -->
           </div>
         </section>
@@ -622,12 +622,12 @@
           
           <!-- LEFT COLUMN: IMAGE VIEWER WITH BOUNDING BOX OVERLAYS -->
           <div class="lg:col-span-6 bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-md shadow-slate-200/40 dark:shadow-black/20 flex flex-col" id="image-panel">
-            <div class="flex items-center justify-between mb-3 min-h-[38px]">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-700/80 h-[48px]">
               <div class="flex items-center gap-2">
                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold text-white shrink-0">2</span>
                 <div>
-                  <h3 class="font-semibold text-sm text-slate-900 dark:text-white">Machine Screen OCR Overlay</h3>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Template: <span id="detected-template-badge" class="font-semibold text-indigo-600 dark:text-indigo-400">Auto Detecting...</span></p>
+                  <h3 class="font-semibold text-sm text-slate-900 dark:text-white leading-none">Machine Screen OCR Overlay</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-none">Template: <span id="detected-template-badge" class="font-semibold text-indigo-600 dark:text-indigo-400">Auto Detecting...</span></p>
                 </div>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
@@ -638,21 +638,18 @@
             </div>
 
             <!-- AUTOMATIC AI SCREEN CALIBRATION STATUS -->
-            <div class="bg-slate-50 dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 mb-3 flex items-center justify-between gap-2 text-xs min-h-[42px]" id="auto-calibration-status">
-              <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold shrink-0">
-                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> AI Auto-Calibrated
+            <div class="bg-slate-50 dark:bg-slate-900/80 px-3 rounded-xl border border-slate-200 dark:border-slate-700/80 mb-3 flex items-center justify-between gap-2 text-xs h-[38px] shrink-0" id="auto-calibration-status">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold text-[11px] shrink-0">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> AI Calibrated
                 </span>
-                <span class="text-slate-500 dark:text-slate-400 text-[11px] hidden sm:inline truncate">
-                  Angle, Distance &amp; Lighting Invariance Active
+                <span id="screen-geometry-badge" class="font-mono text-[10px] text-indigo-600 dark:text-indigo-300 truncate" title="AI Optical Calibration Parameters">
+                  Tilt 32° &bull; CLAHE 2.2 &bull; Lab Mode
                 </span>
               </div>
               <div class="flex items-center gap-2 shrink-0">
-                <span id="screen-geometry-badge" class="font-mono text-[10px] text-indigo-600 dark:text-indigo-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                  Display: 100% Normalized
-                </span>
-                <span id="data-freshness-badge" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                  Live Sync
+                <span id="data-freshness-badge" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
                 </span>
               </div>
             </div>
@@ -689,10 +686,10 @@
           </div>
 
           <!-- RIGHT COLUMN: EXTRACTED FORM DATA & SAP INTEGRATION -->
-          <div class="lg:col-span-6 space-y-5" id="data-panel">
+          <div class="lg:col-span-6 flex flex-col gap-5" id="data-panel">
             
             <!-- CARD: MULTI-ROW TABLE VIEW (Shown for Speed Frame) -->
-            <div id="table-view-card" class="hidden bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-md shadow-slate-200/40 dark:shadow-black/20">
+            <div id="table-view-card" hidden class="hidden bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-md shadow-slate-200/40 dark:shadow-black/20">
               <div class="flex items-center justify-between mb-3 border-b border-slate-200 dark:border-slate-700 pb-3">
                 <div class="flex items-center gap-2">
                   <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold text-white">3</span>
@@ -726,33 +723,30 @@
 
             <!-- CARD: VALIDATION & FORM REVIEW -->
             <div class="bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-md shadow-slate-200/40 dark:shadow-black/20" id="form-card">
-              <div class="flex items-center justify-between mb-3 min-h-[38px] border-b border-slate-200 dark:border-slate-700 pb-2">
+              <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-700/80 h-[48px]">
                 <div class="flex items-center gap-2">
                   <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold text-white shrink-0">3</span>
                   <div>
-                    <h3 class="font-semibold text-sm text-slate-900 dark:text-white">Operator Data Verification Form</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Review &amp; correct extracted metrics before SAP posting</p>
+                    <h3 class="font-semibold text-sm text-slate-900 dark:text-white leading-none">Operator Data Verification Form</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-none">Review &amp; correct extracted metrics before SAP posting</p>
                   </div>
                 </div>
-                <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono shrink-0" id="form-field-count">Fields</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-mono shrink-0 font-medium" id="form-field-count">Fields</span>
               </div>
 
               <!-- FORM STATUS RIBBON (MATCHES CARD 2 HEIGHT & HORIZONTAL RHYTHM) -->
-              <div class="bg-slate-50 dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 mb-3 flex items-center justify-between gap-2 text-xs min-h-[42px]" id="form-status-ribbon">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-semibold shrink-0">
+              <div class="bg-slate-50 dark:bg-slate-900/80 px-3 rounded-xl border border-slate-200 dark:border-slate-700/80 mb-3 flex items-center justify-between gap-2 text-xs h-[38px] shrink-0" id="form-status-ribbon">
+                <div class="flex items-center gap-2 overflow-hidden">
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-semibold text-[11px] shrink-0">
                     <i class="fa-solid fa-clipboard-check text-indigo-500"></i> Verification Mode
                   </span>
-                  <span class="text-slate-500 dark:text-slate-400 text-[11px] hidden sm:inline truncate">
-                    Synced with Machine Screen &bull; Target: SAP CO11N
+                  <span class="text-slate-500 dark:text-slate-400 text-[11px] font-mono truncate">
+                    Synced with Screen &bull; Target: SAP CO11N
                   </span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                  <span class="font-mono text-[10px] text-indigo-600 dark:text-indigo-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                    Sync Active
-                  </span>
-                  <span id="form-field-badge" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                    Ready for SAP
+                  <span id="form-field-badge" class="font-mono text-[10px] text-emerald-600 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                    <i class="fa-solid fa-check text-emerald-500 text-[9px]"></i> Ready for SAP
                   </span>
                 </div>
               </div>
@@ -1338,7 +1332,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Version Control &amp; Rollback</h2>
-              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.1.1 Active</span>
+              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.1.2 Active</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">Track release milestones or roll back to any historical version anytime</p>
           </div>
