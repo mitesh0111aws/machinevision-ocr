@@ -374,6 +374,20 @@ function renderScreenData(data) {
   overallConfidence.textContent = `${Math.round(data.overall_confidence * 100)}% Conf.`;
   formFieldCount.textContent = `${data.fields.length} Fields`;
 
+  // Synchronize dropdown and sample cards with detected template
+  if (templateSelect && data.template_id) {
+    templateSelect.value = data.template_id;
+  }
+  document.querySelectorAll(".sample-card").forEach(el => {
+    el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
+    el.classList.add("border-slate-800");
+  });
+  const activeCard = document.getElementById(`sample-card-${data.template_id}`);
+  if (activeCard) {
+    const highlightColor = currentViewMode === "scanner" ? "border-amber-500 shadow-md shadow-amber-500/20" : "border-blue-500 shadow-md shadow-blue-500/20";
+    activeCard.className = `sample-card cursor-pointer bg-slate-950 ${highlightColor} rounded-xl p-2.5 transition flex flex-col justify-between group`;
+  }
+
   // Work Center synchronization
   if (data.default_work_center) {
     document.getElementById("sap-work-center").value = data.default_work_center;

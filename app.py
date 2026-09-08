@@ -233,8 +233,9 @@ def upload_file():
 
 @app.route("/api/extract", methods=["POST"])
 def extract_data():
-    data = request.json or {}
-    filename = data.get("filename", "carding.jpg")
+    data = request.get_json(silent=True) or {}
+    raw_filename = data.get("filename", "carding.jpg")
+    filename = os.path.basename(raw_filename)
     template_id = data.get("template_id")
     calibration = data.get("calibration")
     client_image_url = data.get("image_url") # Preserves client-side Data URL

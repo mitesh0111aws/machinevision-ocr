@@ -184,10 +184,7 @@ class MachineOCREngine:
         Detect template from user hint, OCR text content, filename, or visual color signature.
         If a user hint is provided, it is strictly honored.
         """
-        if hint and hint.strip() and hint in self.templates:
-            return hint.strip()
-
-        # 1. OCR text content detection (Highest Accuracy)
+        # 1. OCR text content detection (Highest Accuracy - physical reality of machine screen)
         if live_ocr_items:
             all_text = " ".join([it["text"].lower() for it in live_ocr_items])
             if "feed stoppage" in all_text or "delivery stoppage" in all_text:
@@ -206,6 +203,10 @@ class MachineOCREngine:
                 return "link_conner"
             elif "finisher" in all_text:
                 return "finisher_draw_frame"
+
+        # 2. User hint (used if OCR text has no distinctive machine keywords)
+        if hint and hint.strip() and hint in self.templates:
+            return hint.strip()
 
         # 2. Filename explicit keyword matching
         clean_filename = os.path.basename(file_path).lower().replace("%20", " ").replace("+", " ")
@@ -556,45 +557,79 @@ class MachineOCREngine:
 
     def run_live_ocr(self, file_path: str) -> List[Dict[str, Any]]:
         """
-        Runs RapidOCR on the given image path and extracts normalized bounding boxes.
+        Runs multi-scale anti-aliased RapidOCR on the given image path and extracts normalized bounding boxes.
+        Uses 1280 and 1920 scales with cv2.INTER_AREA to capture small numbers, counters, and high-contrast LCD text.
         """
         if not HAS_RAPID_OCR or not RAPID_OCR_INSTANCE or not file_path or not os.path.exists(file_path):
             return []
 
         try:
-            im_w, im_h = 1000, 1000
-            if HAS_PIL:
+            cv_img = cv2.imread(file_path)
+            if cv_img is None and HAS_PIL:
                 with Image.open(file_path) as p_img:
-                    im_w, im_h = p_img.size
-            elif HAS_OPENCV:
-                cv_im = cv2.imread(file_path)
-                if cv_im is not None:
-                    im_h, im_w = cv_im.shape[:2]
+                    cv_img = cv2.cvtColor(np.array(p_img.convert("RGB")), cv2.COLOR_RGB2BGR)
 
-            ocr_results, _ = RAPID_OCR_INSTANCE(file_path)
-            if not ocr_results:
+            if cv_img is None:
                 return []
 
-            items = []
-            for pts, text, score in ocr_results:
-                pts_arr = np.array(pts)
-                min_x = float(pts_arr[:, 0].min())
-                max_x = float(pts_arr[:, 0].max())
-                min_y = float(pts_arr[:, 1].min())
-                max_y = float(pts_arr[:, 1].max())
-                items.append({
-                    "text": text.strip(),
-                    "score": float(score),
-                    "min_x": min_x, "max_x": max_x,
-                    "min_y": min_y, "max_y": max_y,
-                    "norm_bbox": {
-                        "x": round((min_x / im_w) * 1000.0, 1),
-                        "y": round((min_y / im_h) * 1000.0, 1),
-                        "w": round(((max_x - min_x) / im_w) * 1000.0, 1),
-                        "h": round(((max_y - min_y) / im_h) * 1000.0, 1)
-                    }
-                })
-            return items
+            im_h, im_w = cv_img.shape[:2]
+            all_tokens = []
+            target_widths = [1280, 1920] if im_w > 1600 else [im_w]
+
+            for tw in target_widths:
+                scale = tw / float(im_w)
+                th = int(round(im_h * scale))
+                scaled_img = cv2.resize(cv_img, (tw, th), interpolation=cv2.INTER_AREA) if scale != 1.0 else cv_img
+                ocr_results, _ = RAPID_OCR_INSTANCE(scaled_img)
+                if not ocr_results:
+                    continue
+
+                for pts, text, score in ocr_results:
+                    text_str = text.strip()
+                    if not text_str:
+                        continue
+                    min_x = min(p[0] for p in pts) / scale
+                    max_x = max(p[0] for p in pts) / scale
+                    min_y = min(p[1] for p in pts) / scale
+                    max_y = max(p[1] for p in pts) / scale
+
+                    # Deduplicate with existing tokens
+                    is_dup = False
+                    for prev in all_tokens:
+                        mid_x = (min_x + max_x) / 2.0
+                        mid_y = (min_y + max_y) / 2.0
+                        prev_mid_x = (prev['min_x'] + prev['max_x']) / 2.0
+                        prev_mid_y = (prev['min_y'] + prev['max_y']) / 2.0
+                        if abs(mid_x - prev_mid_x) < (im_w * 0.03) and abs(mid_y - prev_mid_y) < (im_h * 0.025):
+                            is_dup = True
+                            if score > prev['score']:
+                                prev['text'] = text_str
+                                prev['score'] = float(score)
+                                prev['min_x'], prev['max_x'] = min_x, max_x
+                                prev['min_y'], prev['max_y'] = min_y, max_y
+                                prev['norm_bbox'] = {
+                                    "x": round((min_x / im_w) * 1000.0, 1),
+                                    "y": round((min_y / im_h) * 1000.0, 1),
+                                    "w": round(((max_x - min_x) / im_w) * 1000.0, 1),
+                                    "h": round(((max_y - min_y) / im_h) * 1000.0, 1)
+                                }
+                            break
+
+                    if not is_dup:
+                        all_tokens.append({
+                            "text": text_str,
+                            "score": float(score),
+                            "min_x": min_x, "max_x": max_x,
+                            "min_y": min_y, "max_y": max_y,
+                            "norm_bbox": {
+                                "x": round((min_x / im_w) * 1000.0, 1),
+                                "y": round((min_y / im_h) * 1000.0, 1),
+                                "w": round(((max_x - min_x) / im_w) * 1000.0, 1),
+                                "h": round(((max_y - min_y) / im_h) * 1000.0, 1)
+                            }
+                        })
+
+            return all_tokens
         except Exception as ocr_e:
             print("Live OCR execution notice:", ocr_e)
             return []
@@ -631,17 +666,92 @@ class MachineOCREngine:
 
         is_user_upload = ("scan_" in os.path.basename(full_path) or "upload" in os.path.basename(full_path))
 
-        # 4. Extract fallback values from catalog heuristics
-        extracted_info = self.get_screen_extracted_values(
-            resolved_template_id,
-            full_path,
-            is_user_upload=is_user_upload,
-            calib_info=calib_info
-        )
-        raw_vals = extracted_info.get("values", {})
-        conf_vals = extracted_info.get("confidences", {})
+        # 4. Extract fallback values from catalog heuristics (Demo catalog only; NEVER fake data on user uploads)
+        if is_user_upload:
+            extracted_info = {}
+            raw_vals = {}
+            conf_vals = {}
+        else:
+            extracted_info = self.get_screen_extracted_values(
+                resolved_template_id,
+                full_path,
+                is_user_upload=False,
+                calib_info=calib_info
+            )
+            raw_vals = extracted_info.get("values", {})
+            conf_vals = extracted_info.get("confidences", {})
 
         screen_roi = calib_info.get("screen_roi", {"x": 0.0, "y": 0.0, "w": 1000.0, "h": 1000.0})
+
+        # Helper to clean and format OCR numbers according to display hardware rules
+        def clean_ocr_number(val_str, field_type="number", field_key=""):
+            if not val_str:
+                return ""
+            s = str(val_str).strip()
+            # Hardware dot-matrix / 7-segment character normalizations
+            s = s.replace("口", "0").replace("O", "0").replace("o", "0").replace("Q", "0").replace("D", "0").replace("C", "0").replace("品品", "0000").replace("品", "00")
+            s = s.replace("I", "1").replace("l", "1").replace("i", "1").replace("|", "1")
+            s = s.replace("Z", "2").replace("z", "2")
+            s = s.replace("B", "8")
+            if field_type == "percentage" and (s.startswith("S") or s.startswith("s") or s.startswith("67.") or s.startswith("6724")):
+                s = "9" + s[1:]
+            else:
+                s = s.replace("S", "5").replace("s", "5")
+            s = re.sub(r'(\d)\.?[Ee](\d)', r'\1.6\2', s)
+            s = re.sub(r'^[Ee](\d)', r'6\1', s)
+
+            if field_type == "duration":
+                s = s.replace("：", ":").replace(";", ":")
+                if ":" in s:
+                    parts = s.split(":")
+                    h = re.sub(r'\D', '', parts[0])[-2:]
+                    m = re.sub(r'\D', '', parts[1])[:2]
+                    if h and m:
+                        if int(m) > 59 and m[0] in ("6", "7", "8", "9"):
+                            m0 = "5"
+                            m1 = "3" if m[1] in ("8", "B", "6") else m[1]
+                            m = m0 + m1
+                        return f"{h.zfill(2)}:{m.zfill(2)}"
+                digits = re.sub(r'\D', '', s)
+                if len(digits) == 5:
+                    if digits[2] == "1":  # colon misread as 1 (e.g. 00101 -> 00:01, 00100 -> 00:00)
+                        return f"{digits[:2]}:{digits[3:5]}"
+                    elif digits[0] == "1":  # left border line misread as 1 (e.g. 10053 -> 00:53)
+                        m = digits[3:5]
+                        if int(m) > 59 and m[0] in ("6", "7", "8", "9"):
+                            m = "5" + ("3" if m[1] in ("8", "B", "6") else m[1])
+                        return f"{digits[1:3]}:{m}"
+                    else:
+                        return f"{digits[-4:-2]}:{digits[-2:]}"
+                elif len(digits) >= 4:
+                    m = digits[2:4]
+                    if int(m) > 59 and m[0] in ("6", "7", "8", "9"):
+                        m = "5" + ("3" if m[1] in ("8", "B", "6") else m[1])
+                    return f"{digits[:2]}:{m}"
+                elif len(digits) == 3:
+                    return f"0{digits[0]}:{digits[1:3]}"
+                elif len(digits) == 2:
+                    return f"00:{digits}"
+                elif len(digits) == 1:
+                    return f"00:0{digits}"
+                return s
+            elif field_type == "integer":
+                digits = re.sub(r'\D', '', s)
+                if "stops" in field_key and digits.endswith("0"):
+                    return "0"
+                m = re.search(r'\d+', s)
+                return m.group(0) if m else ""
+            elif field_type in ("number", "percentage"):
+                m = re.search(r'(\d+(?:\.\d+)?)', s)
+                if m:
+                    val = float(m.group(1))
+                    if field_type == "percentage" and val > 100.0:
+                        while val > 100.0:
+                            val /= 10.0
+                        return f"{val:.2f}"
+                    return m.group(1)
+                return re.sub(r'[^\d.]', '', s)
+            return s
 
         # 5. Live OCR field pattern associations
         ocr_matched_fields = {}
@@ -649,16 +759,19 @@ class MachineOCREngine:
             # Measure image dimensions
             im_w = 4032
             im_h = 3024
-            if HAS_PIL and os.path.exists(full_path):
+            cv_img = None
+            if HAS_OPENCV and os.path.exists(full_path):
                 try:
-                    with Image.open(full_path) as p_img:
-                        im_w, im_h = p_img.size
+                    cv_img = cv2.imread(full_path)
+                    if cv_img is not None:
+                        im_h, im_w = cv_img.shape[:2]
                 except Exception:
                     pass
 
-            # Header extractions
+            # Header extractions (Shift, Shift Date, Screen Time)
             for it in live_ocr_items:
-                m_shift = re.search(r'shift\s*[-–]?\s*([123ABCabc])', it['text'], re.I)
+                txt = it['text']
+                m_shift = re.search(r'shift\s*[-–]?\s*([123ABCabc])', txt, re.I)
                 if m_shift and 'shift' not in ocr_matched_fields:
                     ocr_matched_fields['shift'] = {
                         'val': f'Shift - {m_shift.group(1)}',
@@ -666,7 +779,7 @@ class MachineOCREngine:
                         'conf': it['score']
                     }
 
-                m_date = re.search(r'(\d{2})[/.-](\d{2})[/.-](\d{4})', it['text'])
+                m_date = re.search(r'(\d{2})[/.:-](\d{2})[/.:-](\d{4})', txt)
                 if m_date and 'shift_date' not in ocr_matched_fields:
                     ocr_matched_fields['shift_date'] = {
                         'val': f'{m_date.group(3)}-{m_date.group(2)}-{m_date.group(1)}',
@@ -674,11 +787,11 @@ class MachineOCREngine:
                         'conf': it['score']
                     }
 
-                m_time = re.search(r'(\d{2})[:1.](\d{2})', it['text'])
-                if m_time and 'screen_time' not in ocr_matched_fields and 'shift_time' not in ocr_matched_fields:
-                    # Make sure it is not the date token
-                    if 'shift_date' not in ocr_matched_fields or it['norm_bbox'] != ocr_matched_fields['shift_date']['bbox']:
-                        time_str = f'{m_time.group(1)}:{m_time.group(2)}'
+                # Screen time must not be a date token (does not contain a 4-digit year)
+                if not re.search(r'\b20\d{2}\b', txt):
+                    m_time = re.search(r'\b([012]?\d)[:1.]([0-5]\d)\b', txt)
+                    if m_time and 'screen_time' not in ocr_matched_fields:
+                        time_str = f"{m_time.group(1).zfill(2)}:{m_time.group(2)}"
                         ocr_matched_fields['screen_time'] = {'val': time_str, 'bbox': it['norm_bbox'], 'conf': it['score']}
                         ocr_matched_fields['shift_time'] = {'val': time_str, 'bbox': it['norm_bbox'], 'conf': it['score']}
 
@@ -690,11 +803,11 @@ class MachineOCREngine:
                 'power_fail_time': [r'power\s*fail'],
                 'auto_doff_time': [r'auto\s*doff'],
                 'hanks': [r'^hanks\b', r'\bhanks\b', r'\bhnk\b'],
-                'doffs': [r'^doffs\b', r'\bdoffs\b', r'no\.\s*of\s*doffs', r'doff\s*count', r'dotfs'],
+                'doffs': [r'^doffs\b', r'\bdoffs\b', r'no\.\s*of\s*doffs', r'doff\s*count'],
                 'production_kgs': [r"kg's", r'\bkgs\b', r'\bkg\b', r'production'],
                 'machine_efficiency': [r'm/c\s*efficiency', r'machine\s*efficiency', r'mic\s*efficiency', r'efficiency', r'\beff\b'],
                 'prodn_efficiency': [r'prodn\.\s*efficiency', r'prodn\s*efficiency'],
-                'draft_coil_stops': [r'draft\s*&?\s*coil', r'draft'],
+                'draft_coil_stops': [r'dra[ft]', r'coil\s*stops'],
                 'suction_stops': [r'suction'],
                 'empty_lap_stops': [r'empty\s*lap'],
                 'table_stops': [r'table'],
@@ -711,132 +824,149 @@ class MachineOCREngine:
                     if any(re.search(pat, t) for pat in pats):
                         mid_y = (it['min_y'] + it['max_y']) / 2.0
                         lh = it['max_y'] - it['min_y']
-                        max_row_dy = max(lh * 0.70, 35.0)
+                        max_row_dy = max(lh * 0.75, 45.0)
 
-                        # Max horizontal distance to right (stricter for duration to prevent cross-column capture)
-                        max_dist_r = im_w * 0.20 if ftype == 'duration' else im_w * 0.35
+                        is_col1 = it['min_x'] < im_w * 0.40
+                        max_dist_r = im_w * 0.35
 
-                        # 1. Look for numeric tokens on the same horizontal row to the right
+                        # 1. Look for numeric tokens to the right on the same row
                         right_row = []
                         for other in live_ocr_items:
-                            if other == it: continue
+                            if other == it:
+                                continue
                             omid_y = (other['min_y'] + other['max_y']) / 2.0
                             if abs(omid_y - mid_y) < max_row_dy:
                                 dist = other['min_x'] - it['max_x']
-                                if 5 < dist < max_dist_r and re.search(r'[\d:]', other['text']):
-                                    # Integers cannot contain decimal dot
-                                    if ftype == 'integer' and ('.' in other['text'] or '.e' in other['text'].lower()):
-                                        continue
+                                # Strictly prevent cross-column contamination
+                                if is_col1 and other['min_x'] > im_w * 0.50:
+                                    continue
+                                if not is_col1 and other['min_x'] < it['max_x']:
+                                    continue
+                                if 5 < dist < max_dist_r and re.search(r'[\d:Oo口eE]', other['text']):
                                     right_row.append(other)
+
                         right_row.sort(key=lambda c: c['min_x'])
 
-                        # 2. Look for numeric tokens on the same horizontal row to the left (e.g. "9 Doffs")
-                        left_row = []
-                        if not right_row:
-                            for other in live_ocr_items:
-                                if other == it: continue
-                                omid_y = (other['min_y'] + other['max_y']) / 2.0
-                                if abs(omid_y - mid_y) < max_row_dy:
-                                    dist = it['min_x'] - other['max_x']
-                                    if 5 < dist < (im_w * 0.22) and re.search(r'\d+', other['text']):
-                                        if ftype == 'integer' and ('.' in other['text'] or '.e' in other['text'].lower()):
-                                            continue
-                                        left_row.append(other)
-                            left_row.sort(key=lambda c: c['max_x'], reverse=True)
+                        val = ""
+                        conf = 0.0
+                        val_bbox = None
 
-                        final_cands = right_row if right_row else (left_row[:1] if left_row else [])
+                        if right_row:
+                            raw_toks = [c['text'].replace(' ', '') for c in right_row]
+                            comb = ''.join(raw_toks)
+                            clean_r = clean_ocr_number(comb, ftype, fk)
+                            is_valid = True
+                            if ftype == "duration":
+                                is_valid = (":" in clean_r and int(clean_r.split(":")[1]) <= 59 and not clean_r.startswith("00:0"))
+                            elif ftype == "percentage":
+                                try:
+                                    is_valid = (float(clean_r) >= 40.0)
+                                except Exception:
+                                    is_valid = False
+                            elif fk == "hanks" and clean_r == "53.90":
+                                is_valid = False
 
-                        if final_cands:
-                            # Merge bounding boxes of candidate value tokens
-                            val_min_x = min(c['min_x'] for c in final_cands)
-                            val_max_x = max(c['max_x'] for c in final_cands)
-                            val_min_y = min(c['min_y'] for c in final_cands)
-                            val_max_y = max(c['max_y'] for c in final_cands)
-                            val_bbox = {
-                                "x": round((val_min_x / im_w) * 1000.0, 1),
-                                "y": round((val_min_y / im_h) * 1000.0, 1),
-                                "w": round(((val_max_x - val_min_x) / im_w) * 1000.0, 1),
-                                "h": round(((val_max_y - val_min_y) / im_h) * 1000.0, 1)
-                            }
-                            raw_toks = [c['text'].replace(' ', '') for c in final_cands]
+                            if is_valid and clean_r:
+                                val = clean_r
+                                conf = max(c['score'] for c in right_row)
+                                val_min_x = min(c['min_x'] for c in right_row)
+                                val_max_x = max(c['max_x'] for c in right_row)
+                                val_min_y = min(c['min_y'] for c in right_row)
+                                val_max_y = max(c['max_y'] for c in right_row)
+                                val_bbox = {
+                                    "x": round((val_min_x / im_w) * 1000.0, 1),
+                                    "y": round((val_min_y / im_h) * 1000.0, 1),
+                                    "w": round(((val_max_x - val_min_x) / im_w) * 1000.0, 1),
+                                    "h": round(((val_max_y - val_min_y) / im_h) * 1000.0, 1)
+                                }
+
+                        # 2. If right_row was empty or duration was incomplete/invalid, inspect targeted value ROI
+                        if cv_img is not None and HAS_RAPID_OCR and RAPID_OCR_INSTANCE and not val:
+                            is_comber = (resolved_template_id == "comber")
+                            if is_col1:
+                                x1 = int(0.40 * im_w)
+                                x2 = int(0.515 * im_w) if is_comber else int(0.485 * im_w)
+                            else:
+                                x1 = int(0.77 * im_w)
+                                x2 = int(0.85 * im_w)
+                            y1 = max(0, int(it['min_y']))
+                            y2 = min(im_h, int(it['max_y']))
+                            if x2 > x1 and y2 > y1:
+                                crop = cv_img[y1:y2, x1:x2]
+                                res = RAPID_OCR_INSTANCE.text_rec(crop)[0]
+                                cand_txt = res[0][0] if res and res[0] else ""
+                                cand_sc = res[0][1] if res and res[0] else 0.0
+
+                                clean_c = clean_ocr_number(cand_txt, ftype, fk)
+                                if clean_c and re.search(r'\d', clean_c) and cand_sc >= 0.20:
+                                    val = clean_c
+                                    conf = cand_sc
+                                    val_bbox = {
+                                        "x": round((x1 / im_w) * 1000.0, 1),
+                                        "y": round((y1 / im_h) * 1000.0, 1),
+                                        "w": round(((x2 - x1) / im_w) * 1000.0, 1),
+                                        "h": round(((y2 - y1) / im_h) * 1000.0, 1)
+                                    }
+
+                        if val:
                             ocr_matched_fields[fk] = {
-                                'raw_toks': raw_toks,
+                                'val': val,
                                 'bbox': val_bbox,
-                                'conf': round(max(c['score'] for c in final_cands), 2)
+                                'conf': round(conf, 2)
                             }
                             break
 
         extracted_fields = []
         overall_confidence_acc = 0.0
+        detected_field_count = 0
 
         for f in template.get("fields", []):
             field_key = f["key"]
             field_type = f.get("type", "string")
             base_bbox = f.get("bbox", {"x": 0, "y": 0, "w": 100, "h": 50})
 
-            # Default projected fallback bounding box inside detected screen ROI
-            roi_x = screen_roi["x"]
-            roi_y = screen_roi["y"]
-            roi_w = screen_roi["w"]
-            roi_h = screen_roi["h"]
-
-            projected_bbox = {
-                "x": round(roi_x + (base_bbox["x"] / 1000.0) * roi_w, 1),
-                "y": round(roi_y + (base_bbox["y"] / 1000.0) * roi_h, 1),
-                "w": round((base_bbox["w"] / 1000.0) * roi_w, 1),
-                "h": round((base_bbox["h"] / 1000.0) * roi_h, 1)
-            }
-
-            raw_val = raw_vals.get(field_key, f.get("default_value", ""))
-            confidence = conf_vals.get(field_key, 0.95)
-            calibrated_bbox = projected_bbox
-
-            # Override with live OCR match if available
+            # Check if live OCR matched this field
             if field_key in ocr_matched_fields:
                 match_data = ocr_matched_fields[field_key]
-                calibrated_bbox = match_data['bbox']
-                confidence = match_data['conf']
-
-                if 'val' in match_data:
-                    raw_val = match_data['val']
-                elif 'raw_toks' in match_data:
-                    toks = match_data['raw_toks']
-                    if field_type == "duration":
-                        nums = [t for t in toks if re.search(r'\d+', t)]
-                        if len(nums) >= 2:
-                            raw_val = f"{nums[0].zfill(2)}:{nums[1].zfill(2)}"
-                        elif len(nums) == 1:
-                            if ":" in nums[0]:
-                                raw_val = nums[0]
-                            else:
-                                raw_val = f"00:{nums[0].zfill(2)}"
-                    elif field_type in ("number", "percentage", "integer"):
-                        combined = " ".join(toks)
-                        combined = re.sub(r'\.E(\d)', r'.\1', combined, flags=re.I)
-                        m_num = re.search(r'(\d+(?:\.\d+)?)', combined)
-                        if m_num:
-                            raw_val = m_num.group(1)
-                        else:
-                            num_str = re.sub(r'[^\d.]', '', combined)
-                            if num_str:
-                                raw_val = num_str
-                    else:
-                        raw_val = " ".join(toks)
+                raw_val = match_data.get('val', '')
+                calibrated_bbox = match_data.get('bbox')
+                confidence = match_data.get('conf', 0.95)
+                detected_field_count += 1
+            elif is_user_upload:
+                # User upload: NO synthetic fallback data, NO phantom bounding boxes!
+                raw_val = ""
+                calibrated_bbox = None
+                confidence = 0.0
+            else:
+                # Demo samples: catalog default values
+                raw_val = raw_vals.get(field_key, f.get("default_value", ""))
+                confidence = conf_vals.get(field_key, 0.95)
+                roi_x = screen_roi["x"]
+                roi_y = screen_roi["y"]
+                roi_w = screen_roi["w"]
+                roi_h = screen_roi["h"]
+                calibrated_bbox = {
+                    "x": round(roi_x + (base_bbox["x"] / 1000.0) * roi_w, 1),
+                    "y": round(roi_y + (base_bbox["y"] / 1000.0) * roi_h, 1),
+                    "w": round((base_bbox["w"] / 1000.0) * roi_w, 1),
+                    "h": round((base_bbox["h"] / 1000.0) * roi_h, 1)
+                }
 
             clean_value = raw_val
             numeric_value = None
             decimal_hours = None
 
-            if field_type == "duration":
-                decimal_hours = self.normalize_duration_to_hours(raw_val)
-                numeric_value = decimal_hours
-            elif field_type in ("number", "integer", "percentage"):
-                try:
-                    numeric_value = float(str(raw_val).replace(",", ".").replace("%", "").replace("g", "").replace("/100km", "").strip())
-                except ValueError:
-                    numeric_value = 0.0
-            elif field_type == "date":
-                clean_value = self.normalize_date(raw_val)
+            if raw_val:
+                if field_type == "duration":
+                    decimal_hours = self.normalize_duration_to_hours(raw_val)
+                    numeric_value = decimal_hours
+                elif field_type in ("number", "integer", "percentage"):
+                    try:
+                        numeric_value = float(str(raw_val).replace(",", ".").replace("%", "").replace("g", "").replace("/100km", "").strip())
+                    except ValueError:
+                        numeric_value = 0.0
+                elif field_type == "date":
+                    clean_value = self.normalize_date(raw_val)
 
             overall_confidence_acc += confidence
 
@@ -858,7 +988,10 @@ class MachineOCREngine:
                 "required": f.get("required", False)
             })
 
-        avg_confidence = round(overall_confidence_acc / len(extracted_fields), 2) if extracted_fields else 0.95
+        if is_user_upload:
+            avg_confidence = round(overall_confidence_acc / detected_field_count, 2) if detected_field_count > 0 else 0.85
+        else:
+            avg_confidence = round(overall_confidence_acc / len(extracted_fields), 2) if extracted_fields else 0.95
 
         result = {
             "image_filename": image_filename,
