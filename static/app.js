@@ -546,6 +546,25 @@ function setupEventListeners() {
     });
   }
 
+  const btnViewScans = document.getElementById("btn-view-scans");
+  if (btnViewScans) {
+    btnViewScans.addEventListener("click", openScansModal);
+  }
+
+  const scansModal = document.getElementById("scans-modal");
+  if (scansModal) {
+    scansModal.addEventListener("click", (e) => {
+      if (e.target === scansModal) closeScansModal();
+    });
+  }
+
+  const scanDetailModal = document.getElementById("scan-detail-modal");
+  if (scanDetailModal) {
+    scanDetailModal.addEventListener("click", (e) => {
+      if (e.target === scanDetailModal) closeScanDetailModal();
+    });
+  }
+
   if (btnDownloadApk) {
     btnDownloadApk.addEventListener("click", () => {
       apkModal.classList.remove("hidden");
