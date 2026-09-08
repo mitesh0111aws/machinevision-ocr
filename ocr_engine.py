@@ -475,7 +475,9 @@ class MachineOCREngine:
         self,
         image_filename: str,
         template_id: Optional[str] = None,
-        base_dirs: Optional[List[str]] = None
+        base_dirs: Optional[List[str]] = None,
+        calibration: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> Dict[str, Any]:
         full_path = image_filename
         if not os.path.exists(full_path) and base_dirs:

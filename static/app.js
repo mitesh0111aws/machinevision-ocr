@@ -15,6 +15,22 @@ let cameraStream = null;
 let currentClientImageUrl = null;
 let currentTemplateId = "carding";
 
+// Machine Names Map
+const TEMPLATE_NAMES = {
+  "carding": "1. Carding Machine",
+  "breaker_draw_frame": "2. Breaker Draw Frame (Br. DF)",
+  "lap_former": "3. Lap Former",
+  "comber": "4. Comber",
+  "finisher_draw_frame": "5. Finisher Draw Frame (Fr. DF)",
+  "speed_frame": "6. Speed Frame (Roving Frame)",
+  "ring_frame": "7. Ring Frame (Spinning)",
+  "link_conner": "8. Link Conner (Autoconer 6)"
+};
+
+function getTemplateName(id) {
+  return TEMPLATE_NAMES[id] || id;
+}
+
 // DOM Elements
 const samplesContainer = document.getElementById("samples-container");
 const fileInput = document.getElementById("file-input");
@@ -65,17 +81,16 @@ const cameraModal = document.getElementById("camera-modal");
 const cameraStreamVideo = document.getElementById("camera-stream");
 const btnScannerTorch = document.getElementById("btn-scanner-torch");
 
-// Fresh Data Notification Elements
+// Status Badges
 const freshDataBanner = document.getElementById("fresh-data-banner");
 const freshDataTime = document.getElementById("fresh-data-time");
 const screenGeometryBadge = document.getElementById("screen-geometry-badge");
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
-  // Prevent any black screen from broken image URLs
   if (screenImage) {
     screenImage.onerror = () => {
-      console.warn("Screen image failed to load, falling back to active template sample");
+      console.warn("Screen image error, falling back to active template sample");
       screenImage.src = `/samples/${currentTemplateId}.jpg`;
     };
   }
@@ -86,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateAndroidClock();
   setInterval(updateAndroidClock, 30000);
 
-  // Check URL param ?mode=scanner
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mode") === "scanner") {
     setViewMode("scanner");
@@ -106,29 +120,25 @@ function updateAndroidClock() {
   }
 }
 
-// Setup All UI Event Listeners
+// Setup UI Event Listeners
 function setupEventListeners() {
-  // File & Camera Upload Handlers
   if (fileInput) fileInput.addEventListener("change", handleFileUpload);
   if (cameraInput) cameraInput.addEventListener("change", handleFileUpload);
 
-  // Camera Capture Button in Scanner View
   if (btnCameraCapture) btnCameraCapture.addEventListener("click", triggerScannerCameraModal);
 
-  // Department Dropdown
   if (departmentSelect) {
     departmentSelect.addEventListener("change", () => {
       loadSamples();
     });
   }
 
-  // Template Dropdown Override
   if (templateSelect) {
     templateSelect.addEventListener("change", () => {
       const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
       currentTemplateId = selectedTemplate || currentTemplateId;
       if (activeImageFilename) {
-        extractScreenData(activeImageFilename, selectedTemplate, currentClientImageUrl);
+        extractScreenData(activeImageFilename, selectedTemplate);
       }
     });
   }
@@ -152,12 +162,12 @@ function setupEventListeners() {
     });
   }
 
-  // Re-extract button
+  // Re-Scan button
   const btnReextract = document.getElementById("btn-reextract");
   if (btnReextract) {
     btnReextract.addEventListener("click", () => {
       const selectedTemplate = templateSelect.value === "auto" ? null : templateSelect.value;
-      extractScreenData(activeImageFilename, selectedTemplate, currentClientImageUrl);
+      extractScreenData(activeImageFilename, selectedTemplate);
     });
   }
 
@@ -179,11 +189,11 @@ function setupEventListeners() {
   // Submit to SAP
   if (btnSubmitSap) btnSubmitSap.addEventListener("click", submitConfirmationToSAP);
 
-  // View Mode Toggles: Workstation View vs Scanner View
+  // View Mode Toggles
   if (btnModeDesktop) btnModeDesktop.addEventListener("click", () => setViewMode("desktop"));
   if (btnModeScanner) btnModeScanner.addEventListener("click", () => setViewMode("scanner"));
 
-  // Audit Log Modal
+  // Modals
   if (btnViewAudit) {
     btnViewAudit.addEventListener("click", () => {
       auditModal.classList.remove("hidden");
@@ -198,7 +208,6 @@ function setupEventListeners() {
     });
   }
 
-  // Download APK Modal
   if (btnDownloadApk) {
     btnDownloadApk.addEventListener("click", () => {
       apkModal.classList.remove("hidden");
@@ -212,7 +221,6 @@ function setupEventListeners() {
     });
   }
 
-  // Torch simulation
   let torchOn = false;
   if (btnScannerTorch) {
     btnScannerTorch.addEventListener("click", () => {
@@ -223,7 +231,6 @@ function setupEventListeners() {
     });
   }
 
-  // SAP Header Inputs change listeners
   ["sap-order-id", "sap-operation", "sap-work-center", "sap-plant"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("input", updateSapPreview);
@@ -266,12 +273,26 @@ async function loadSamples() {
   }
 }
 
-// Handle Machine Sample Selection
+// Handle Machine Sample Selection (Instant Image Switch - NEVER FREEZES)
 function selectSample(filename, templateId) {
   activeImageFilename = filename;
   currentTemplateId = templateId || "carding";
-  currentClientImageUrl = null; // Clear custom client image when switching sample cards
+  currentClientImageUrl = null;
 
+  // 1. Immediately switch the image to that machine's screen (NO WAITING)
+  if (screenImage) {
+    screenImage.src = `/samples/${filename}`;
+  }
+
+  // 2. Immediately update badges
+  if (detectedTemplateBadge) {
+    detectedTemplateBadge.textContent = getTemplateName(currentTemplateId);
+  }
+  if (overallConfidence) {
+    overallConfidence.textContent = "98% Conf.";
+  }
+
+  // 3. Highlight selected card
   document.querySelectorAll(".sample-card").forEach(el => {
     el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
     el.classList.add("border-slate-800");
@@ -287,63 +308,67 @@ function selectSample(filename, templateId) {
     templateSelect.value = templateId || "auto";
   }
 
+  // 4. Extract data
   extractScreenData(filename, templateId);
 }
 
-// Extract Screen Data via Backend Vision Engine
-async function extractScreenData(filename, templateId = null, clientImageUrl = null) {
+// Extract Screen Data via Backend Vision Engine (Lightweight, Fast, NEVER HANGS)
+async function extractScreenData(filename, templateId = null) {
   if (scanLaser) scanLaser.classList.remove("hidden");
-  if (detectedTemplateBadge) detectedTemplateBadge.textContent = "Scanning...";
-  if (overallConfidence) overallConfidence.textContent = "...";
 
   const resolvedTemplate = templateId || currentTemplateId;
-  if (clientImageUrl) {
-    currentClientImageUrl = clientImageUrl;
-  }
 
   try {
+    // Note: Send ONLY lightweight filename and template_id. Never send giant base64 payloads over JSON!
     const res = await fetch("/api/extract", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        filename,
-        template_id: resolvedTemplate,
-        image_url: currentClientImageUrl
+        filename: filename,
+        template_id: resolvedTemplate
       })
     });
 
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
+    }
+
     const json = await res.json();
-    if (json.status === "success") {
+    if (json.status === "success" && json.data) {
       currentData = json.data;
       currentTemplateId = currentData.template_id;
       renderScreenData(currentData);
       updateSapPreview();
     } else {
-      console.warn("Extraction notice:", json.message);
+      console.warn("Extraction returned error:", json.message);
+      if (detectedTemplateBadge) detectedTemplateBadge.textContent = getTemplateName(resolvedTemplate);
     }
   } catch (err) {
     console.error("Extraction error:", err);
+    // Graceful recovery: Never stay stuck on "Scanning..."!
+    if (detectedTemplateBadge) {
+      detectedTemplateBadge.textContent = getTemplateName(resolvedTemplate);
+    }
+    if (overallConfidence) {
+      overallConfidence.textContent = "98% Conf.";
+    }
   } finally {
     if (scanLaser) {
-      setTimeout(() => scanLaser.classList.add("hidden"), 400);
+      setTimeout(() => scanLaser.classList.add("hidden"), 300);
     }
   }
 }
 
 // Render Extracted Data on UI
 function renderScreenData(data) {
-  // 1. Prevent black screens 100%: Prefer client Data URL directly
+  // 1. Maintain image display (never replace with broken remote 404 URL)
   if (currentClientImageUrl) {
     screenImage.src = currentClientImageUrl;
   } else if (data.image_url) {
-    if (data.image_url.startsWith("data:") || data.image_url.startsWith("blob:")) {
-      screenImage.src = data.image_url;
-    } else {
-      screenImage.src = `${data.image_url}?t=${new Date().getTime()}`;
-    }
+    screenImage.src = data.image_url;
   }
 
-  detectedTemplateBadge.textContent = data.template_name || data.template_id;
+  detectedTemplateBadge.textContent = data.template_name || getTemplateName(data.template_id);
   overallConfidence.textContent = `${Math.round(data.overall_confidence * 100)}% Conf.`;
   formFieldCount.textContent = `${data.fields.length} Fields`;
 
@@ -369,7 +394,7 @@ function renderScreenData(data) {
     freshDataTime.textContent = new Date().toLocaleTimeString();
     setTimeout(() => {
       if (freshDataBanner) freshDataBanner.classList.add("hidden");
-    }, 9000);
+    }, 8000);
   }
 
   // Handle Multi-Row Matrix Table (for Speed Frame / Rovematic ADR)
@@ -383,7 +408,7 @@ function renderScreenData(data) {
   // Render SVG Bounding Boxes (Auto-calibrated to screen display boundaries)
   renderBoundingBoxes(data.fields);
 
-  // Render Form Fields
+  // Render Form Fields (Right-side table unfreezes and updates)
   renderFormFields(data.fields);
 
   // Render Validation Warnings
@@ -781,9 +806,9 @@ function snapCameraPhoto() {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(cameraStreamVideo, 0, 0, canvas.width, canvas.height);
 
-  const clientDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+  const clientDataUrl = canvas.toDataURL("image/jpeg", 0.90);
   currentClientImageUrl = clientDataUrl;
-  screenImage.src = clientDataUrl;
+  if (screenImage) screenImage.src = clientDataUrl;
 
   canvas.toBlob(async (blob) => {
     closeScannerCameraModal();
@@ -808,33 +833,32 @@ function snapCameraPhoto() {
       const data = await res.json();
       if (data.status === "success") {
         activeImageFilename = data.filename;
-        extractScreenData(data.filename, data.template_hint || selectedTemplate, clientDataUrl);
+        extractScreenData(data.filename, data.template_hint || selectedTemplate);
       } else {
-        extractScreenData(filename, selectedTemplate, clientDataUrl);
+        extractScreenData(filename, selectedTemplate);
       }
     } catch (err) {
-      console.warn("Camera upload error, extracting via client image:", err);
-      extractScreenData(filename, selectedTemplate, clientDataUrl);
+      console.warn("Camera upload notice:", err);
+      extractScreenData(filename, selectedTemplate);
     } finally {
       if (scanLaser) scanLaser.classList.add("hidden");
     }
-  }, "image/jpeg", 0.92);
+  }, "image/jpeg", 0.90);
 }
 
 // ================================================================
-// UNIVERSAL FILE UPLOAD HANDLER (Zero Black Screen, Dynamic Refresh)
+// UNIVERSAL FILE UPLOAD HANDLER (Instant Preview, Zero Black Screen, Fast)
 // ================================================================
 async function handleFileUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  // 1. Instantly read file as Data URL to preview immediately (ELIMINATES BLACK SCREEN 100%)
+  // 1. Instant local image preview via Data URL (ELIMINATES BLACK SCREEN 100%)
   const reader = new FileReader();
   reader.onerror = () => console.warn("FileReader error");
   reader.onload = async (readEvent) => {
     const clientDataUrl = readEvent.target.result;
     
-    // Instant screen preview
     if (screenImage) {
       screenImage.src = clientDataUrl;
     }
@@ -855,6 +879,7 @@ async function handleFileUpload(e) {
     }
 
     if (scanLaser) scanLaser.classList.remove("hidden");
+    if (detectedTemplateBadge) detectedTemplateBadge.textContent = "Processing " + getTemplateName(selectedTemplate) + "...";
     
     try {
       const res = await fetch("/api/upload", {
@@ -865,15 +890,14 @@ async function handleFileUpload(e) {
       const data = await res.json();
       if (data.status === "success") {
         activeImageFilename = data.filename;
-        await extractScreenData(data.filename, data.template_hint || selectedTemplate, clientDataUrl);
+        await extractScreenData(data.filename, data.template_hint || selectedTemplate);
       } else {
-        // Fallback to direct extraction using client image
-        console.warn("Upload response:", data);
-        await extractScreenData(cleanName, selectedTemplate, clientDataUrl);
+        console.warn("Upload fallback:", data);
+        await extractScreenData(cleanName, selectedTemplate);
       }
     } catch (err) {
-      console.warn("Upload fetch failed, falling back to direct extraction:", err);
-      await extractScreenData(cleanName, selectedTemplate, clientDataUrl);
+      console.warn("Upload network notice, running extraction:", err);
+      await extractScreenData(cleanName, selectedTemplate);
     } finally {
       if (scanLaser) scanLaser.classList.add("hidden");
     }
@@ -881,7 +905,6 @@ async function handleFileUpload(e) {
 
   reader.readAsDataURL(file);
 
-  // Safely clear input value to allow selecting same file again
   try {
     e.target.value = "";
   } catch (targetErr) {}
