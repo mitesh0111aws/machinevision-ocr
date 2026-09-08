@@ -16,6 +16,13 @@ let cameraStream = null;
 let currentClientImageUrl = null;
 let currentTemplateId = "carding";
 
+// Calibration Studio & Active Learning State
+let activeCalibProfile = null;
+let activeCalibTemplateId = "carding";
+let activeCalibGlareLevel = "high";
+let activeCalibUploadFilename = null;
+let originalDetectedOcrValues = {};
+
 // Session & Hierarchy State
 let currentUser = JSON.parse(localStorage.getItem("mv_user") || "null");
 let currentPlant = JSON.parse(localStorage.getItem("mv_plant") || '{"id":"1000","name":"Bed Sheet Plant Anjar"}');
@@ -433,6 +440,15 @@ window.closeScanDetailModal = closeScanDetailModal;
 window.openVersionModal = openVersionModal;
 window.closeVersionModal = closeVersionModal;
 window.copyRollbackCommand = copyRollbackCommand;
+window.openCalibrationStudio = openCalibrationStudio;
+window.closeCalibrationStudio = closeCalibrationStudio;
+window.loadCalibrationProfileForSelectedMachine = loadCalibrationProfileForSelectedMachine;
+window.updateCalibSliderUI = updateCalibSliderUI;
+window.setCalibGlareLevel = setCalibGlareLevel;
+window.previewCalibrationSliders = previewCalibrationSliders;
+window.saveCalibrationProfile = saveCalibrationProfile;
+window.resetCalibrationSliders = resetCalibrationSliders;
+window.handleCalibPhotoUpload = handleCalibPhotoUpload;
 
 // Update Android Clock
 function updateAndroidClock() {
@@ -964,8 +980,13 @@ function hideTooltip() {
 // Render Form Fields in Two Responsive Columns
 function renderFormFields(fields) {
   formFieldsContainer.innerHTML = "";
+  originalDetectedOcrValues = {};
 
   fields.forEach(f => {
+    originalDetectedOcrValues[f.key] = {
+      value: String(f.value || ""),
+      label: f.label || f.key
+    };
     const isRequired = f.required ? `<span class="text-rose-400">*</span>` : "";
     const badgeColor = f.status === "VALID" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10" : "text-amber-400 border-amber-500/20 bg-amber-500/10";
     
@@ -1124,6 +1145,40 @@ async function submitConfirmationToSAP() {
       loadAuditLogs();
       updateScansCountBadge();
       sapResponseCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+      // Active Learning Feedback: Silently record any manual field edits
+      try {
+        const corrections = [];
+        if (currentData && currentData.fields) {
+          currentData.fields.forEach(f => {
+            const orig = originalDetectedOcrValues[f.key];
+            if (orig && String(orig.value).trim() !== String(f.value || "").trim()) {
+              corrections.push({
+                field_key: f.key,
+                field_label: orig.label,
+                ocr_detected: orig.value,
+                operator_corrected: f.value
+              });
+            }
+          });
+        }
+        if (corrections.length > 0) {
+          fetch("/api/calibration/active_learning", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              template_id: currentData.template_id,
+              machine_name: currentData.template_name,
+              operator_id: (currentUser && currentUser.username) ? currentUser.username : "operator",
+              operator_name: (currentUser && currentUser.name) ? currentUser.name : "Shift Operator",
+              image_filename: activeImageFilename,
+              corrections: corrections
+            })
+          }).catch(err => console.warn("Active learning feedback notice:", err));
+        }
+      } catch (alErr) {
+        console.warn("Active learning error:", alErr);
+      }
     }
   } catch (err) {
     alert("SAP submission error: " + err.message);
@@ -1798,4 +1853,245 @@ async function handleFileUpload(e) {
   try {
     e.target.value = "";
   } catch (targetErr) {}
+}
+
+// ================================================================
+// AI OPTICAL CALIBRATION & MACHINE TEACHING STUDIO CONTROLLER
+// ================================================================
+const calibrationModal = document.getElementById("calibration-studio-modal");
+const calibMachineSelect = document.getElementById("calib-machine-select");
+const calibPreviewImg = document.getElementById("calib-preview-img");
+const calibPreviewSpinner = document.getElementById("calib-preview-spinner");
+const calibPreviewStatus = document.getElementById("calib-preview-status");
+const calibTiltSlider = document.getElementById("calib-tilt-slider");
+const calibTiltDisplay = document.getElementById("calib-tilt-display");
+const calibClaheSlider = document.getElementById("calib-clahe-slider");
+const calibClaheDisplay = document.getElementById("calib-clahe-display");
+const calibColorFilter = document.getElementById("calib-color-filter");
+const calibMountBadge = document.getElementById("calib-mount-badge");
+const calibStatusBadge = document.getElementById("calib-status-badge");
+const btnSaveCalib = document.getElementById("btn-save-calib");
+const calibInsightCount = document.getElementById("calib-insight-count");
+const calibInsightList = document.getElementById("calib-insight-list");
+
+function openCalibrationStudio(templateId) {
+  const targetId = templateId || currentTemplateId || "carding";
+  if (calibMachineSelect) calibMachineSelect.value = targetId;
+  activeCalibTemplateId = targetId;
+  activeCalibUploadFilename = null;
+
+  if (calibrationModal) {
+    calibrationModal.classList.remove("hidden");
+    calibrationModal.classList.add("flex");
+  }
+
+  loadCalibrationProfileForSelectedMachine();
+  loadCalibrationInsights();
+}
+
+function closeCalibrationStudio() {
+  if (calibrationModal) {
+    calibrationModal.classList.add("hidden");
+    calibrationModal.classList.remove("flex");
+  }
+}
+
+async function loadCalibrationProfileForSelectedMachine() {
+  if (!calibMachineSelect) return;
+  const tid = calibMachineSelect.value;
+  activeCalibTemplateId = tid;
+
+  try {
+    const res = await fetch(`/api/calibration/profile/${tid}`);
+    const data = await res.json();
+    if (data.status === "success") {
+      activeCalibProfile = data.profile || {};
+      
+      const tilt = activeCalibProfile.tilt_angle_compensation ?? 0.0;
+      const clahe = activeCalibProfile.clahe_clip_limit ?? 2.5;
+      const filt = activeCalibProfile.color_channel_filter || "lab_lightness";
+      const glare = activeCalibProfile.glare_suppression || "medium";
+      const mount = (activeCalibProfile.screen_mount_type || data.screen_type || "HMI").replace(/_/g, " ").toUpperCase();
+
+      if (calibTiltSlider) calibTiltSlider.value = tilt;
+      if (calibTiltDisplay) calibTiltDisplay.textContent = (tilt >= 0 ? `+${tilt}` : `${tilt}`) + "°";
+
+      if (calibClaheSlider) calibClaheSlider.value = clahe;
+      if (calibClaheDisplay) calibClaheDisplay.textContent = Number(clahe).toFixed(1);
+
+      if (calibColorFilter) calibColorFilter.value = filt;
+      setCalibGlareLevel(glare);
+
+      if (calibMountBadge) calibMountBadge.textContent = mount;
+      if (calibStatusBadge) {
+        calibStatusBadge.innerHTML = `<i class="fa-solid fa-circle-check text-[10px]"></i> Golden Profile: ${data.template_name || tid}`;
+      }
+
+      if (calibPreviewImg) {
+        calibPreviewImg.src = `/samples/${tid}.jpg`;
+      }
+
+      previewCalibrationSliders();
+    }
+  } catch (err) {
+    console.warn("Could not load calibration profile:", err);
+  }
+}
+
+function updateCalibSliderUI() {
+  if (calibTiltSlider && calibTiltDisplay) {
+    const v = parseFloat(calibTiltSlider.value);
+    calibTiltDisplay.textContent = (v >= 0 ? `+${v}` : `${v}`) + "°";
+  }
+  if (calibClaheSlider && calibClaheDisplay) {
+    calibClaheDisplay.textContent = parseFloat(calibClaheSlider.value).toFixed(1);
+  }
+  debouncedCalibPreview();
+}
+
+function setCalibGlareLevel(level) {
+  activeCalibGlareLevel = level || "medium";
+  document.querySelectorAll(".calib-glare-btn").forEach(b => {
+    b.className = "calib-glare-btn py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition";
+  });
+  const activeBtn = document.getElementById(`calib-glare-${activeCalibGlareLevel}`);
+  if (activeBtn) {
+    activeBtn.className = "calib-glare-btn py-1.5 rounded-xl border border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold transition";
+  }
+}
+
+const debouncedCalibPreview = debounce(previewCalibrationSliders, 350);
+
+async function previewCalibrationSliders() {
+  if (!calibMachineSelect) return;
+  const tid = calibMachineSelect.value;
+  const tilt = parseFloat(calibTiltSlider ? calibTiltSlider.value : 0.0);
+  const clahe = parseFloat(calibClaheSlider ? calibClaheSlider.value : 2.5);
+  const filt = calibColorFilter ? calibColorFilter.value : "lab_lightness";
+
+  const payload = {
+    template_id: tid,
+    filename: activeCalibUploadFilename || `${tid}.jpg`,
+    calibration: {
+      tilt_angle_compensation: tilt,
+      clahe_clip_limit: clahe,
+      color_channel_filter: filt,
+      glare_suppression: activeCalibGlareLevel
+    }
+  };
+
+  if (calibPreviewSpinner) calibPreviewSpinner.classList.remove("hidden");
+
+  try {
+    const res = await fetch("/api/calibration/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (json.status === "success" && json.preview_url) {
+      if (calibPreviewImg) calibPreviewImg.src = json.preview_url;
+      if (calibPreviewStatus && json.calib_info) {
+        calibPreviewStatus.textContent = json.calib_info.status_text || "Calibrated & Processed";
+      }
+    }
+  } catch (e) {
+    console.warn("Preview error:", e);
+  } finally {
+    if (calibPreviewSpinner) calibPreviewSpinner.classList.add("hidden");
+  }
+}
+
+async function saveCalibrationProfile() {
+  if (!calibMachineSelect) return;
+  const tid = calibMachineSelect.value;
+  const tilt = parseFloat(calibTiltSlider ? calibTiltSlider.value : 0.0);
+  const clahe = parseFloat(calibClaheSlider ? calibClaheSlider.value : 2.5);
+  const filt = calibColorFilter ? calibColorFilter.value : "lab_lightness";
+
+  const updatedProfile = {
+    ...(activeCalibProfile || {}),
+    tilt_angle_compensation: tilt,
+    clahe_clip_limit: clahe,
+    color_channel_filter: filt,
+    glare_suppression: activeCalibGlareLevel
+  };
+
+  if (btnSaveCalib) {
+    btnSaveCalib.disabled = true;
+    btnSaveCalib.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+  }
+
+  try {
+    const res = await fetch("/api/calibration/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ template_id: tid, calibration_profile: updatedProfile })
+    });
+    const json = await res.json();
+    if (json.status === "success") {
+      activeCalibProfile = updatedProfile;
+      if (btnSaveCalib) {
+        btnSaveCalib.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Saved as Golden Profile!`;
+        setTimeout(() => {
+          btnSaveCalib.disabled = false;
+          btnSaveCalib.innerHTML = `<i class="fa-solid fa-check"></i> <span>Save as Golden Profile</span>`;
+        }, 1800);
+      }
+    } else {
+      alert("Could not save: " + json.message);
+      if (btnSaveCalib) btnSaveCalib.disabled = false;
+    }
+  } catch (err) {
+    alert("Save error: " + err.message);
+    if (btnSaveCalib) btnSaveCalib.disabled = false;
+  }
+}
+
+function resetCalibrationSliders() {
+  loadCalibrationProfileForSelectedMachine();
+}
+
+async function handleCalibPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("template_hint", activeCalibTemplateId);
+
+  try {
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const json = await res.json();
+    if (json.status === "success") {
+      activeCalibUploadFilename = json.filename;
+      previewCalibrationSliders();
+    }
+  } catch (err) {
+    console.warn("Upload for calibration failed:", err);
+  }
+}
+
+async function loadCalibrationInsights() {
+  try {
+    const res = await fetch("/api/calibration/insights");
+    const json = await res.json();
+    if (json.status === "success") {
+      if (calibInsightCount) calibInsightCount.textContent = json.total_corrections || 0;
+      if (calibInsightList) {
+        if (!json.top_fields || json.top_fields.length === 0) {
+          calibInsightList.innerHTML = `<span class="italic text-slate-400">Zero discrepancies reported. OCR is operating with high operator agreement.</span>`;
+        } else {
+          calibInsightList.innerHTML = json.top_fields.map(tf => `
+            <div class="flex items-center justify-between py-0.5 border-b border-slate-100 dark:border-slate-800">
+              <span class="font-medium text-slate-700 dark:text-slate-300">${escapeHtml(tf.field_label)} (${escapeHtml(tf.field_key)})</span>
+              <span class="font-mono text-amber-500 font-bold">${tf.count} manual adjustment${tf.count > 1 ? 's' : ''}</span>
+            </div>
+          `).join("");
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Insights load error:", e);
+  }
 }

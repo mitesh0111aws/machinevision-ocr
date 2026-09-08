@@ -195,6 +195,11 @@
           <i class="fa-solid fa-images text-indigo-500"></i> Scan Logs (<span class="scans-count-badge">0</span>)
         </button>
 
+        <!-- AI OPTICAL CALIBRATION STUDIO BUTTON -->
+        <button id="btn-open-calibration-studio" onclick="openCalibrationStudio()" title="Template-Specific AI Optical Calibration &amp; Glare Tuning" class="px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-solid fa-sliders text-amber-500"></i> Calibration Studio
+        </button>
+
         <!-- DOWNLOAD APK BUTTON -->
         <button id="btn-download-apk" class="px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1.5 transition">
           <i class="fa-brands fa-android text-sm"></i> APK
@@ -1337,6 +1342,197 @@
         <button onclick="closeVersionModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition text-xs">
           Close Window
         </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: AI OPTICAL CALIBRATION STUDIO           -->
+  <!-- ============================================== -->
+  <div id="calibration-studio-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all animate-[fadeIn_0.2s_ease-out]">
+      
+      <!-- MODAL HEADER -->
+      <div class="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/60 dark:bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 text-white flex items-center justify-center text-lg shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">AI Optical Calibration &amp; Teaching Studio</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">Template-Specific Profiles</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Teach AI camera angle, contrast thresholds, color isolation, and glare suppression per machine</p>
+          </div>
+        </div>
+        <button onclick="closeCalibrationStudio()" class="w-9 h-9 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- MACHINE SELECTOR & METADATA BAR -->
+      <div class="px-5 sm:px-6 py-3.5 bg-slate-100/70 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 w-full sm:w-auto">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 shrink-0">Select Machine to Tune:</label>
+          <select id="calib-machine-select" onchange="loadCalibrationProfileForSelectedMachine()" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3 py-1.5 font-medium outline-none focus:border-amber-500 w-full sm:w-auto">
+            <option value="carding">1. Carding Machine (Waist Tilted HMI • 32°)</option>
+            <option value="breaker_draw_frame">2. Breaker Draw Frame (Dark Mono LCD • 0°)</option>
+            <option value="lap_former">3. Lap Former (Amber Touch HMI • 15°)</option>
+            <option value="comber">4. Comber (Cyan Graphic LCD • 0°)</option>
+            <option value="finisher_draw_frame">5. Finisher Draw Frame (Dark Mono LCD • 0°)</option>
+            <option value="speed_frame">6. Speed Frame (Wide Tabular Matrix • 10°)</option>
+            <option value="ring_frame">7. Ring Frame (Compact Siemens Panel • 5°)</option>
+            <option value="link_conner">8. Link Conner (Autoconer 6 HMI • 0°)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap text-xs">
+          <span id="calib-mount-badge" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono text-[11px] border border-indigo-500/20">
+            Waist Tilted HMI
+          </span>
+          <span id="calib-status-badge" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold text-[11px] border border-emerald-500/20 flex items-center gap-1">
+            <i class="fa-solid fa-circle-check text-[10px]"></i> Golden Profile Active
+          </span>
+        </div>
+      </div>
+
+      <!-- MAIN SPLIT BODY -->
+      <div class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 max-h-[62vh] overflow-y-auto">
+        
+        <!-- LEFT COLUMN: LIVE OPTICAL PREVIEW (5 Cols) -->
+        <div class="lg:col-span-6 flex flex-col space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-eye text-amber-500"></i> Calibrated Optical Preview
+            </span>
+            <span id="calib-preview-status" class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+              Live Filter Preview
+            </span>
+          </div>
+
+          <!-- PREVIEW IMAGE CONTAINER -->
+          <div class="relative w-full aspect-[4/3] bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex items-center justify-center group shadow-inner">
+            <img id="calib-preview-img" src="/samples/carding.jpg" alt="Calibration Preview" class="w-full h-full object-contain select-none transition-all duration-300">
+            
+            <!-- OVERLAY RETICLE FOR CORNERS -->
+            <div class="absolute inset-4 border border-dashed border-amber-400/40 rounded-xl pointer-events-none flex items-center justify-center">
+              <span class="text-[10px] font-mono text-amber-300/60 bg-slate-900/80 px-2 py-1 rounded">Screen Boundary Calibration Region</span>
+            </div>
+
+            <!-- LOADING SPINNER -->
+            <div id="calib-preview-spinner" class="hidden absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center flex-col gap-2">
+              <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+              <span class="text-xs font-medium text-slate-200">Recomputing Optical Matrix...</span>
+            </div>
+          </div>
+
+          <!-- TEST WITH PHOTO CONTROLS -->
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <button onclick="previewCalibrationSliders()" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+              <span>Re-Test Calibration</span>
+            </button>
+            <label class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition">
+              <i class="fa-solid fa-upload"></i>
+              <span>Upload Test Photo</span>
+              <input type="file" id="calib-file-upload" accept="image/*" class="hidden" onchange="handleCalibPhotoUpload(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: OPTICAL ADJUSTMENT CONTROLS (7 Cols) -->
+        <div class="lg:col-span-6 space-y-4">
+          
+          <!-- CONTROL 1: TILT & PERSPECTIVE COMPENSATION -->
+          <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-up-down text-indigo-500"></i> Angle &amp; Tilt Compensation
+              </label>
+              <span id="calib-tilt-display" class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">+32.0°</span>
+            </div>
+            <input type="range" id="calib-tilt-slider" min="-45" max="45" step="1" value="32" oninput="updateCalibSliderUI()" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Compensates for perspective foreshortening on low-mounted touchscreens tilted upward toward the operator.</p>
+          </div>
+
+          <!-- CONTROL 2: CONTRAST BOOST (CLAHE CLIP LIMIT) -->
+          <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-half-stroke text-amber-500"></i> Adaptive Contrast (CLAHE Limit)
+              </label>
+              <span id="calib-clahe-display" class="font-mono font-bold text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">2.2</span>
+            </div>
+            <input type="range" id="calib-clahe-slider" min="1.0" max="5.0" step="0.1" value="2.2" oninput="updateCalibSliderUI()" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Sharpen faint digit strokes on dark monochrome LCDs (Draw Frames) or reduce saturation on bright touchscreens.</p>
+          </div>
+
+          <!-- CONTROL 3: COLOR CHANNEL / WAVELENGTH FILTER -->
+          <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-2">
+            <label class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-palette text-cyan-500"></i> Color Space &amp; Channel Filter
+            </label>
+            <select id="calib-color-filter" onchange="previewCalibrationSliders()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs rounded-xl px-3 py-2 font-medium outline-none focus:border-amber-500">
+              <option value="lab_lightness">LAB L-Channel Lightness (Universal for Touch HMIs - Carding / Speed Frame)</option>
+              <option value="blue_isolate">Cyan / Blue LCD Booster (Tuned for Comber blue screens)</option>
+              <option value="green_isolate">Dark Green Mono LCD Booster (Tuned for Breaker / Finisher Draw Frame)</option>
+              <option value="grayscale_enhanced">High-Contrast Grayscale (Tuned for Ring Frame / Lap Former)</option>
+            </select>
+          </div>
+
+          <!-- CONTROL 4: CEILING GLARE SUPPRESSION -->
+          <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-2">
+            <label class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-sun text-yellow-500"></i> Overhead Ceiling Glare Suppression
+            </label>
+            <div class="grid grid-cols-4 gap-2 text-xs font-medium">
+              <button type="button" onclick="setCalibGlareLevel('none')" id="calib-glare-none" class="calib-glare-btn py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition">None</button>
+              <button type="button" onclick="setCalibGlareLevel('low')" id="calib-glare-low" class="calib-glare-btn py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition">Low</button>
+              <button type="button" onclick="setCalibGlareLevel('medium')" id="calib-glare-medium" class="calib-glare-btn py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition">Medium</button>
+              <button type="button" onclick="setCalibGlareLevel('high')" id="calib-glare-high" class="calib-glare-btn py-1.5 rounded-xl border border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold transition">High</button>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Attenuates high-bay sodium/LED lighting reflections on top portion of machine glass.</p>
+          </div>
+
+          <!-- ACTIVE LEARNING FEEDBACK INSIGHTS -->
+          <div class="p-4 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-950/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-graduation-cap"></i> Active Learning &amp; Operator Feedback
+              </span>
+              <span class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400">
+                <span id="calib-insight-count" class="font-bold">0</span> Corrections Logged
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-400">
+              When operators manually adjust detected values, the system logs the discrepancy to refine this template's optical profile.
+            </p>
+            <div id="calib-insight-list" class="text-[11px] space-y-1 text-slate-500 dark:text-slate-400">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MODAL FOOTER ACTION BAR -->
+      <div class="px-5 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div class="text-slate-500 dark:text-slate-400 flex items-center gap-2 font-mono text-[11px]">
+          <i class="fa-solid fa-floppy-disk text-indigo-500"></i>
+          <span>Configuration stores to <code class="text-indigo-600 dark:text-indigo-400">templates.json</code> per machine</span>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button onclick="resetCalibrationSliders()" class="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition">
+            Reset Defaults
+          </button>
+          <button onclick="saveCalibrationProfile()" id="btn-save-calib" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white font-bold transition shadow-lg shadow-indigo-600/25 flex items-center gap-1.5">
+            <i class="fa-solid fa-check"></i>
+            <span>Save as Golden Profile</span>
+          </button>
+        </div>
       </div>
 
     </div>

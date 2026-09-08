@@ -50,24 +50,260 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 50, "y": 120, "w": 900, "h": 760}
+        "screen_bounds": {
+          "x": 50,
+          "y": 120,
+          "w": 900,
+          "h": 760
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 100, "y": 240, "w": 120, "h": 40}, "unit": ""},
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 240, "w": 160, "h": 40}, "unit": ""},
-        {"key": "shift_time", "label": "Screen Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 760, "y": 240, "w": 100, "h": 40}, "unit": ""},
-        {"key": "hanks", "label": "Hank Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 335, "y": 335, "w": 110, "h": 50}, "unit": "Hanks"},
-        {"key": "production_kgs", "label": "Production Output (Kgs)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 335, "y": 395, "w": 110, "h": 50}, "unit": "Kgs"},
-        {"key": "run_time", "label": "Run Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 335, "y": 455, "w": 110, "h": 50}, "unit": "HH:MM"},
-        {"key": "idle_time", "label": "Idle Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 335, "y": 515, "w": 110, "h": 50}, "unit": "HH:MM"},
-        {"key": "power_fail_time", "label": "Power Fail Time", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 335, "y": 570, "w": 110, "h": 50}, "unit": "HH:MM"},
-        {"key": "machine_efficiency", "label": "M/c Eff (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 335, "y": 625, "w": 110, "h": 50}, "unit": "%"},
-        {"key": "double_lap", "label": "Double Lap Faults", "category": "Stoppages", "type": "integer", "sap_field": "STOP_DLAP", "required": false, "bbox": {"x": 740, "y": 365, "w": 100, "h": 45}, "unit": "Stops"},
-        {"key": "other_faults", "label": "Other Faults", "category": "Stoppages", "type": "integer", "sap_field": "STOP_OTHER", "required": false, "bbox": {"x": 740, "y": 425, "w": 100, "h": 45}, "unit": "Stops"},
-        {"key": "sliver_break", "label": "Sliver Break", "category": "Stoppages", "type": "integer", "sap_field": "STOP_SLIVER", "required": false, "bbox": {"x": 740, "y": 485, "w": 100, "h": 45}, "unit": "Stops"},
-        {"key": "chute_faults", "label": "Chute Faults", "category": "Stoppages", "type": "integer", "sap_field": "STOP_CHUTE", "required": false, "bbox": {"x": 740, "y": 540, "w": 100, "h": 45}, "unit": "Stops"},
-        {"key": "doffs", "label": "No of Doffs", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 740, "y": 595, "w": 100, "h": 45}, "unit": "Doffs"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 100,
+            "y": 240,
+            "w": 120,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 420,
+            "y": 240,
+            "w": 160,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Screen Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 760,
+            "y": 240,
+            "w": 100,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "hanks",
+          "label": "Hank Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 335,
+            "y": 335,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kgs)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 335,
+            "y": 395,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 335,
+            "y": 455,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 335,
+            "y": 515,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Power Fail Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 335,
+            "y": 570,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "M/c Eff (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 335,
+            "y": 625,
+            "w": 110,
+            "h": 50
+          },
+          "unit": "%"
+        },
+        {
+          "key": "double_lap",
+          "label": "Double Lap Faults",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_DLAP",
+          "required": false,
+          "bbox": {
+            "x": 740,
+            "y": 365,
+            "w": 100,
+            "h": 45
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "other_faults",
+          "label": "Other Faults",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_OTHER",
+          "required": false,
+          "bbox": {
+            "x": 740,
+            "y": 425,
+            "w": 100,
+            "h": 45
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "sliver_break",
+          "label": "Sliver Break",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_SLIVER",
+          "required": false,
+          "bbox": {
+            "x": 740,
+            "y": 485,
+            "w": 100,
+            "h": 45
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "chute_faults",
+          "label": "Chute Faults",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_CHUTE",
+          "required": false,
+          "bbox": {
+            "x": 740,
+            "y": 540,
+            "w": 100,
+            "h": 45
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "doffs",
+          "label": "No of Doffs",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 740,
+            "y": 595,
+            "w": 100,
+            "h": 45
+          },
+          "unit": "Doffs"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 32.0,
+        "clahe_clip_limit": 2.2,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "high",
+        "color_channel_filter": "lab_lightness",
+        "aspect_ratio": 1.333,
+        "screen_mount_type": "waist_tilted_hmi",
+        "golden_corners": [
+          {
+            "x": 50,
+            "y": 120
+          },
+          {
+            "x": 950,
+            "y": 120
+          },
+          {
+            "x": 950,
+            "y": 880
+          },
+          {
+            "x": 50,
+            "y": 880
+          }
+        ]
+      }
     },
     "breaker_draw_frame": {
       "id": "breaker_draw_frame",
@@ -84,21 +320,216 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 60, "y": 120, "w": 880, "h": 760}
+        "screen_bounds": {
+          "x": 60,
+          "y": 120,
+          "w": 880,
+          "h": 760
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 235, "w": 115, "h": 40}, "unit": ""},
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 235, "w": 180, "h": 40}, "unit": ""},
-        {"key": "shift_time", "label": "Screen Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 790, "y": 235, "w": 100, "h": 40}, "unit": ""},
-        {"key": "run_time", "label": "Run Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 395, "y": 275, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "idle_time", "label": "Idle Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 338, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "doff_time", "label": "Doff Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 401, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "power_fail_time", "label": "Power Fail Time", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME_PF", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 464, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 395, "y": 527, "w": 115, "h": 60}, "unit": "Hanks"},
-        {"key": "doffs", "label": "Doffs Count", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 395, "y": 590, "w": 115, "h": 60}, "unit": "Doffs"},
-        {"key": "production_kgs", "label": "Production Output (Kg's)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 395, "y": 653, "w": 115, "h": 60}, "unit": "Kgs"},
-        {"key": "machine_efficiency", "label": "M/c Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 395, "y": 716, "w": 115, "h": 60}, "unit": "%"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 80,
+            "y": 235,
+            "w": 115,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 420,
+            "y": 235,
+            "w": 180,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Screen Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 790,
+            "y": 235,
+            "w": 100,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 395,
+            "y": 275,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 338,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "doff_time",
+          "label": "Doff Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 401,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Power Fail Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME_PF",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 464,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 527,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "doffs",
+          "label": "Doffs Count",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 590,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Doffs"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kg's)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 395,
+            "y": 653,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "M/c Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 716,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "%"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 0.0,
+        "clahe_clip_limit": 3.4,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "medium",
+        "color_channel_filter": "green_isolate",
+        "aspect_ratio": 1.333,
+        "screen_mount_type": "eye_level_monochrome_lcd",
+        "golden_corners": [
+          {
+            "x": 60,
+            "y": 120
+          },
+          {
+            "x": 940,
+            "y": 120
+          },
+          {
+            "x": 940,
+            "y": 880
+          },
+          {
+            "x": 60,
+            "y": 880
+          }
+        ]
+      }
     },
     "lap_former": {
       "id": "lap_former",
@@ -115,25 +546,276 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 40, "y": 60, "w": 920, "h": 860}
+        "screen_bounds": {
+          "x": 40,
+          "y": 60,
+          "w": 920,
+          "h": 860
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 200, "w": 120, "h": 40}, "unit": ""},
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 200, "w": 180, "h": 40}, "unit": ""},
-        {"key": "shift_time", "label": "Screen Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 790, "y": 200, "w": 100, "h": 40}, "unit": ""},
-        {"key": "run_time", "label": "Run Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 370, "y": 275, "w": 105, "h": 60}, "unit": "HH:MM"},
-        {"key": "idle_time", "label": "Idle Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 370, "y": 340, "w": 105, "h": 60}, "unit": "HH:MM"},
-        {"key": "power_fail_time", "label": "Power Fail Time", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 370, "y": 415, "w": 105, "h": 60}, "unit": "HH:MM"},
-        {"key": "auto_doff_time", "label": "Auto Doff Time", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_DOFF", "sap_unit": "H", "required": false, "bbox": {"x": 370, "y": 485, "w": 105, "h": 60}, "unit": "HH:MM"},
-        {"key": "machine_efficiency", "label": "M/c Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 370, "y": 555, "w": 105, "h": 60}, "unit": "%"},
-        {"key": "prodn_efficiency", "label": "Prodn. Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_PEFF", "required": false, "bbox": {"x": 370, "y": 625, "w": 105, "h": 60}, "unit": "%"},
-        {"key": "doffs", "label": "No. of Doffs", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 765, "y": 265, "w": 110, "h": 55}, "unit": "Doffs"},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 765, "y": 330, "w": 110, "h": 55}, "unit": "Hanks"},
-        {"key": "production_kgs", "label": "Production Output (Kgs)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 765, "y": 405, "w": 110, "h": 55}, "unit": "Kgs"},
-        {"key": "creel_stops", "label": "Creel Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_CREEL", "required": false, "bbox": {"x": 765, "y": 475, "w": 110, "h": 55}, "unit": "Stops"},
-        {"key": "drafting_stops", "label": "Drafting Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_DRAFT", "required": false, "bbox": {"x": 765, "y": 545, "w": 110, "h": 55}, "unit": "Stops"},
-        {"key": "calender_stops", "label": "Calender Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_CALENDER", "required": false, "bbox": {"x": 765, "y": 615, "w": 110, "h": 55}, "unit": "Stops"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 80,
+            "y": 200,
+            "w": 120,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 420,
+            "y": 200,
+            "w": 180,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Screen Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 790,
+            "y": 200,
+            "w": 100,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 370,
+            "y": 275,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 370,
+            "y": 340,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Power Fail Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 370,
+            "y": 415,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "auto_doff_time",
+          "label": "Auto Doff Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_DOFF",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 370,
+            "y": 485,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "M/c Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 370,
+            "y": 555,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "%"
+        },
+        {
+          "key": "prodn_efficiency",
+          "label": "Prodn. Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_PEFF",
+          "required": false,
+          "bbox": {
+            "x": 370,
+            "y": 625,
+            "w": 105,
+            "h": 60
+          },
+          "unit": "%"
+        },
+        {
+          "key": "doffs",
+          "label": "No. of Doffs",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 265,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Doffs"
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 330,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kgs)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 765,
+            "y": 405,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "creel_stops",
+          "label": "Creel Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_CREEL",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 475,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "drafting_stops",
+          "label": "Drafting Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_DRAFT",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 545,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "calender_stops",
+          "label": "Calender Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_CALENDER",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 615,
+            "w": 110,
+            "h": 55
+          },
+          "unit": "Stops"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 15.0,
+        "clahe_clip_limit": 2.4,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "medium",
+        "color_channel_filter": "grayscale_enhanced",
+        "aspect_ratio": 1.333,
+        "screen_mount_type": "amber_touch_hmi",
+        "golden_corners": [
+          {
+            "x": 40,
+            "y": 60
+          },
+          {
+            "x": 960,
+            "y": 60
+          },
+          {
+            "x": 960,
+            "y": 920
+          },
+          {
+            "x": 40,
+            "y": 920
+          }
+        ]
+      }
     },
     "comber": {
       "id": "comber",
@@ -150,25 +832,275 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 40, "y": 80, "w": 920, "h": 840}
+        "screen_bounds": {
+          "x": 40,
+          "y": 80,
+          "w": 920,
+          "h": 840
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 48, "y": 195, "w": 115, "h": 50}, "unit": ""},
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 195, "w": 180, "h": 50}, "unit": ""},
-        {"key": "shift_time", "label": "Screen Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 790, "y": 195, "w": 100, "h": 50}, "unit": ""},
-        {"key": "run_time", "label": "Run Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 355, "y": 305, "w": 125, "h": 62}, "unit": "HH:MM"},
-        {"key": "idle_time", "label": "Idle Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 355, "y": 368, "w": 125, "h": 62}, "unit": "HH:MM"},
-        {"key": "power_fail_time", "label": "Power Fail Time", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 355, "y": 431, "w": 125, "h": 62}, "unit": "HH:MM"},
-        {"key": "production_kgs", "label": "Production Output (Kgs)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 355, "y": 494, "w": 125, "h": 62}, "unit": "Kgs"},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 355, "y": 557, "w": 125, "h": 62}, "unit": "Hanks"},
-        {"key": "machine_efficiency", "label": "M/c Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 355, "y": 620, "w": 125, "h": 62}, "unit": "%"},
-        {"key": "prodn_efficiency", "label": "Prodn Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_PEFF", "required": false, "bbox": {"x": 355, "y": 683, "w": 125, "h": 62}, "unit": "%"},
-        {"key": "doffs", "label": "Doffs Count", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 765, "y": 305, "w": 120, "h": 62}, "unit": "Counts"},
-        {"key": "draft_coil_stops", "label": "Draft & Coil Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_DRAFT", "required": false, "bbox": {"x": 765, "y": 368, "w": 120, "h": 62}, "unit": "Stops"},
-        {"key": "suction_stops", "label": "Suction Pr. Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_SUCTION", "required": false, "bbox": {"x": 765, "y": 431, "w": 120, "h": 62}, "unit": "Stops"},
-        {"key": "empty_lap_stops", "label": "Empty Lap Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_LAP", "required": false, "bbox": {"x": 765, "y": 494, "w": 120, "h": 62}, "unit": "Stops"},
-        {"key": "table_stops", "label": "Table Stops", "category": "Stoppages", "type": "integer", "sap_field": "STOP_TABLE", "required": false, "bbox": {"x": 765, "y": 557, "w": 120, "h": 62}, "unit": "Stops"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 48,
+            "y": 195,
+            "w": 115,
+            "h": 50
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 420,
+            "y": 195,
+            "w": 180,
+            "h": 50
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Screen Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 790,
+            "y": 195,
+            "w": 100,
+            "h": 50
+          },
+          "unit": ""
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 355,
+            "y": 305,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 355,
+            "y": 368,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Power Fail Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 355,
+            "y": 431,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kgs)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 355,
+            "y": 494,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 355,
+            "y": 557,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "M/c Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 355,
+            "y": 620,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "%"
+        },
+        {
+          "key": "prodn_efficiency",
+          "label": "Prodn Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_PEFF",
+          "required": false,
+          "bbox": {
+            "x": 355,
+            "y": 683,
+            "w": 125,
+            "h": 62
+          },
+          "unit": "%"
+        },
+        {
+          "key": "doffs",
+          "label": "Doffs Count",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 305,
+            "w": 120,
+            "h": 62
+          },
+          "unit": "Counts"
+        },
+        {
+          "key": "draft_coil_stops",
+          "label": "Draft & Coil Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_DRAFT",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 368,
+            "w": 120,
+            "h": 62
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "suction_stops",
+          "label": "Suction Pr. Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_SUCTION",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 431,
+            "w": 120,
+            "h": 62
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "empty_lap_stops",
+          "label": "Empty Lap Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_LAP",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 494,
+            "w": 120,
+            "h": 62
+          },
+          "unit": "Stops"
+        },
+        {
+          "key": "table_stops",
+          "label": "Table Stops",
+          "category": "Stoppages",
+          "type": "integer",
+          "sap_field": "STOP_TABLE",
+          "required": false,
+          "bbox": {
+            "x": 765,
+            "y": 557,
+            "w": 120,
+            "h": 62
+          },
+          "unit": "Stops"
+        }
+      ],
+      "calibration_profile": {
+        "aspect_ratio": 1.333,
+        "clahe_clip_limit": 2.8,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "color_channel_filter": "blue_isolate",
+        "glare_suppression": "low",
+        "golden_corners": [
+          {
+            "x": 40,
+            "y": 80
+          },
+          {
+            "x": 960,
+            "y": 80
+          },
+          {
+            "x": 960,
+            "y": 920
+          },
+          {
+            "x": 40,
+            "y": 920
+          }
+        ],
+        "screen_mount_type": "cyan_graphic_lcd",
+        "tilt_angle_compensation": 0.0
+      }
     },
     "finisher_draw_frame": {
       "id": "finisher_draw_frame",
@@ -185,21 +1117,216 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 60, "y": 80, "w": 880, "h": 800}
+        "screen_bounds": {
+          "x": 60,
+          "y": 80,
+          "w": 880,
+          "h": 800
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift Number", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 80, "y": 235, "w": 115, "h": 40}, "unit": ""},
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 420, "y": 235, "w": 180, "h": 40}, "unit": ""},
-        {"key": "shift_time", "label": "Screen Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 790, "y": 235, "w": 100, "h": 40}, "unit": ""},
-        {"key": "run_time", "label": "Run Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 395, "y": 275, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "idle_time", "label": "Idle Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 338, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "doff_time", "label": "Doff Time (HH:MM)", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 401, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "power_fail_time", "label": "Power Fail Time", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME_PF", "sap_unit": "H", "required": false, "bbox": {"x": 395, "y": 464, "w": 115, "h": 60}, "unit": "HH:MM"},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 395, "y": 527, "w": 115, "h": 60}, "unit": "Hanks"},
-        {"key": "doffs", "label": "Doffs Count", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 395, "y": 590, "w": 115, "h": 60}, "unit": "Doffs"},
-        {"key": "production_kgs", "label": "Production Output (Kg's)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 395, "y": 653, "w": 115, "h": 60}, "unit": "Kgs"},
-        {"key": "machine_efficiency", "label": "M/c Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 395, "y": 716, "w": 115, "h": 60}, "unit": "%"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 80,
+            "y": 235,
+            "w": 115,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 420,
+            "y": 235,
+            "w": 180,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Screen Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 790,
+            "y": 235,
+            "w": 100,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 395,
+            "y": 275,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 338,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "doff_time",
+          "label": "Doff Time (HH:MM)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 401,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Power Fail Time",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME_PF",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 464,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "HH:MM"
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 527,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "doffs",
+          "label": "Doffs Count",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 590,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Doffs"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kg's)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 395,
+            "y": 653,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "M/c Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 395,
+            "y": 716,
+            "w": 115,
+            "h": 60
+          },
+          "unit": "%"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 0.0,
+        "clahe_clip_limit": 3.4,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "medium",
+        "color_channel_filter": "green_isolate",
+        "aspect_ratio": 1.333,
+        "screen_mount_type": "eye_level_monochrome_lcd",
+        "golden_corners": [
+          {
+            "x": 60,
+            "y": 80
+          },
+          {
+            "x": 940,
+            "y": 80
+          },
+          {
+            "x": 940,
+            "y": 880
+          },
+          {
+            "x": 60,
+            "y": 880
+          }
+        ]
+      }
     },
     "speed_frame": {
       "id": "speed_frame",
@@ -217,20 +1344,199 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 70, "y": 80, "w": 860, "h": 860}
+        "screen_bounds": {
+          "x": 70,
+          "y": 80,
+          "w": 860,
+          "h": 860
+        }
       },
       "fields": [
-        {"key": "shift_date", "label": "Production Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 88, "y": 288, "w": 85, "h": 32}, "unit": ""},
-        {"key": "machine_efficiency", "label": "Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 175, "y": 288, "w": 35, "h": 32}, "unit": "%"},
-        {"key": "stop_time_mins", "label": "Stop Machine Time (min)", "category": "Stoppages", "type": "number", "sap_field": "DOWN_TIME_MIN", "sap_unit": "MIN", "required": false, "bbox": {"x": 212, "y": 288, "w": 65, "h": 32}, "unit": "Mins"},
-        {"key": "opt_percent", "label": "% Optimal", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_OPT", "required": false, "bbox": {"x": 280, "y": 288, "w": 55, "h": 32}, "unit": "%"},
-        {"key": "doffs", "label": "Doffings Count", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 420, "y": 288, "w": 60, "h": 32}, "unit": "Doffs"},
-        {"key": "meters_per_spindle", "label": "Mts per Spindle", "category": "Yield", "type": "number", "sap_field": "USERFLD_MPS", "sap_unit": "M", "required": false, "bbox": {"x": 510, "y": 288, "w": 75, "h": 32}, "unit": "Mts"},
-        {"key": "production_kgs", "label": "Production Output (Kgs)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 635, "y": 288, "w": 50, "h": 32}, "unit": "Kgs"},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "CONF_TEXT", "sap_unit": "HNK", "required": false, "bbox": {"x": 688, "y": 288, "w": 50, "h": 32}, "unit": "Hanks"},
-        {"key": "machine_serial", "label": "Machine Serial No", "category": "Header", "type": "string", "sap_field": "EQUIPMENT", "required": false, "bbox": {"x": 305, "y": 930, "w": 100, "h": 25}, "unit": ""},
-        {"key": "current_shift", "label": "Current Shift", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 525, "y": 930, "w": 100, "h": 25}, "unit": ""}
-      ]
+        {
+          "key": "shift_date",
+          "label": "Production Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 88,
+            "y": 288,
+            "w": 85,
+            "h": 32
+          },
+          "unit": ""
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 175,
+            "y": 288,
+            "w": 35,
+            "h": 32
+          },
+          "unit": "%"
+        },
+        {
+          "key": "stop_time_mins",
+          "label": "Stop Machine Time (min)",
+          "category": "Stoppages",
+          "type": "number",
+          "sap_field": "DOWN_TIME_MIN",
+          "sap_unit": "MIN",
+          "required": false,
+          "bbox": {
+            "x": 212,
+            "y": 288,
+            "w": 65,
+            "h": 32
+          },
+          "unit": "Mins"
+        },
+        {
+          "key": "opt_percent",
+          "label": "% Optimal",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_OPT",
+          "required": false,
+          "bbox": {
+            "x": 280,
+            "y": 288,
+            "w": 55,
+            "h": 32
+          },
+          "unit": "%"
+        },
+        {
+          "key": "doffs",
+          "label": "Doffings Count",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 420,
+            "y": 288,
+            "w": 60,
+            "h": 32
+          },
+          "unit": "Doffs"
+        },
+        {
+          "key": "meters_per_spindle",
+          "label": "Mts per Spindle",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "USERFLD_MPS",
+          "sap_unit": "M",
+          "required": false,
+          "bbox": {
+            "x": 510,
+            "y": 288,
+            "w": 75,
+            "h": 32
+          },
+          "unit": "Mts"
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Output (Kgs)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 635,
+            "y": 288,
+            "w": 50,
+            "h": 32
+          },
+          "unit": "Kgs"
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "CONF_TEXT",
+          "sap_unit": "HNK",
+          "required": false,
+          "bbox": {
+            "x": 688,
+            "y": 288,
+            "w": 50,
+            "h": 32
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "machine_serial",
+          "label": "Machine Serial No",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "EQUIPMENT",
+          "required": false,
+          "bbox": {
+            "x": 305,
+            "y": 930,
+            "w": 100,
+            "h": 25
+          },
+          "unit": ""
+        },
+        {
+          "key": "current_shift",
+          "label": "Current Shift",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 525,
+            "y": 930,
+            "w": 100,
+            "h": 25
+          },
+          "unit": ""
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 10.0,
+        "clahe_clip_limit": 2.6,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "medium",
+        "color_channel_filter": "lab_lightness",
+        "aspect_ratio": 1.45,
+        "screen_mount_type": "wide_tabular_display",
+        "golden_corners": [
+          {
+            "x": 70,
+            "y": 80
+          },
+          {
+            "x": 930,
+            "y": 80
+          },
+          {
+            "x": 930,
+            "y": 940
+          },
+          {
+            "x": 70,
+            "y": 940
+          }
+        ]
+      }
     },
     "ring_frame": {
       "id": "ring_frame",
@@ -247,20 +1553,201 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 240, "y": 230, "w": 520, "h": 540}
+        "screen_bounds": {
+          "x": 240,
+          "y": 230,
+          "w": 520,
+          "h": 540
+        }
       },
       "fields": [
-        {"key": "shift", "label": "Shift", "category": "Header", "type": "string", "sap_field": "SHIFT", "required": true, "bbox": {"x": 265, "y": 360, "w": 140, "h": 90}, "unit": ""},
-        {"key": "shift_date", "label": "Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 415, "y": 360, "w": 150, "h": 90}, "unit": ""},
-        {"key": "shift_time", "label": "Time", "category": "Header", "type": "time", "sap_field": "TIME", "required": false, "bbox": {"x": 575, "y": 360, "w": 130, "h": 90}, "unit": ""},
-        {"key": "hanks", "label": "Hanks Produced", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "HNK", "required": true, "bbox": {"x": 265, "y": 455, "w": 140, "h": 90}, "unit": "Hanks"},
-        {"key": "grams_spindle", "label": "Grams / Spindle", "category": "Yield", "type": "number", "sap_field": "USERFLD_GPS", "sap_unit": "G", "required": false, "bbox": {"x": 415, "y": 455, "w": 150, "h": 90}, "unit": "g"},
-        {"key": "doffs", "label": "No. Doffs", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": false, "bbox": {"x": 575, "y": 455, "w": 130, "h": 90}, "unit": "Doffs"},
-        {"key": "run_time", "label": "Run Time (hrs)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 265, "y": 550, "w": 140, "h": 90}, "unit": "hrs"},
-        {"key": "doffing_time", "label": "Doffing Time (hrs)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_3", "sap_unit": "H", "required": false, "bbox": {"x": 415, "y": 550, "w": 150, "h": 90}, "unit": "hrs"},
-        {"key": "idle_time", "label": "Idle Time (hrs)", "category": "Production", "type": "duration", "sap_field": "DOWN_TIME", "sap_unit": "H", "required": false, "bbox": {"x": 575, "y": 550, "w": 130, "h": 90}, "unit": "hrs"},
-        {"key": "power_fail_time", "label": "Pow Fail Time (hrs)", "category": "Production", "type": "duration", "sap_field": "USERFLD_PFT", "sap_unit": "H", "required": false, "bbox": {"x": 415, "y": 645, "w": 150, "h": 90}, "unit": "hrs"}
-      ]
+        {
+          "key": "shift",
+          "label": "Shift",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "bbox": {
+            "x": 265,
+            "y": 360,
+            "w": 140,
+            "h": 90
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_date",
+          "label": "Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 415,
+            "y": 360,
+            "w": 150,
+            "h": 90
+          },
+          "unit": ""
+        },
+        {
+          "key": "shift_time",
+          "label": "Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "bbox": {
+            "x": 575,
+            "y": 360,
+            "w": 130,
+            "h": 90
+          },
+          "unit": ""
+        },
+        {
+          "key": "hanks",
+          "label": "Hanks Produced",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "HNK",
+          "required": true,
+          "bbox": {
+            "x": 265,
+            "y": 455,
+            "w": 140,
+            "h": 90
+          },
+          "unit": "Hanks"
+        },
+        {
+          "key": "grams_spindle",
+          "label": "Grams / Spindle",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "USERFLD_GPS",
+          "sap_unit": "G",
+          "required": false,
+          "bbox": {
+            "x": 415,
+            "y": 455,
+            "w": 150,
+            "h": 90
+          },
+          "unit": "g"
+        },
+        {
+          "key": "doffs",
+          "label": "No. Doffs",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": false,
+          "bbox": {
+            "x": 575,
+            "y": 455,
+            "w": 130,
+            "h": 90
+          },
+          "unit": "Doffs"
+        },
+        {
+          "key": "run_time",
+          "label": "Run Time (hrs)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 265,
+            "y": 550,
+            "w": 140,
+            "h": 90
+          },
+          "unit": "hrs"
+        },
+        {
+          "key": "doffing_time",
+          "label": "Doffing Time (hrs)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_3",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 415,
+            "y": 550,
+            "w": 150,
+            "h": 90
+          },
+          "unit": "hrs"
+        },
+        {
+          "key": "idle_time",
+          "label": "Idle Time (hrs)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "DOWN_TIME",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 575,
+            "y": 550,
+            "w": 130,
+            "h": 90
+          },
+          "unit": "hrs"
+        },
+        {
+          "key": "power_fail_time",
+          "label": "Pow Fail Time (hrs)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "USERFLD_PFT",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 415,
+            "y": 645,
+            "w": 150,
+            "h": 90
+          },
+          "unit": "hrs"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 5.0,
+        "clahe_clip_limit": 2.5,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "low",
+        "color_channel_filter": "grayscale_enhanced",
+        "aspect_ratio": 1.0,
+        "screen_mount_type": "compact_siemens_panel",
+        "golden_corners": [
+          {
+            "x": 240,
+            "y": 230
+          },
+          {
+            "x": 760,
+            "y": 230
+          },
+          {
+            "x": 760,
+            "y": 770
+          },
+          {
+            "x": 240,
+            "y": 770
+          }
+        ]
+      }
     },
     "link_conner": {
       "id": "link_conner",
@@ -277,22 +1764,228 @@
         "offset_x": 0,
         "offset_y": 0,
         "rotation": 0,
-        "screen_bounds": {"x": 30, "y": 40, "w": 940, "h": 920}
+        "screen_bounds": {
+          "x": 30,
+          "y": 40,
+          "w": 940,
+          "h": 920
+        }
       },
       "fields": [
-        {"key": "shift_date", "label": "Shift Date", "category": "Header", "type": "date", "sap_field": "POSTG_DATE", "required": true, "bbox": {"x": 750, "y": 915, "w": 150, "h": 25}, "unit": ""},
-        {"key": "group_name", "label": "Winding Group", "category": "Header", "type": "string", "sap_field": "GROUP_NAME", "required": false, "bbox": {"x": 45, "y": 305, "w": 135, "h": 40}, "unit": ""},
-        {"key": "lot_name", "label": "Lot Name", "category": "Header", "type": "string", "sap_field": "BATCH", "required": false, "bbox": {"x": 45, "y": 495, "w": 135, "h": 30}, "unit": ""},
-        {"key": "production_kgs", "label": "Production Weight (Kg)", "category": "Yield", "type": "number", "sap_field": "YIELD", "sap_unit": "KG", "required": true, "bbox": {"x": 440, "y": 290, "w": 80, "h": 35}, "unit": "Kg"},
-        {"key": "packages_doffed", "label": "Packages Doffed", "category": "Operations", "type": "integer", "sap_field": "NO_OF_DOFFS", "required": true, "bbox": {"x": 470, "y": 328, "w": 50, "h": 35}, "unit": "Pkgs"},
-        {"key": "machine_efficiency", "label": "Machine Efficiency (%)", "category": "KPI", "type": "percentage", "sap_field": "USERFLD_EFF", "required": false, "bbox": {"x": 440, "y": 365, "w": 80, "h": 35}, "unit": "%"},
-        {"key": "production_time", "label": "Production Time (HH:MM:SS)", "category": "Production", "type": "duration", "sap_field": "ACT_WORK_2", "sap_unit": "H", "required": true, "bbox": {"x": 440, "y": 400, "w": 80, "h": 35}, "unit": "HH:MM:SS"},
-        {"key": "time_span", "label": "Time Span", "category": "Production", "type": "duration", "sap_field": "TIME_SPAN", "sap_unit": "H", "required": false, "bbox": {"x": 440, "y": 435, "w": 80, "h": 35}, "unit": "HH:MM:SS"},
-        {"key": "red_lights_pct", "label": "Red Lights (%)", "category": "Stoppages", "type": "percentage", "sap_field": "USERFLD_RL", "required": false, "bbox": {"x": 440, "y": 470, "w": 80, "h": 35}, "unit": "%"},
-        {"key": "yarn_joints", "label": "Yarn Joints (/100 km)", "category": "Quality", "type": "number", "sap_field": "USERFLD_YJ", "required": false, "bbox": {"x": 730, "y": 290, "w": 110, "h": 35}, "unit": "/100km"},
-        {"key": "yarn_breaks", "label": "Yarn Breaks (/100 km)", "category": "Quality", "type": "number", "sap_field": "USERFLD_YB", "required": false, "bbox": {"x": 730, "y": 328, "w": 110, "h": 35}, "unit": "/100km"},
-        {"key": "clearer_cuts", "label": "Clearer Cuts (/100 km)", "category": "Quality", "type": "number", "sap_field": "USERFLD_CC", "required": false, "bbox": {"x": 730, "y": 400, "w": 110, "h": 35}, "unit": "/100km"}
-      ]
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "bbox": {
+            "x": 750,
+            "y": 915,
+            "w": 150,
+            "h": 25
+          },
+          "unit": ""
+        },
+        {
+          "key": "group_name",
+          "label": "Winding Group",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "GROUP_NAME",
+          "required": false,
+          "bbox": {
+            "x": 45,
+            "y": 305,
+            "w": 135,
+            "h": 40
+          },
+          "unit": ""
+        },
+        {
+          "key": "lot_name",
+          "label": "Lot Name",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "BATCH",
+          "required": false,
+          "bbox": {
+            "x": 45,
+            "y": 495,
+            "w": 135,
+            "h": 30
+          },
+          "unit": ""
+        },
+        {
+          "key": "production_kgs",
+          "label": "Production Weight (Kg)",
+          "category": "Yield",
+          "type": "number",
+          "sap_field": "YIELD",
+          "sap_unit": "KG",
+          "required": true,
+          "bbox": {
+            "x": 440,
+            "y": 290,
+            "w": 80,
+            "h": 35
+          },
+          "unit": "Kg"
+        },
+        {
+          "key": "packages_doffed",
+          "label": "Packages Doffed",
+          "category": "Operations",
+          "type": "integer",
+          "sap_field": "NO_OF_DOFFS",
+          "required": true,
+          "bbox": {
+            "x": 470,
+            "y": 328,
+            "w": 50,
+            "h": 35
+          },
+          "unit": "Pkgs"
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "Machine Efficiency (%)",
+          "category": "KPI",
+          "type": "percentage",
+          "sap_field": "USERFLD_EFF",
+          "required": false,
+          "bbox": {
+            "x": 440,
+            "y": 365,
+            "w": 80,
+            "h": 35
+          },
+          "unit": "%"
+        },
+        {
+          "key": "production_time",
+          "label": "Production Time (HH:MM:SS)",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "ACT_WORK_2",
+          "sap_unit": "H",
+          "required": true,
+          "bbox": {
+            "x": 440,
+            "y": 400,
+            "w": 80,
+            "h": 35
+          },
+          "unit": "HH:MM:SS"
+        },
+        {
+          "key": "time_span",
+          "label": "Time Span",
+          "category": "Production",
+          "type": "duration",
+          "sap_field": "TIME_SPAN",
+          "sap_unit": "H",
+          "required": false,
+          "bbox": {
+            "x": 440,
+            "y": 435,
+            "w": 80,
+            "h": 35
+          },
+          "unit": "HH:MM:SS"
+        },
+        {
+          "key": "red_lights_pct",
+          "label": "Red Lights (%)",
+          "category": "Stoppages",
+          "type": "percentage",
+          "sap_field": "USERFLD_RL",
+          "required": false,
+          "bbox": {
+            "x": 440,
+            "y": 470,
+            "w": 80,
+            "h": 35
+          },
+          "unit": "%"
+        },
+        {
+          "key": "yarn_joints",
+          "label": "Yarn Joints (/100 km)",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "USERFLD_YJ",
+          "required": false,
+          "bbox": {
+            "x": 730,
+            "y": 290,
+            "w": 110,
+            "h": 35
+          },
+          "unit": "/100km"
+        },
+        {
+          "key": "yarn_breaks",
+          "label": "Yarn Breaks (/100 km)",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "USERFLD_YB",
+          "required": false,
+          "bbox": {
+            "x": 730,
+            "y": 328,
+            "w": 110,
+            "h": 35
+          },
+          "unit": "/100km"
+        },
+        {
+          "key": "clearer_cuts",
+          "label": "Clearer Cuts (/100 km)",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "USERFLD_CC",
+          "required": false,
+          "bbox": {
+            "x": 730,
+            "y": 400,
+            "w": 110,
+            "h": 35
+          },
+          "unit": "/100km"
+        }
+      ],
+      "calibration_profile": {
+        "tilt_angle_compensation": 0.0,
+        "clahe_clip_limit": 2.8,
+        "clahe_grid_size": [
+          8,
+          8
+        ],
+        "glare_suppression": "low",
+        "color_channel_filter": "lab_lightness",
+        "aspect_ratio": 1.333,
+        "screen_mount_type": "autoconer_6_hmi",
+        "golden_corners": [
+          {
+            "x": 30,
+            "y": 40
+          },
+          {
+            "x": 970,
+            "y": 40
+          },
+          {
+            "x": 970,
+            "y": 960
+          },
+          {
+            "x": 30,
+            "y": 960
+          }
+        ]
+      }
     }
   }
 }

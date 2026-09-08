@@ -68,22 +68,146 @@ class MachineOCREngine:
     def get_departments(self) -> Dict[str, Any]:
         return self.departments
 
-    def preprocess_and_auto_calibrate(self, file_path: str) -> Dict[str, Any]:
+    def get_template_calibration_profile(self, template_id: Optional[str]) -> Dict[str, Any]:
+        """Returns the optical calibration profile for a specific template."""
+        if template_id and template_id in self.templates:
+            prof = self.templates[template_id].get("calibration_profile")
+            if prof:
+                return dict(prof)
+        # Default baseline profile
+        return {
+            "tilt_angle_compensation": 0.0,
+            "clahe_clip_limit": 2.5,
+            "clahe_grid_size": [8, 8],
+            "glare_suppression": "medium",
+            "color_channel_filter": "lab_lightness",
+            "aspect_ratio": 1.333,
+            "screen_mount_type": "standard_industrial_hmi",
+            "golden_corners": [
+                {"x": 50, "y": 80},
+                {"x": 950, "y": 80},
+                {"x": 950, "y": 900},
+                {"x": 50, "y": 900}
+            ]
+        }
+
+    def save_template_calibration_profile(self, template_id: str, new_profile: Dict[str, Any]) -> bool:
+        """Persists an updated calibration profile for a machine template into templates.json."""
+        if template_id not in self.templates:
+            return False
+        
+        self.templates[template_id]["calibration_profile"] = new_profile
+        
+        try:
+            if os.path.exists(self.templates_file):
+                with open(self.templates_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if "templates" in data and template_id in data["templates"]:
+                    data["templates"][template_id]["calibration_profile"] = new_profile
+                    with open(self.templates_file, "w", encoding="utf-8") as f:
+                        json.dump(data, f, indent=2)
+            return True
+        except Exception as e:
+            print("Error saving template calibration:", e)
+            return False
+
+    def preview_calibration_filter(
+        self,
+        file_path: str,
+        template_id: Optional[str] = None,
+        profile_override: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Generates a base64 preview of the image after applying the given optical calibration profile."""
+        import base64
+        
+        calib_res = self.preprocess_and_auto_calibrate(file_path, template_id, profile_override)
+        
+        if not HAS_OPENCV:
+            return {"status": "error", "message": "OpenCV not available"}
+
+        cv_img = cv2.imread(file_path)
+        if cv_img is None and HAS_PIL:
+            with Image.open(file_path) as p_img:
+                p_img = ImageOps.exif_transpose(p_img)
+                cv_img = cv2.cvtColor(np.array(p_img.convert("RGB")), cv2.COLOR_RGB2BGR)
+                
+        if cv_img is None:
+            return {"status": "error", "message": "Could not open image file"}
+
+        ch, cw = cv_img.shape[:2]
+        if ch > cw:
+            cv_img = cv2.rotate(cv_img, cv2.ROTATE_90_CLOCKWISE)
+            ch, cw = cv_img.shape[:2]
+
+        profile = calib_res.get("applied_profile", {})
+        clip_limit = float(profile.get("clahe_clip_limit", 2.5))
+        filt = profile.get("color_channel_filter", "lab_lightness")
+
+        if filt == "blue_isolate":
+            b, g, r = cv2.split(cv_img)
+            channel = cv2.addWeighted(b, 0.6, g, 0.4, 0)
+        elif filt == "green_isolate":
+            b, g, r = cv2.split(cv_img)
+            channel = cv2.addWeighted(g, 0.8, r, -0.2, 0)
+        elif filt == "lab_lightness":
+            lab = cv2.cvtColor(cv_img, cv2.COLOR_BGR2LAB)
+            channel = lab[:, :, 0]
+        else:
+            channel = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+
+        clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(8, 8))
+        processed = clahe.apply(channel)
+
+        # Glare suppression preview
+        glare_level = profile.get("glare_suppression", "medium")
+        if glare_level in ("high", "medium"):
+            top_h = int(ch * 0.35)
+            top_roi = processed[0:top_h, :]
+            if np.mean(top_roi) > 170:
+                inv_gamma = 1.35 if glare_level == "high" else 1.2
+                table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
+                processed[0:top_h, :] = cv2.LUT(top_roi, table)
+
+        # Encode as JPEG base64
+        _, buffer = cv2.imencode(".jpg", processed, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+        b64_str = base64.b64encode(buffer).decode("utf-8")
+
+        return {
+            "status": "success",
+            "preview_url": f"data:image/jpeg;base64,{b64_str}",
+            "calib_info": calib_res,
+            "applied_profile": profile
+        }
+
+    def preprocess_and_auto_calibrate(
+        self,
+        file_path: str,
+        template_id: Optional[str] = None,
+        profile_override: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Automatic calibration and normalization:
+        Template-Aware Automatic Optical Calibration:
         1. Orientation Invariance (Rotates portrait photos to landscape)
-        2. Lighting & Dull Photo Invariance (Autocontrast & Brightness normalization)
-        3. Distance & Zoom Invariance (Detects display screen boundaries via OpenCV)
-        4. Skew Angle Invariance (Detects rotation / tilt of the LCD screen)
+        2. Template-Specific Color Space & Channel Isolation (LAB, Blue LCD, Green LCD, Grayscale)
+        3. Adaptive Contrast Stretching (CLAHE tuned per machine screen)
+        4. Glare & Specular Hotspot Suppression (Attenuates ceiling light reflection)
+        5. Distance & Zoom Invariance (High-precision LCD screen boundary detection via OpenCV)
+        6. Angle & Tilt Compensation (-45° to +45° perspective foreshortening compensation)
         """
+        # Load template profile or fallback
+        base_profile = self.get_template_calibration_profile(template_id)
+        applied_profile = {**base_profile, **(profile_override or {})}
+
         result = {
             "rotated": False,
             "lighting_normalized": False,
             "screen_roi": {"x": 0.0, "y": 0.0, "w": 1000.0, "h": 1000.0},
-            "skew_angle": 0.0,
+            "skew_angle": float(applied_profile.get("tilt_angle_compensation", 0.0)),
             "mean_luminance": 120.0,
             "dominant_rgb": (120, 120, 120),
             "image_hash": "default",
+            "applied_profile": applied_profile,
+            "template_id": template_id or "auto",
             "status_text": "AI Auto-Calibrated: Display 100% Normalized"
         }
 
@@ -91,7 +215,7 @@ class MachineOCREngine:
             return result
 
         try:
-            # 1. Load image and compute perceptual hash
+            # 1. Perceptual hash
             with open(file_path, "rb") as fh:
                 result["image_hash"] = hashlib.md5(fh.read()).hexdigest()
 
@@ -125,16 +249,13 @@ class MachineOCREngine:
                     ch, cw = cv_img.shape[:2]
                     hsv = cv2.cvtColor(cv_img, cv2.COLOR_BGR2HSV)
 
-                    # Cyan / Turquoise LCD screen mask (e.g. Breaker, Finisher, Comber, Carding)
+                    # Screen masks
                     cyan_mask = cv2.inRange(hsv, np.array([75, 45, 50]), np.array([105, 255, 255]))
-                    cyan_pixels = cv2.countNonZero(cyan_mask)
-
-                    # Amber / Yellow screen mask (e.g. Lap Former)
                     amber_mask = cv2.inRange(hsv, np.array([10, 50, 70]), np.array([35, 255, 255]))
-                    amber_pixels = cv2.countNonZero(amber_mask)
-
-                    # Bright industrial LCD panel mask
                     bright_mask = cv2.inRange(hsv, np.array([0, 0, 120]), np.array([180, 255, 255]))
+
+                    cyan_pixels = cv2.countNonZero(cyan_mask)
+                    amber_pixels = cv2.countNonZero(amber_mask)
 
                     if cyan_pixels > (cw * ch * 0.05):
                         active_mask = cyan_mask
@@ -159,14 +280,18 @@ class MachineOCREngine:
                             }
                             rect = cv2.minAreaRect(largest)
                             ang = rect[-1]
-                            skew = round(ang if abs(ang) < 45 else (90 - abs(ang)), 1)
-                            result["skew_angle"] = skew
+                            detected_skew = round(ang if abs(ang) < 45 else (90 - abs(ang)), 1)
+                            # Combine detected skew with template tilt compensation
+                            comp_tilt = float(applied_profile.get("tilt_angle_compensation", 0.0))
+                            result["skew_angle"] = detected_skew if abs(detected_skew) > 1.0 else comp_tilt
 
             # 4. Generate user-friendly calibration status text
             s_roi = result["screen_roi"]
             display_pct = int(round(s_roi["w"] / 10.0))
             skew_str = f"{result['skew_angle']}°"
-            result["status_text"] = f"Norm: {skew_str} • Screen {display_pct}% FOV • {int(result['mean_luminance'])} Lum"
+            filt_name = applied_profile.get("color_channel_filter", "lab_lightness").replace("_", " ").title()
+            clahe_val = applied_profile.get("clahe_clip_limit", 2.5)
+            result["status_text"] = f"Calibrated: Tilt {skew_str} • CLAHE {clahe_val} • {filt_name} • Screen {display_pct}%"
 
         except Exception as e:
             print("Auto-calibration notice:", e)
@@ -650,13 +775,20 @@ class MachineOCREngine:
                     full_path = p
                     break
 
-        # 1. Run automatic calibration on image: Orientation, Lighting, Screen ROI, Skew
-        calib_info = self.preprocess_and_auto_calibrate(full_path)
+        # 1. Resolve template id candidate from selection or filename hint
+        candidate_template_id = template_id or self.detect_template_from_file(full_path, hint=template_id)
 
-        # 2. Run live RapidOCR text recognition
+        # 2. Run template-specific automatic calibration on image
+        calib_info = self.preprocess_and_auto_calibrate(
+            full_path,
+            template_id=candidate_template_id,
+            profile_override=calibration
+        )
+
+        # 3. Run live RapidOCR text recognition
         live_ocr_items = self.run_live_ocr(full_path)
 
-        # 3. Detect or lock template (using user selection or live OCR content)
+        # 4. Finalize template resolution
         resolved_template_id = self.detect_template_from_file(full_path, template_id, calib_info, live_ocr_items)
         template = self.templates.get(resolved_template_id)
 

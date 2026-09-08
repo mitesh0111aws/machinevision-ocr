@@ -77,6 +77,21 @@ def init_db():
             sap_status TEXT DEFAULT 'Scanned'
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS active_learning_corrections (
+            id TEXT PRIMARY KEY,
+            created_at TEXT,
+            template_id TEXT,
+            machine_name TEXT,
+            field_key TEXT,
+            field_label TEXT,
+            ocr_detected_value TEXT,
+            operator_corrected_value TEXT,
+            operator_id TEXT,
+            operator_name TEXT,
+            image_filename TEXT
+        )
+    """)
     cursor.execute("PRAGMA table_info(sap_confirmations)")
     existing_cols = [c[1] for c in cursor.fetchall()]
     if "department" not in existing_cols:
@@ -669,10 +684,142 @@ def get_version():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify({
-        "current_version": "2.0.0",
+        "current_version": "2.1.0",
         "release_date": "2026-09-08",
         "app_name": "MachineVision OCR & SAP Floor Portal"
     })
+
+@app.route("/api/calibration/profile/<template_id>", methods=["GET"])
+def get_calibration_profile(template_id):
+    profile = engine.get_template_calibration_profile(template_id)
+    template = engine.templates.get(template_id, {})
+    return jsonify({
+        "status": "success",
+        "template_id": template_id,
+        "template_name": template.get("name", template_id),
+        "screen_type": template.get("screen_type", "Touch HMI"),
+        "profile": profile
+    })
+
+@app.route("/api/calibration/preview", methods=["POST"])
+def preview_calibration():
+    data = request.get_json(silent=True) or {}
+    template_id = data.get("template_id", "carding")
+    profile_override = data.get("calibration", {})
+    filename = data.get("filename")
+    
+    file_path = None
+    if filename:
+        candidate_paths = [
+            os.path.join(app.config["UPLOAD_FOLDER"], filename),
+            os.path.join(app.config["SAMPLES_FOLDER"], filename),
+            os.path.join(app.config["SAMPLES_FOLDER"], f"{template_id}.jpg")
+        ]
+        for p in candidate_paths:
+            if os.path.exists(p):
+                file_path = p
+                break
+    if not file_path:
+        file_path = os.path.join(app.config["SAMPLES_FOLDER"], f"{template_id}.jpg")
+        if not os.path.exists(file_path):
+            file_path = os.path.join(app.config["SAMPLES_FOLDER"], "carding.jpg")
+            
+    preview_res = engine.preview_calibration_filter(file_path, template_id=template_id, profile_override=profile_override)
+    return jsonify(preview_res)
+
+@app.route("/api/calibration/save", methods=["POST"])
+def save_calibration_profile():
+    data = request.get_json(silent=True) or {}
+    template_id = data.get("template_id")
+    profile = data.get("calibration_profile")
+    if not template_id or not profile:
+        return jsonify({"status": "error", "message": "template_id and calibration_profile required"}), 400
+    
+    success = engine.save_template_calibration_profile(template_id, profile)
+    if success:
+        return jsonify({
+            "status": "success",
+            "message": f"Calibration profile saved permanently for {template_id}",
+            "template_id": template_id,
+            "profile": profile
+        })
+    return jsonify({"status": "error", "message": "Failed to save calibration profile"}), 500
+
+@app.route("/api/calibration/active_learning", methods=["POST"])
+def log_active_learning():
+    data = request.get_json(silent=True) or {}
+    template_id = data.get("template_id", "unknown")
+    machine_name = data.get("machine_name", template_id)
+    operator_id = data.get("operator_id", "operator")
+    operator_name = data.get("operator_name", "Shift Operator")
+    image_filename = data.get("image_filename", "")
+    corrections = data.get("corrections", [])
+    
+    if not corrections:
+        return jsonify({"status": "noop", "message": "No corrections detected"})
+        
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        cursor = conn.cursor()
+        now = datetime.datetime.now().isoformat()
+        
+        for c in corrections:
+            corr_id = f"corr_{uuid.uuid4().hex[:12]}"
+            cursor.execute("""
+                INSERT INTO active_learning_corrections (
+                    id, created_at, template_id, machine_name, field_key, field_label,
+                    ocr_detected_value, operator_corrected_value, operator_id, operator_name, image_filename
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                corr_id, now, template_id, machine_name,
+                c.get("field_key"), c.get("field_label"),
+                str(c.get("ocr_detected", "")), str(c.get("operator_corrected", "")),
+                operator_id, operator_name, image_filename
+            ))
+        conn.commit()
+        conn.close()
+        return jsonify({
+            "status": "success",
+            "recorded_count": len(corrections),
+            "message": f"Logged {len(corrections)} manual corrections to Active Learning database"
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/api/calibration/insights", methods=["GET"])
+def get_calibration_insights():
+    try:
+        conn = sqlite3.connect(app.config["DB_FILE"])
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM active_learning_corrections")
+        total_corrections = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT template_id, machine_name, COUNT(*) as cnt
+            FROM active_learning_corrections
+            GROUP BY template_id
+            ORDER BY cnt DESC
+        """)
+        by_machine = [{"template_id": r[0], "machine_name": r[1], "count": r[2]} for r in cursor.fetchall()]
+        
+        cursor.execute("""
+            SELECT field_key, field_label, COUNT(*) as cnt
+            FROM active_learning_corrections
+            GROUP BY field_key
+            ORDER BY cnt DESC
+            LIMIT 10
+        """)
+        top_fields = [{"field_key": r[0], "field_label": r[1], "count": r[2]} for r in cursor.fetchall()]
+        
+        conn.close()
+        return jsonify({
+            "status": "success",
+            "total_corrections": total_corrections,
+            "by_machine": by_machine,
+            "top_fields": top_fields
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 def seed_initial_scans():
     try:

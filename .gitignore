@@ -8,3 +8,4 @@ uploads/*
 .vercel
 *.ses
 :memory:*
+.env*

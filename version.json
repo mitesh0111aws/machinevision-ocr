@@ -1,19 +1,34 @@
 {
   "app_name": "MachineVision OCR & SAP Floor Portal",
-  "current_version": "2.0.0",
+  "current_version": "2.1.0",
   "release_date": "2026-09-08",
-  "git_tag": "v2.0.0",
+  "git_tag": "v2.1.0",
   "revert_guide": {
     "view_versions": "git tag -l -n",
-    "switch_to_version": "git checkout <version_tag> (e.g. git checkout v1.3.0)",
+    "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.1.0",
+      "date": "2026-09-08",
+      "title": "Template-Wise AI Optical Calibration, Calibration Studio & Active Learning",
+      "tag": "v2.1.0",
+      "revert_command": "git checkout v2.1.0",
+      "changes": [
+        "Added template-specific optical calibration profiles (tilt angle, CLAHE contrast, color space isolation, glare suppression) for all 8 textile spinning machines.",
+        "Built supervisor AI Calibration Studio modal (#calibration-studio-modal) with real-time visual filter preview and 1-click Golden Profile persistence.",
+        "Implemented Active Learning feedback loop: operator manual edits in verification form automatically log diffs to train and tune machine calibration.",
+        "Added color channel wavelength isolation (LAB L-channel, Cyan/Blue LCD booster, Dark Green Mono LCD, Grayscale) tailored to each machine screen type.",
+        "Added calibration insights API (/api/calibration/insights) to track operator correction rates across machines and fields."
+      ]
+    },
     {
       "version": "2.0.0",
       "date": "2026-09-08",
       "title": "Unified Responsive Workstation, Version Control & Enterprise Re-Alignment",
       "tag": "v2.0.0",
+      "revert_command": "git checkout v2.0.0",
       "changes": [
         "Removed artificial scanner frame and mode switcher; unified desktop and mobile scanner into a single adaptive view.",
         "Both Camera Capture and Photo Upload available side-by-side on the primary toolbar.",
