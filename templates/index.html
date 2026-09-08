@@ -188,7 +188,7 @@
           <!-- VERSION BADGE (Click to View Release History & Rollback Info) -->
           <button onclick="openVersionModal()" title="View Version & Release History" class="px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1 transition shadow-sm shrink-0">
             <i class="fa-solid fa-code-branch text-[11px] text-indigo-500"></i>
-            <span id="app-version-badge">v2.1.2</span>
+            <span id="app-version-badge">v2.2.0</span>
           </button>
 
           <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
@@ -210,7 +210,7 @@
           </button>
 
           <!-- AUDIT LOG BUTTON -->
-          <button id="btn-view-audit" title="View Audit Trail" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 transition shrink-0">
+          <button id="btn-view-audit" onclick="openAuditModal()" title="View Audit Trail" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1 transition shrink-0">
             <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
             <span class="hidden 2xl:inline">Audit</span> (<span id="audit-count">0</span>)
           </button>
@@ -222,16 +222,136 @@
           <i class="fa-solid fa-moon inline dark:hidden text-indigo-600"></i>
         </button>
 
-        <!-- USER PROFILE & LOGOUT (Visible when authenticated) -->
-        <div id="header-user-panel" class="hidden items-center gap-1.5 shrink-0 flex-nowrap">
-          <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs shrink-0">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-            <span id="header-username" class="font-semibold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">Operator</span>
-          </div>
-          <button id="btn-logout-header" title="Sign Out" class="px-2.5 py-1.5 rounded-xl border border-rose-300/40 dark:border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-1 transition shrink-0">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span class="hidden lg:inline">Sign Out</span>
+        <!-- USER PROFILE & ACCOUNT DROPDOWN (Visible when authenticated) -->
+        <div id="header-user-panel" class="relative hidden items-center shrink-0">
+          
+          <!-- Trigger: User Profile Pill Button -->
+          <button id="btn-user-menu" onclick="toggleUserDropdown()" type="button" aria-haspopup="true" aria-expanded="false" title="User Profile, Quick Station Settings & Logout"
+                  class="flex items-center gap-2 pl-1.5 pr-2 sm:pr-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-xs transition shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 cursor-pointer">
+            <!-- Avatar with Online Dot -->
+            <div class="relative w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-[11px] shadow-sm shadow-indigo-500/20 shrink-0">
+              <span id="header-user-avatar">OP</span>
+              <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-800"></span>
+            </div>
+            
+            <!-- User Name and Role (Desktop & Tablet) -->
+            <div class="hidden sm:flex flex-col text-left leading-none justify-center">
+              <span id="header-username" class="font-bold text-slate-800 dark:text-slate-100 max-w-[95px] truncate text-xs">Operator</span>
+              <span id="header-user-role" class="text-[9px] text-indigo-600 dark:text-indigo-400 font-semibold tracking-wide uppercase mt-0.5">Shift Operator</span>
+            </div>
+
+            <!-- Animated Chevron -->
+            <i id="user-menu-chevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ml-0.5"></i>
           </button>
+
+          <!-- Dropdown Menu Card -->
+          <div id="user-dropdown-menu" class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl shadow-slate-900/15 dark:shadow-black/70 z-[100] p-2.5 overflow-hidden">
+            
+            <!-- User Identity Header Card -->
+            <div class="p-3 bg-gradient-to-br from-slate-50 via-slate-50/80 to-indigo-50/40 dark:from-slate-800/90 dark:via-slate-800/60 dark:to-indigo-950/30 rounded-xl border border-slate-200/70 dark:border-slate-700/60 mb-2">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-md shadow-indigo-500/30 shrink-0">
+                  <span id="dropdown-user-avatar">OP</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1.5">
+                    <h4 id="dropdown-user-name" class="text-sm font-bold text-slate-900 dark:text-white truncate">Shift Operator</h4>
+                    <span id="dropdown-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 shrink-0">Operator</span>
+                  </div>
+                  <p id="dropdown-user-username" class="text-xs text-slate-500 dark:text-slate-400 truncate">@operator</p>
+                </div>
+              </div>
+
+              <!-- Active Plant & Dept Ribbon -->
+              <div class="mt-2.5 pt-2 border-t border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between text-[11px]">
+                <div class="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 truncate">
+                  <i class="fa-solid fa-location-dot text-indigo-500 shrink-0"></i>
+                  <span id="dropdown-active-plant-dept" class="truncate font-medium">Bed Sheet Plant Anjar &bull; Warping</span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] shrink-0 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> SAP Live
+                </span>
+              </div>
+            </div>
+
+            <!-- Quick Settings & Actions -->
+            <div class="space-y-0.5 py-1">
+              <!-- Switch Plant / Department -->
+              <button onclick="showView('plant_dept'); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">Switch Plant / Department</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Change manufacturing floor</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </button>
+
+              <!-- AI Optical Calibration Studio -->
+              <button onclick="openCalibrationStudio(); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-sliders text-xs"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">AI Calibration Studio</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Glare, lighting & optical tuning</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </button>
+
+              <!-- Scanned Data & Image History -->
+              <button onclick="openScansModal(); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-images text-xs"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">Scanned Records Explorer</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">View captured photos & OCR logs</div>
+                </div>
+                <span class="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 scans-count-badge">0</span>
+              </button>
+
+              <!-- System Audit Trail -->
+              <button onclick="openAuditModal(); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">System Audit Trail</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Security, compliance & OCR events</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </button>
+
+              <!-- Version & Release History -->
+              <button onclick="openVersionModal(); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+                <div class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-code-branch text-xs"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">Version & Rollback</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Release history & instant rollback</div>
+                </div>
+                <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">v2.2.0</span>
+              </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="my-1.5 border-t border-slate-200 dark:border-slate-800"></div>
+
+            <!-- Prominent Red Sign Out Button -->
+            <button id="btn-dropdown-logout" onclick="handleLogout(); toggleUserDropdown(false);" class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-xs font-bold transition group cursor-pointer border border-rose-200/60 dark:border-rose-800/40">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                </div>
+                <span>Sign Out of Station</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded-md bg-rose-200/70 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-semibold">End Shift</span>
+            </button>
+
+          </div>
         </div>
 
       </div>
@@ -1332,7 +1452,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Version Control &amp; Rollback</h2>
-              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.1.2 Active</span>
+              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.2.0 Active</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">Track release milestones or roll back to any historical version anytime</p>
           </div>

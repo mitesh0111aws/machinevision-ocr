@@ -1,14 +1,28 @@
 {
   "app_name": "MachineVision OCR & SAP Floor Portal",
-  "current_version": "2.1.2",
+  "current_version": "2.2.0",
   "release_date": "2026-09-08",
-  "git_tag": "v2.1.2",
+  "git_tag": "v2.2.0",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.2.0",
+      "date": "2026-09-08",
+      "title": "Enterprise User Profile Dropdown Menu, Quick Station Settings & Prominent Sign Out",
+      "tag": "v2.2.0",
+      "revert_command": "git checkout v2.2.0",
+      "changes": [
+        "Replaced single overflowing sign-out button with an enterprise-grade User Profile Dropdown Menu in top navigation header.",
+        "Profile pill trigger displays user avatar initials with online status dot, operator full name, and role badge ('Shift Operator' / 'Mill Admin').",
+        "Dropdown card includes operator identity header, active plant & department indicator with live SAP status, quick actions (Switch Plant/Dept, AI Calibration Studio, Scanned Records Explorer, Audit Trail, Version & Rollback).",
+        "Prominent End Shift / Sign Out button with rose-red styling, clear icon, and instant session termination.",
+        "Smooth click-outside and Escape key dismissal."
+      ]
+    },
     {
       "version": "2.1.2",
       "date": "2026-09-08",

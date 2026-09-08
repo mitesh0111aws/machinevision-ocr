@@ -684,7 +684,7 @@ def get_version():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify({
-        "current_version": "2.1.0",
+        "current_version": "2.2.0",
         "release_date": "2026-09-08",
         "app_name": "MachineVision OCR & SAP Floor Portal"
     })

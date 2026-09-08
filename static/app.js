@@ -298,6 +298,7 @@ function quickLogin(type) {
 }
 
 function handleLogout() {
+  toggleUserDropdown(false);
   currentUser = null;
   localStorage.removeItem("mv_user");
   showView("login");
@@ -401,11 +402,19 @@ function launchWorkstation() {
 function updatePlantDeptBadges() {
   const plantBadge = document.getElementById("current-plant-badge");
   const deptBadge = document.getElementById("current-dept-badge");
-  if (plantBadge && currentPlant) {
-    plantBadge.textContent = PLANT_DISPLAY_NAMES[currentPlant.id] || currentPlant.name || `Plant ${currentPlant.id}`;
+  const plantName = currentPlant ? (PLANT_DISPLAY_NAMES[currentPlant.id] || currentPlant.name || `Plant ${currentPlant.id}`) : "Bed Sheet Plant Anjar";
+  const deptName = currentDepartment ? (currentDepartment.id === "new_spinning" ? "New Spinning" : (currentDepartment.name || currentDepartment.id)) : "Warping";
+
+  if (plantBadge) {
+    plantBadge.textContent = plantName;
   }
-  if (deptBadge && currentDepartment) {
-    deptBadge.textContent = currentDepartment.id === "new_spinning" ? "New Spinning" : (currentDepartment.name || currentDepartment.id);
+  if (deptBadge) {
+    deptBadge.textContent = deptName;
+  }
+
+  const dropdownActivePlantDept = document.getElementById("dropdown-active-plant-dept");
+  if (dropdownActivePlantDept) {
+    dropdownActivePlantDept.textContent = `${plantName} • ${deptName}`;
   }
 
   const sapPlantInput = document.getElementById("sap-plant");
@@ -417,15 +426,83 @@ function updatePlantDeptBadges() {
 function updateUserDisplayName() {
   const headerUsername = document.getElementById("header-username");
   const welcomeUserName = document.getElementById("welcome-user-name");
+  const headerUserAvatar = document.getElementById("header-user-avatar");
+  const headerUserRole = document.getElementById("header-user-role");
+  const dropdownUserAvatar = document.getElementById("dropdown-user-avatar");
+  const dropdownUserName = document.getElementById("dropdown-user-name");
+  const dropdownUserUsername = document.getElementById("dropdown-user-username");
+  const dropdownUserRole = document.getElementById("dropdown-user-role");
+  const dropdownUserBadge = document.getElementById("dropdown-user-badge");
+  const dropdownActivePlantDept = document.getElementById("dropdown-active-plant-dept");
+
   const displayName = currentUser ? (currentUser.name || currentUser.username) : "Operator";
+  const rawUsername = currentUser ? (currentUser.username || "operator") : "operator";
+  const isAdmin = currentUser && (currentUser.role === "admin" || rawUsername.toLowerCase().includes("admin"));
+  const roleText = isAdmin ? "Mill Admin" : "Shift Operator";
+  const badgeText = isAdmin ? "Admin" : "Operator";
+
+  // Initials (e.g. "Shift Operator" -> "SO", "Mill Admin" -> "MA", "Operator" -> "OP")
+  let initials = "OP";
+  if (displayName) {
+    const parts = displayName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      initials = (parts[0][0] + parts[1][0]).toUpperCase();
+    } else if (parts.length === 1 && parts[0].length >= 2) {
+      initials = parts[0].substring(0, 2).toUpperCase();
+    }
+  }
+
   if (headerUsername) headerUsername.textContent = displayName;
   if (welcomeUserName) welcomeUserName.textContent = displayName;
+  if (headerUserAvatar) headerUserAvatar.textContent = initials;
+  if (headerUserRole) headerUserRole.textContent = roleText;
+
+  if (dropdownUserAvatar) dropdownUserAvatar.textContent = initials;
+  if (dropdownUserName) dropdownUserName.textContent = displayName;
+  if (dropdownUserUsername) dropdownUserUsername.textContent = `@${rawUsername}`;
+  if (dropdownUserRole) dropdownUserRole.textContent = roleText;
+  if (dropdownUserBadge) {
+    dropdownUserBadge.textContent = badgeText;
+    if (isAdmin) {
+      dropdownUserBadge.className = "px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 shrink-0";
+    } else {
+      dropdownUserBadge.className = "px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 shrink-0";
+    }
+  }
+
+  if (dropdownActivePlantDept) {
+    const plantName = currentPlant ? (PLANT_DISPLAY_NAMES[currentPlant.id] || currentPlant.name || `Plant ${currentPlant.id}`) : "Bed Sheet Plant Anjar";
+    const deptName = currentDepartment ? (currentDepartment.id === "new_spinning" ? "New Spinning" : (currentDepartment.name || currentDepartment.id)) : "Warping";
+    dropdownActivePlantDept.textContent = `${plantName} • ${deptName}`;
+  }
+}
+
+function toggleUserDropdown(forceState) {
+  const menu = document.getElementById("user-dropdown-menu");
+  const chevron = document.getElementById("user-menu-chevron");
+  const btn = document.getElementById("btn-user-menu");
+  if (!menu) return;
+
+  const isCurrentlyOpen = !menu.classList.contains("hidden");
+  const shouldOpen = typeof forceState === "boolean" ? forceState : !isCurrentlyOpen;
+
+  if (shouldOpen) {
+    updateUserDisplayName();
+    menu.classList.remove("hidden");
+    if (chevron) chevron.classList.add("rotate-180");
+    if (btn) btn.setAttribute("aria-expanded", "true");
+  } else {
+    menu.classList.add("hidden");
+    if (chevron) chevron.classList.remove("rotate-180");
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
 }
 
 // Expose functions globally for inline HTML onclick handlers
 window.handleLoginSubmit = handleLoginSubmit;
 window.quickLogin = quickLogin;
 window.handleLogout = handleLogout;
+window.toggleUserDropdown = toggleUserDropdown;
 window.togglePasswordVisibility = togglePasswordVisibility;
 window.selectPlant = selectPlant;
 window.selectDepartment = selectDepartment;
@@ -547,19 +624,48 @@ function setupEventListeners() {
     appVersionBadge.addEventListener("click", openVersionModal);
   }
 
+function openAuditModal() {
+  if (auditModal) {
+    auditModal.classList.remove("hidden");
+    auditModal.classList.add("flex");
+    loadAuditLogs();
+  }
+}
+
+function closeAuditModal() {
+  if (auditModal) {
+    auditModal.classList.add("hidden");
+    auditModal.classList.remove("flex");
+  }
+}
+window.openAuditModal = openAuditModal;
+window.closeAuditModal = closeAuditModal;
+
   // Modals
   if (btnViewAudit) {
-    btnViewAudit.addEventListener("click", () => {
-      auditModal.classList.remove("hidden");
-      auditModal.classList.add("flex");
-      loadAuditLogs();
-    });
+    btnViewAudit.addEventListener("click", openAuditModal);
   }
   if (btnCloseAudit) {
-    btnCloseAudit.addEventListener("click", () => {
-      auditModal.classList.add("hidden");
-      auditModal.classList.remove("flex");
-    });
+    btnCloseAudit.addEventListener("click", closeAuditModal);
+  }
+
+  // User Profile Dropdown outside click & Escape dismiss
+  document.addEventListener("click", (e) => {
+    const userPanel = document.getElementById("header-user-panel");
+    if (userPanel && !userPanel.contains(e.target)) {
+      toggleUserDropdown(false);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      toggleUserDropdown(false);
+    }
+  });
+
+  const btnDropdownLogout = document.getElementById("btn-dropdown-logout");
+  if (btnDropdownLogout) {
+    btnDropdownLogout.addEventListener("click", handleLogout);
   }
 
   const btnViewScans = document.getElementById("btn-view-scans");
