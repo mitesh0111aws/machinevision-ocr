@@ -229,7 +229,7 @@ async function handleLoginSubmit(event) {
   }
 
   const staticUsers = {
-    "admin": { password: "admin123", name: "Mitesh Bambhaniya (Mill Admin)", role: "Administrator" },
+    "admin": { password: "admin123", name: "Mitesh Bambhaniya (Admin)", role: "Administrator" },
     "operator": { password: "operator123", name: "Shift Operator - Line 1", role: "Operator" },
     "supervisor": { password: "supervisor123", name: "Spinning Supervisor", role: "Supervisor" },
     "welspun": { password: "welspun2026", name: "Plant In-Charge", role: "Manager" }
@@ -437,12 +437,12 @@ function updateUserDisplayName() {
 
   const displayName = currentUser ? (currentUser.name || currentUser.username) : "Operator";
   const rawUsername = currentUser ? (currentUser.username || "operator") : "operator";
-  const isAdmin = currentUser && (currentUser.role === "admin" || rawUsername.toLowerCase().includes("admin"));
-  const roleText = isAdmin ? "Mill Admin" : "Shift Operator";
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "Administrator" || rawUsername.toLowerCase().includes("admin"));
+  const roleText = isAdmin ? "Admin" : "Shift Operator";
   const badgeText = isAdmin ? "Admin" : "Operator";
 
-  // Initials (e.g. "Shift Operator" -> "SO", "Mill Admin" -> "MA", "Operator" -> "OP")
-  let initials = "OP";
+  // Initials (e.g. "Shift Operator" -> "SO", "Admin" -> "AD", "Operator" -> "OP")
+  let initials = isAdmin ? "AD" : "OP";
   if (displayName) {
     const parts = displayName.trim().split(/\s+/);
     if (parts.length >= 2) {
@@ -467,6 +467,21 @@ function updateUserDisplayName() {
       dropdownUserBadge.className = "px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 shrink-0";
     } else {
       dropdownUserBadge.className = "px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 shrink-0";
+    }
+  }
+
+  // RBAC for AI Calibration & Teaching Studio: strictly Admin-only
+  const btnCalibHeader = document.getElementById("btn-open-calibration-studio");
+  const dropdownItemCalib = document.getElementById("dropdown-item-calibration");
+  if (btnCalibHeader) {
+    btnCalibHeader.classList.toggle("hidden", !isAdmin);
+  }
+  if (dropdownItemCalib) {
+    dropdownItemCalib.classList.toggle("hidden", !isAdmin);
+    if (isAdmin) {
+      dropdownItemCalib.classList.add("flex");
+    } else {
+      dropdownItemCalib.classList.remove("flex");
     }
   }
 
@@ -498,10 +513,19 @@ function closeUserDropdown() {
   if (btn) btn.setAttribute("aria-expanded", "false");
 }
 
+let _dropdownToggleLock = false;
+
 function toggleUserDropdown(event) {
   if (event && event.stopPropagation) {
     event.stopPropagation();
   }
+  if (event && event.preventDefault) {
+    event.preventDefault();
+  }
+  if (_dropdownToggleLock) return;
+  _dropdownToggleLock = true;
+  setTimeout(() => { _dropdownToggleLock = false; }, 150);
+
   const menu = document.getElementById("user-dropdown-menu");
   if (!menu) return;
   if (menu.classList.contains("hidden")) {
@@ -668,6 +692,7 @@ window.closeAuditModal = closeAuditModal;
   const btnUserMenu = document.getElementById("btn-user-menu");
   if (btnUserMenu) {
     btnUserMenu.addEventListener("click", (e) => {
+      e.preventDefault();
       e.stopPropagation();
       toggleUserDropdown(e);
     });
@@ -2084,6 +2109,17 @@ const calibInsightCount = document.getElementById("calib-insight-count");
 const calibInsightList = document.getElementById("calib-insight-list");
 
 function openCalibrationStudio(templateId) {
+  const rawUsername = currentUser ? (currentUser.username || "operator") : "operator";
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "Administrator" || rawUsername.toLowerCase().includes("admin"));
+  if (!isAdmin) {
+    if (typeof showToast === "function") {
+      showToast("Access Restricted: AI Calibration & Teaching Studio requires Admin credentials.", "warning");
+    } else {
+      alert("Access Restricted: AI Calibration & Teaching Studio requires Admin credentials.");
+    }
+    return;
+  }
+
   const targetId = templateId || currentTemplateId || "carding";
   if (calibMachineSelect) calibMachineSelect.value = targetId;
   activeCalibTemplateId = targetId;

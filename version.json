@@ -1,14 +1,28 @@
 {
   "app_name": "WelVision - AI Machine Vision & SAP Floor Portal",
-  "current_version": "2.3.1",
+  "current_version": "2.4.0",
   "release_date": "2026-09-08",
-  "git_tag": "v2.3.1",
+  "git_tag": "v2.4.0",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.4.0",
+      "date": "2026-09-08",
+      "title": "Official Welspun Corporate Branding, Profile Dropdown Fix, Clean Header & Admin RBAC",
+      "tag": "v2.4.0",
+      "revert_command": "git checkout v2.4.0",
+      "changes": [
+        "Integrated official Welspun circular logo emblem and signature corporate navy/blue (#160a8a) across header, favicon, and login screen.",
+        "Completely eliminated User Profile button click race condition by removing dual inline/addEventListener listeners and adding a 150ms debouncing lock.",
+        "Cleaned and optimized header by permanently removing '8 SPINNING STAGES' and 'SAP READY' badges adjacent to brand name.",
+        "Enforced Role-Based Access Control (RBAC): AI Calibration & Teaching Studio is strictly restricted to Admin login and hidden from Shift Operators.",
+        "Systematically renamed 'Mill Admin' to 'Admin' across all UI elements, login chips, profile cards, and backend authentication."
+      ]
+    },
     {
       "version": "2.3.1",
       "date": "2026-09-08",
@@ -43,7 +57,7 @@
       "revert_command": "git checkout v2.2.0",
       "changes": [
         "Replaced single overflowing sign-out button with an enterprise-grade User Profile Dropdown Menu in top navigation header.",
-        "Profile pill trigger displays user avatar initials with online status dot, operator full name, and role badge ('Shift Operator' / 'Mill Admin').",
+        "Profile pill trigger displays user avatar initials with online status dot, operator full name, and role badge ('Shift Operator' / 'Admin').",
         "Dropdown card includes operator identity header, active plant & department indicator with live SAP status, quick actions (Switch Plant/Dept, AI Calibration Studio, Scanned Records Explorer, Audit Trail, Version & Rollback).",
         "Prominent End Shift / Sign Out button with rose-red styling, clear icon, and instant session termination.",
         "Smooth click-outside and Escape key dismissal."

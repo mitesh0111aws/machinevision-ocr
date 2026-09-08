@@ -172,7 +172,7 @@ def auth_login():
 
     # Static credentials catalog
     valid_users = {
-        "admin": {"password": "admin123", "name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator"},
+        "admin": {"password": "admin123", "name": "Mitesh Bambhaniya (Admin)", "role": "Administrator"},
         "operator": {"password": "operator123", "name": "Shift Operator - Line 1", "role": "Operator"},
         "supervisor": {"password": "supervisor123", "name": "Spinning Supervisor", "role": "Supervisor"},
         "welspun": {"password": "welspun2026", "name": "Plant In-Charge", "role": "Manager"}
@@ -684,7 +684,7 @@ def get_version():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify({
-        "current_version": "2.3.1",
+        "current_version": "2.4.0",
         "release_date": "2026-09-08",
         "app_name": "WelVision - AI Machine Vision & SAP Floor Portal"
     })
@@ -849,13 +849,13 @@ def seed_initial_scans():
                 },
                 {
                     "template": "lap_former", "name": "3. Lap Former", "file": "lap_former.jpg",
-                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator",
+                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Admin)", "role": "Administrator",
                     "yield": "612.8 Kg", "runtime": "03:40", "idle": "04:52", "eff": "42.94%", "doffs": "36", "hanks": "--",
                     "status": "Confirmed in SAP", "date_offset": 1
                 },
                 {
                     "template": "finisher_draw_frame", "name": "5. Finisher Draw Frame (Fr. DF)", "file": "finisher_fr._draw_frame.jpg",
-                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator",
+                    "operator": "admin", "op_name": "Mitesh Bambhaniya (Admin)", "role": "Administrator",
                     "yield": "432.4 Kg", "runtime": "06:12", "idle": "01:48", "eff": "77.50%", "doffs": "23", "hanks": "119.17",
                     "status": "Scanned", "date_offset": 2
                 },

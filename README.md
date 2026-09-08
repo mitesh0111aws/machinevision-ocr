@@ -19,7 +19,7 @@ Open your browser at:
 
 ### 3. Features Included
 - **Eye-Friendly Industrial Theme**: Ergonomic Slate Dark Mode & Industrial Daylight Light Mode with 1-click toggle.
-- **Enterprise Static Authentication**: Shift Operator & Mill Admin login with 1-click quick-access demo chips.
+- **Enterprise Static Authentication**: Shift Operator & Admin login with 1-click quick-access demo chips.
 - **Plant & Department Hierarchy**: Plant 1000 (Welspun Anjar) & New Spinning (8 sequential machines).
 - **8 Value Chain Stages**: Carding, Breaker DF, Lap Former, Comber, Finisher DF, Speed Frame, Ring Frame, Link Conner.
 - **AI Auto-Calibrated OCR**: Angle, distance, and lighting invariant live computer vision extraction.

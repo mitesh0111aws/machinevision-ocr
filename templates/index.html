@@ -148,62 +148,26 @@
     <div class="max-w-[1536px] mx-auto px-3 sm:px-6 py-2 flex items-center justify-between gap-2 w-full">
       
       <!-- LEFT: BRAND & APP IDENTITY -->
-      <div class="flex items-center gap-2.5 shrink-0">
-        <!-- UNIQUE WELVISION AI LOGO ICON -->
+      <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="if(window.currentUser){showView('workstation');}else{showView('login');}">
+        <!-- OFFICIAL WELSPUN CIRCULAR EMBLEM BADGE -->
         <div class="relative flex items-center justify-center shrink-0">
-          <svg class="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-md rounded-xl" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="wv-head-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#4f46e5"/>
-                <stop offset="45%" stop-color="#312e81"/>
-                <stop offset="100%" stop-color="#0f172a"/>
-              </linearGradient>
-              <linearGradient id="wv-head-arc" x1="12" y1="32" x2="52" y2="32" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#06b6d4"/>
-                <stop offset="50%" stop-color="#818cf8"/>
-                <stop offset="100%" stop-color="#c084fc"/>
-              </linearGradient>
-              <radialGradient id="wv-head-iris" cx="32" cy="32" r="10" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="40%" stop-color="#6366f1"/>
-                <stop offset="85%" stop-color="#1e1b4b"/>
-                <stop offset="100%" stop-color="#090d16"/>
-              </radialGradient>
-            </defs>
-            <rect width="64" height="64" rx="16" fill="url(#wv-head-bg)"/>
-            <rect x="1" y="1" width="62" height="62" rx="15" stroke="#818cf8" stroke-opacity="0.35" stroke-width="1.5"/>
-            <!-- Viewfinder Brackets -->
-            <path d="M 12 21 L 12 12 L 21 12" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 43 12 L 52 12 L 52 21" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 52 43 L 52 52 L 43 52" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 21 52 L 12 52 L 12 43" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Vision Eye Lens Contour -->
-            <path d="M 14 32 C 18 20 46 20 50 32 C 46 44 18 44 14 32 Z" fill="#6366f1" fill-opacity="0.2" stroke="url(#wv-head-arc)" stroke-width="2.4" stroke-linejoin="round"/>
-            <!-- Laser Scanline -->
-            <line x1="10" y1="32" x2="54" y2="32" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="3 2" stroke-opacity="0.85"/>
-            <!-- Center Optical Iris -->
-            <circle cx="32" cy="32" r="8" fill="url(#wv-head-iris)"/>
-            <circle cx="32" cy="32" r="7.5" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.7"/>
-            <circle cx="32" cy="32" r="3.8" fill="#090d16"/>
-            <circle cx="32" cy="32" r="1.8" fill="#38bdf8"/>
-            <circle cx="29.8" cy="29.8" r="1.2" fill="#ffffff" fill-opacity="0.95"/>
-          </svg>
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#160a8a] p-1 shadow-md shadow-[#160a8a]/30 flex items-center justify-center border border-indigo-300/30 overflow-hidden">
+            <img src="/static/welspun_icon.png" alt="Welspun" class="w-full h-full object-contain">
+          </div>
           <!-- Active Status Pulse Beacon -->
           <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500 border-2 border-white dark:border-slate-900"></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
           </span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <div class="flex items-baseline tracking-tight">
-              <span class="font-black text-lg sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-indigo-400 to-cyan-400 leading-none">Wel</span>
-              <span class="font-bold text-lg sm:text-xl text-slate-900 dark:text-white leading-none tracking-tight">Vision</span>
+              <span class="font-black text-lg sm:text-xl text-[#160a8a] dark:text-indigo-400 leading-none">Wel</span>
+              <span class="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-none tracking-tight">Vision</span>
             </div>
-            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hidden md:inline-block">8 Spinning Stages</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hidden lg:inline-block">SAP Ready</span>
           </div>
-          <p class="text-[10.5px] text-slate-500 dark:text-slate-400 hidden 2xl:block mt-0.5">Welspun AI Machine Vision &bull; Screen Digitization &bull; SAP CO11N</p>
+          <p class="text-[10px] sm:text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Welspun Machine Vision &bull; SAP NetWeaver CO11N</p>
         </div>
       </div>
 
@@ -234,7 +198,7 @@
           <!-- VERSION BADGE (Click to View Release History & Rollback Info) -->
           <button onclick="openVersionModal()" title="View Version & Release History" class="px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1 transition shadow-sm shrink-0">
             <i class="fa-solid fa-code-branch text-[11px] text-indigo-500"></i>
-            <span id="app-version-badge">v2.3.1</span>
+            <span id="app-version-badge">v2.4.0</span>
           </button>
 
           <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
@@ -272,7 +236,7 @@
         <div id="header-user-panel" class="relative hidden items-center shrink-0">
           
           <!-- Trigger: User Profile Pill Button -->
-          <button id="btn-user-menu" onclick="toggleUserDropdown(event)" type="button" aria-haspopup="true" aria-expanded="false" title="User Profile, Quick Station Settings & Logout"
+          <button id="btn-user-menu" type="button" aria-haspopup="true" aria-expanded="false" title="User Profile, Quick Station Settings & Logout"
                   class="flex items-center gap-2 pl-1.5 pr-2 sm:pr-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 text-xs transition shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 cursor-pointer select-none">
             <!-- Avatar with Online Dot -->
             <div class="relative w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-[11px] shadow-sm shadow-indigo-500/20 shrink-0 pointer-events-none">
@@ -334,16 +298,16 @@
                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
               </button>
 
-              <!-- AI Optical Calibration Studio -->
-              <button onclick="openCalibrationStudio(); toggleUserDropdown(false);" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
+              <!-- AI Optical Calibration Studio (Admin Only) -->
+              <button id="dropdown-item-calibration" onclick="openCalibrationStudio(); toggleUserDropdown(false);" class="hidden w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-left cursor-pointer">
                 <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                   <i class="fa-solid fa-sliders text-xs"></i>
                 </div>
                 <div class="flex-1">
-                  <div class="font-semibold text-slate-800 dark:text-slate-200">AI Calibration Studio</div>
-                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Glare, lighting & optical tuning</div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">AI Calibration &amp; Teaching Studio</div>
+                  <div class="text-[10px] text-slate-500 dark:text-slate-400">Admin-only: Glare, lighting &amp; multi-shot teaching</div>
                 </div>
-                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300">Admin</span>
               </button>
 
               <!-- Scanned Data & Image History -->
@@ -379,7 +343,7 @@
                   <div class="font-semibold text-slate-800 dark:text-slate-200">Version & Rollback</div>
                   <div class="text-[10px] text-slate-500 dark:text-slate-400">Release history & instant rollback</div>
                 </div>
-                <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">v2.3.1</span>
+                <span class="px-1.5 py-0.5 text-[10px] font-mono font-bold rounded-md bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">v2.4.0</span>
               </button>
             </div>
 
@@ -417,54 +381,20 @@
       <!-- CARD HEADER -->
       <div class="text-center mb-6">
         <div class="inline-flex relative mb-3.5">
-          <svg class="w-16 h-16 drop-shadow-xl rounded-2xl" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="wv-login-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#4f46e5"/>
-                <stop offset="45%" stop-color="#312e81"/>
-                <stop offset="100%" stop-color="#0f172a"/>
-              </linearGradient>
-              <linearGradient id="wv-login-arc" x1="12" y1="32" x2="52" y2="32" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#06b6d4"/>
-                <stop offset="50%" stop-color="#818cf8"/>
-                <stop offset="100%" stop-color="#c084fc"/>
-              </linearGradient>
-              <radialGradient id="wv-login-iris" cx="32" cy="32" r="10" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="40%" stop-color="#6366f1"/>
-                <stop offset="85%" stop-color="#1e1b4b"/>
-                <stop offset="100%" stop-color="#090d16"/>
-              </radialGradient>
-            </defs>
-            <rect width="64" height="64" rx="18" fill="url(#wv-login-bg)"/>
-            <rect x="1" y="1" width="62" height="62" rx="17" stroke="#818cf8" stroke-opacity="0.4" stroke-width="1.5"/>
-            <!-- Viewfinder Brackets -->
-            <path d="M 12 21 L 12 12 L 21 12" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 43 12 L 52 12 L 52 21" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 52 43 L 52 52 L 43 52" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M 21 52 L 12 52 L 12 43" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Vision Eye Lens Contour -->
-            <path d="M 14 32 C 18 20 46 20 50 32 C 46 44 18 44 14 32 Z" fill="#6366f1" fill-opacity="0.2" stroke="url(#wv-login-arc)" stroke-width="2.4" stroke-linejoin="round"/>
-            <!-- Laser Scanline -->
-            <line x1="10" y1="32" x2="54" y2="32" stroke="#38bdf8" stroke-width="1.4" stroke-dasharray="3 2" stroke-opacity="0.85"/>
-            <!-- Center Optical Iris -->
-            <circle cx="32" cy="32" r="8" fill="url(#wv-login-iris)"/>
-            <circle cx="32" cy="32" r="7.5" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.7"/>
-            <circle cx="32" cy="32" r="3.8" fill="#090d16"/>
-            <circle cx="32" cy="32" r="1.8" fill="#38bdf8"/>
-            <circle cx="29.8" cy="29.8" r="1.2" fill="#ffffff" fill-opacity="0.95"/>
-          </svg>
+          <div class="w-16 h-16 rounded-3xl bg-[#160a8a] p-2 shadow-xl shadow-[#160a8a]/35 flex items-center justify-center border border-indigo-400/30 overflow-hidden">
+            <img src="/static/welspun_icon.png" alt="Welspun Emblem" class="w-full h-full object-contain">
+          </div>
           <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500 border-2 border-white dark:border-slate-800"></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white dark:border-slate-800"></span>
           </span>
         </div>
         <div class="flex items-center justify-center gap-0.5 mb-1">
-          <span class="font-black text-2xl sm:text-3xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-indigo-400 to-cyan-400">Wel</span>
-          <span class="font-bold text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">Vision</span>
+          <span class="font-black text-2xl sm:text-3xl tracking-tight text-[#160a8a] dark:text-indigo-400">Wel</span>
+          <span class="font-black text-2xl sm:text-3xl tracking-tight text-slate-900 dark:text-white">Vision</span>
         </div>
         <h2 class="text-sm sm:text-base font-bold tracking-tight text-slate-700 dark:text-slate-300">Operator Workstation Sign In</h2>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Welspun Textile AI Machine Vision &amp; SAP Floor Portal</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Welspun Textile AI Machine Vision &amp; SAP Floor Portal</p>
       </div>
 
       <!-- ERROR ALERT BANNER -->
@@ -531,7 +461,7 @@
           </button>
           <button type="button" onclick="quickLogin('admin')" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-left transition group">
             <div class="font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
-              <span>Mill Admin</span>
+              <span>Admin</span>
               <i class="fa-solid fa-bolt text-[10px] opacity-70 group-hover:opacity-100"></i>
             </div>
             <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">admin / admin123</div>
