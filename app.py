@@ -67,6 +67,75 @@ engine = MachineOCREngine()
 def index():
     return render_template("index.html")
 
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json() or {}
+    username = str(data.get("username", "")).strip().lower()
+    password = str(data.get("password", "")).strip()
+
+    # Static credentials catalog
+    valid_users = {
+        "admin": {"password": "admin123", "name": "Mitesh Bambhaniya (Mill Admin)", "role": "Administrator"},
+        "operator": {"password": "operator123", "name": "Shift Operator - Line 1", "role": "Operator"},
+        "supervisor": {"password": "supervisor123", "name": "Spinning Supervisor", "role": "Supervisor"},
+        "welspun": {"password": "welspun2026", "name": "Plant In-Charge", "role": "Manager"}
+    }
+
+    if username in valid_users and valid_users[username]["password"] == password:
+        user_info = valid_users[username]
+        return jsonify({
+            "status": "success",
+            "token": f"tk_{uuid.uuid4().hex[:16]}",
+            "username": username,
+            "name": user_info["name"],
+            "role": user_info["role"]
+        })
+    elif username and password:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid credentials. Use demo credentials: operator / operator123 or admin / admin123"
+        }), 401
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Please enter both username and password."
+        }), 400
+
+@app.route("/api/plants", methods=["GET"])
+def get_plants():
+    return jsonify({
+        "status": "success",
+        "plants": [
+            {
+                "id": "1000",
+                "code": "PLANT-1000",
+                "name": "Plant 1000 - Main Spinning Mill (Welspun Anjar Complex)",
+                "location": "Anjar, Gujarat",
+                "status": "Active",
+                "badge": "Primary Unit",
+                "departments": ["new_spinning", "blowroom", "winding"]
+            },
+            {
+                "id": "2000",
+                "code": "PLANT-2000",
+                "name": "Plant 2000 - Unit 2 Synthetic & Blended Yarns",
+                "location": "Anjar, Gujarat",
+                "status": "Connected",
+                "badge": "Active Lines",
+                "departments": ["new_spinning"]
+            },
+            {
+                "id": "3000",
+                "code": "PLANT-3000",
+                "name": "Plant 3000 - Vapi Spinning & Technical Textiles",
+                "location": "Vapi, Gujarat",
+                "status": "Standby",
+                "badge": "Standby",
+                "departments": ["new_spinning"]
+            }
+        ]
+    })
+
 @app.route("/api/departments", methods=["GET"])
 def get_departments():
     return jsonify({

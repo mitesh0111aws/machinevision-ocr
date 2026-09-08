@@ -2,6 +2,7 @@
 // Production Machine Screen OCR & SAP Vision Integration App
 // Department: New Spinning (8-Stage Textile Value Chain)
 // Automated Angle, Distance & Lighting Invariant Screen Calibration
+// Eye-Friendly Industrial Theme & Role-Based Hierarchy Flow
 // ================================================================
 
 // Global Application State
@@ -14,6 +15,12 @@ let currentViewMode = "desktop"; // "desktop" or "scanner"
 let cameraStream = null;
 let currentClientImageUrl = null;
 let currentTemplateId = "carding";
+
+// Session & Hierarchy State
+let currentUser = JSON.parse(localStorage.getItem("mv_user") || "null");
+let currentPlant = JSON.parse(localStorage.getItem("mv_plant") || '{"id":"1000","name":"Plant 1000 - Main Spinning Mill (Welspun Anjar)"}');
+let currentDepartment = JSON.parse(localStorage.getItem("mv_dept") || '{"id":"new_spinning","name":"New Spinning (8 Machines)"}');
+let currentAppView = "login";
 
 // Machine Names Map
 const TEMPLATE_NAMES = {
@@ -88,6 +95,9 @@ const screenGeometryBadge = document.getElementById("screen-geometry-badge");
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  initViewRouting();
+
   if (screenImage) {
     screenImage.onerror = () => {
       console.warn("Screen image error, falling back to active template sample");
@@ -111,6 +121,281 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// ================================================================
+// THEME SWITCHER (Eye-Friendly Dual Dark / Light Mode)
+// ================================================================
+function initTheme() {
+  const savedTheme = localStorage.getItem("mv_theme") || "dark";
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+
+  const btnThemeToggle = document.getElementById("btn-theme-toggle");
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.toggle("dark");
+      localStorage.setItem("mv_theme", isDark ? "dark" : "light");
+    });
+  }
+}
+
+// ================================================================
+// VIEW ROUTING & AUTHENTICATION
+// ================================================================
+function initViewRouting() {
+  if (currentUser && currentUser.username) {
+    if (currentPlant && currentDepartment) {
+      showView("workstation");
+    } else {
+      showView("plant_dept");
+    }
+  } else {
+    showView("login");
+  }
+}
+
+function showView(viewName) {
+  currentAppView = viewName;
+  const viewLogin = document.getElementById("view-login");
+  const viewPlantDept = document.getElementById("view-plant-dept");
+  const viewWorkstation = document.getElementById("view-workstation");
+  const headerContextBadge = document.getElementById("header-context-badge");
+  const headerWorkstationControls = document.getElementById("header-workstation-controls");
+  const headerUserPanel = document.getElementById("header-user-panel");
+
+  if (viewLogin) viewLogin.classList.toggle("hidden", viewName !== "login");
+  if (viewPlantDept) viewPlantDept.classList.toggle("hidden", viewName !== "plant_dept");
+  if (viewWorkstation) viewWorkstation.classList.toggle("hidden", viewName !== "workstation");
+
+  if (viewName === "login") {
+    if (headerContextBadge) headerContextBadge.classList.add("hidden");
+    if (headerWorkstationControls) headerWorkstationControls.classList.add("hidden");
+    if (headerUserPanel) headerUserPanel.classList.add("hidden");
+  } else if (viewName === "plant_dept") {
+    if (headerContextBadge) headerContextBadge.classList.add("hidden");
+    if (headerWorkstationControls) headerWorkstationControls.classList.add("hidden");
+    if (headerUserPanel) {
+      headerUserPanel.classList.remove("hidden");
+      headerUserPanel.classList.add("flex");
+    }
+    updateUserDisplayName();
+  } else if (viewName === "workstation") {
+    if (headerContextBadge) {
+      headerContextBadge.classList.remove("hidden");
+      headerContextBadge.classList.add("flex");
+    }
+    if (headerWorkstationControls) {
+      headerWorkstationControls.classList.remove("hidden");
+      headerWorkstationControls.classList.add("flex");
+    }
+    if (headerUserPanel) {
+      headerUserPanel.classList.remove("hidden");
+      headerUserPanel.classList.add("flex");
+    }
+    updateUserDisplayName();
+    updatePlantDeptBadges();
+    setTimeout(adjustOverlayPosition, 100);
+  }
+}
+
+async function handleLoginSubmit(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  const usernameInput = document.getElementById("login-username");
+  const passwordInput = document.getElementById("login-password");
+  const errorBanner = document.getElementById("login-error-banner");
+  const errorText = document.getElementById("login-error-text");
+  const btnSubmit = document.getElementById("btn-login-submit");
+
+  const username = usernameInput ? usernameInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value.trim() : "";
+
+  if (!username || !password) {
+    if (errorBanner && errorText) {
+      errorText.textContent = "Please enter both username and password.";
+      errorBanner.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
+  }
+
+  const staticUsers = {
+    "admin": { password: "admin123", name: "Mitesh Bambhaniya (Mill Admin)", role: "Administrator" },
+    "operator": { password: "operator123", name: "Shift Operator - Line 1", role: "Operator" },
+    "supervisor": { password: "supervisor123", name: "Spinning Supervisor", role: "Supervisor" },
+    "welspun": { password: "welspun2026", name: "Plant In-Charge", role: "Manager" }
+  };
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.status === "success") {
+      currentUser = {
+        token: data.token,
+        username: data.username,
+        name: data.name,
+        role: data.role
+      };
+      localStorage.setItem("mv_user", JSON.stringify(currentUser));
+      if (errorBanner) errorBanner.classList.add("hidden");
+      showView("plant_dept");
+      return;
+    }
+  } catch (err) {
+    console.warn("Backend auth API notice, falling back to static check:", err);
+  }
+
+  // Client-side fallback check for static credentials
+  const lowerUser = username.toLowerCase();
+  if (staticUsers[lowerUser] && staticUsers[lowerUser].password === password) {
+    currentUser = {
+      token: "tk_" + Math.random().toString(36).substring(2),
+      username: lowerUser,
+      name: staticUsers[lowerUser].name,
+      role: staticUsers[lowerUser].role
+    };
+    localStorage.setItem("mv_user", JSON.stringify(currentUser));
+    if (errorBanner) errorBanner.classList.add("hidden");
+    showView("plant_dept");
+  } else {
+    if (errorBanner && errorText) {
+      errorText.textContent = "Invalid username or password. Demo: operator / operator123 or admin / admin123";
+      errorBanner.classList.remove("hidden");
+    }
+  }
+
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.innerHTML = `<span>Sign In to Workstation</span> <i class="fa-solid fa-arrow-right"></i>`;
+  }
+}
+
+function quickLogin(type) {
+  const usernameInput = document.getElementById("login-username");
+  const passwordInput = document.getElementById("login-password");
+  if (type === "operator") {
+    if (usernameInput) usernameInput.value = "operator";
+    if (passwordInput) passwordInput.value = "operator123";
+  } else if (type === "admin") {
+    if (usernameInput) usernameInput.value = "admin";
+    if (passwordInput) passwordInput.value = "admin123";
+  }
+  handleLoginSubmit();
+}
+
+function handleLogout() {
+  currentUser = null;
+  localStorage.removeItem("mv_user");
+  showView("login");
+}
+
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById("login-password");
+  const icon = document.getElementById("password-toggle-icon");
+  if (!passwordInput) return;
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    if (icon) {
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    }
+  } else {
+    passwordInput.type = "password";
+    if (icon) {
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    }
+  }
+}
+
+// ================================================================
+// PLANT & DEPARTMENT SELECTION HIERARCHY
+// ================================================================
+function selectPlant(id, name) {
+  currentPlant = { id, name };
+  localStorage.setItem("mv_plant", JSON.stringify(currentPlant));
+
+  document.querySelectorAll(".plant-card").forEach(card => {
+    card.classList.remove("border-indigo-600", "bg-indigo-50/50", "dark:bg-indigo-950/30", "shadow-md");
+    card.classList.add("border-slate-200", "dark:border-slate-700", "bg-white", "dark:bg-slate-800/80");
+    const check = card.querySelector(".plant-check");
+    if (check) check.className = "fa-regular fa-circle text-slate-400 text-lg plant-check";
+  });
+
+  const activeCard = document.getElementById(`card-plant-${id}`);
+  if (activeCard) {
+    activeCard.classList.remove("border-slate-200", "dark:border-slate-700", "bg-white", "dark:bg-slate-800/80");
+    activeCard.classList.add("border-indigo-600", "bg-indigo-50/50", "dark:bg-indigo-950/30", "shadow-md");
+    const check = activeCard.querySelector(".plant-check");
+    if (check) check.className = "fa-solid fa-check-circle text-indigo-600 dark:text-indigo-400 text-lg plant-check";
+  }
+
+  const summaryPlant = document.getElementById("selected-summary-plant");
+  if (summaryPlant) summaryPlant.textContent = `Plant ${id}`;
+
+  const sapPlantInput = document.getElementById("sap-plant");
+  if (sapPlantInput) {
+    sapPlantInput.value = id;
+    updateSapPreview();
+  }
+}
+
+function selectDepartment(id, name) {
+  currentDepartment = { id, name };
+  localStorage.setItem("mv_dept", JSON.stringify(currentDepartment));
+
+  const summaryDept = document.getElementById("selected-summary-dept");
+  if (summaryDept) summaryDept.textContent = name;
+
+  if (departmentSelect) {
+    departmentSelect.value = id;
+  }
+}
+
+function launchWorkstation() {
+  showView("workstation");
+}
+
+function updatePlantDeptBadges() {
+  const plantBadge = document.getElementById("current-plant-badge");
+  const deptBadge = document.getElementById("current-dept-badge");
+  if (plantBadge && currentPlant) plantBadge.textContent = `Plant ${currentPlant.id}`;
+  if (deptBadge && currentDepartment) deptBadge.textContent = currentDepartment.id === "new_spinning" ? "New Spinning" : currentDepartment.name;
+
+  const sapPlantInput = document.getElementById("sap-plant");
+  if (sapPlantInput && currentPlant) {
+    sapPlantInput.value = currentPlant.id;
+  }
+}
+
+function updateUserDisplayName() {
+  const headerUsername = document.getElementById("header-username");
+  const welcomeUserName = document.getElementById("welcome-user-name");
+  const displayName = currentUser ? (currentUser.name || currentUser.username) : "Operator";
+  if (headerUsername) headerUsername.textContent = displayName;
+  if (welcomeUserName) welcomeUserName.textContent = displayName;
+}
+
+// Expose functions globally for inline HTML onclick handlers
+window.handleLoginSubmit = handleLoginSubmit;
+window.quickLogin = quickLogin;
+window.handleLogout = handleLogout;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.selectPlant = selectPlant;
+window.selectDepartment = selectDepartment;
+window.launchWorkstation = launchWorkstation;
+window.showView = showView;
+
 // Update Android Clock
 function updateAndroidClock() {
   const clockEl = document.getElementById("android-clock");
@@ -128,6 +413,18 @@ function setupEventListeners() {
   if (cameraInput) cameraInput.addEventListener("change", handleFileUpload);
 
   if (btnCameraCapture) btnCameraCapture.addEventListener("click", triggerScannerCameraModal);
+
+  const btnChangeDept = document.getElementById("btn-change-dept");
+  if (btnChangeDept) {
+    btnChangeDept.addEventListener("click", () => {
+      showView("plant_dept");
+    });
+  }
+
+  const btnLogoutHeader = document.getElementById("btn-logout-header");
+  if (btnLogoutHeader) {
+    btnLogoutHeader.addEventListener("click", handleLogout);
+  }
 
   if (departmentSelect) {
     departmentSelect.addEventListener("change", () => {
@@ -685,7 +982,8 @@ async function updateSapPreview() {
     operation_no: document.getElementById("sap-operation").value,
     work_center: document.getElementById("sap-work-center").value,
     plant: document.getElementById("sap-plant").value,
-    operator_id: "OPR-8420"
+    operator_id: (currentUser && currentUser.username) ? currentUser.username.toUpperCase() : "OPR-8420",
+    department: (currentDepartment && currentDepartment.name) ? currentDepartment.name : "New Spinning"
   };
 
   try {
@@ -722,7 +1020,9 @@ async function submitConfirmationToSAP() {
     order_no: document.getElementById("sap-order-id").value,
     operation_no: document.getElementById("sap-operation").value,
     work_center: document.getElementById("sap-work-center").value,
-    plant: document.getElementById("sap-plant").value
+    plant: document.getElementById("sap-plant").value,
+    operator_id: (currentUser && currentUser.username) ? currentUser.username.toUpperCase() : "OPR-8420",
+    department: (currentDepartment && currentDepartment.name) ? currentDepartment.name : "New Spinning"
   };
 
   try {
