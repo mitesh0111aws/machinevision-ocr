@@ -659,6 +659,21 @@ def download_apk():
         download_name="MachineVision_Zebra_Scanner_Android_Project.zip"
     )
 
+@app.route("/api/version", methods=["GET"])
+def get_version():
+    ver_path = os.path.join(BASE_DIR, "version.json")
+    if os.path.exists(ver_path):
+        try:
+            with open(ver_path, "r", encoding="utf-8") as f:
+                return jsonify(json.load(f))
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({
+        "current_version": "2.0.0",
+        "release_date": "2026-09-08",
+        "app_name": "MachineVision OCR & SAP Floor Portal"
+    })
+
 def seed_initial_scans():
     try:
         conn = sqlite3.connect(app.config["DB_FILE"])

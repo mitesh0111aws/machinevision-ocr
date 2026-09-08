@@ -1,0 +1,73 @@
+{
+  "app_name": "MachineVision OCR & SAP Floor Portal",
+  "current_version": "2.0.0",
+  "release_date": "2026-09-08",
+  "git_tag": "v2.0.0",
+  "revert_guide": {
+    "view_versions": "git tag -l -n",
+    "switch_to_version": "git checkout <version_tag> (e.g. git checkout v1.3.0)",
+    "return_to_latest": "git checkout main"
+  },
+  "releases": [
+    {
+      "version": "2.0.0",
+      "date": "2026-09-08",
+      "title": "Unified Responsive Workstation, Version Control & Enterprise Re-Alignment",
+      "tag": "v2.0.0",
+      "changes": [
+        "Removed artificial scanner frame and mode switcher; unified desktop and mobile scanner into a single adaptive view.",
+        "Both Camera Capture and Photo Upload available side-by-side on the primary toolbar.",
+        "Responsive alignment for Zebra Rugged Scanner resolutions (TC21/TC52/TC57/TC58) and desktop screens.",
+        "Central version control system (version.json + /api/version + Version History modal).",
+        "Realigned enterprise UI with SAP NetWeaver live status indicator and clean tabbed workstation."
+      ]
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-09-08",
+      "title": "Scanned Records Database Storage, RBAC & Side-by-Side Image Inspector",
+      "tag": "v1.3.0",
+      "changes": [
+        "Added SQLite scanned_records table to persist every scan event with image URL, operator, and extracted JSON.",
+        "Role-Based Access Control (RBAC): Operators see only their own data; Admins have global cross-department view.",
+        "Filterable Scanned Records Explorer (Department-wise, Machine-wise, Date-wise, Operator-wise).",
+        "Side-by-Side Image & Detected OCR Data Inspector lightbox.",
+        "Renamed plants to Bed Sheet Plant Anjar, Terry Towel Plant Anjar, Terry Towel Plant Vapi, and departments Warping and Weaving."
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-09-08",
+      "title": "Enterprise Static Authentication, Plant/Department Selector & Dual Themes",
+      "tag": "v1.2.0",
+      "changes": [
+        "Added static operator/admin authentication portal with 1-click quick-login chips.",
+        "Implemented Step 1 (Plant) and Step 2 (Department) manufacturing selection hierarchy.",
+        "Dual Eye-Comfort design system: Ergonomic Slate Dark Mode & Industrial Daylight Light Mode.",
+        "Vercel bundle optimization (decoupled heavy onnxruntime for serverless deployment)."
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-09-08",
+      "title": "AI Auto-Calibration & Angle/Lighting Invariance",
+      "tag": "v1.1.0",
+      "changes": [
+        "Added perspective auto-calibration for skewed machine screen photos.",
+        "Lighting and contrast normalization for low-light mill floor conditions.",
+        "Fixed Comber yield & runtime field extraction accuracy and eliminated loop detection errors."
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-09-07",
+      "title": "Initial 8-Stage MachineVision OCR & SAP CO11N RFC Integration",
+      "tag": "v1.0.0",
+      "changes": [
+        "8-Stage spinning value chain templates: Carding to Autoconer 6.",
+        "Dual SAP payload generation: BAPI_PRODORDCONF_CREATE_TT and S/4HANA OData API.",
+        "Zebra Android scanner project packaging and APK download."
+      ]
+    }
+  ]
+}

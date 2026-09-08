@@ -178,18 +178,20 @@
 
       <!-- WORKSTATION CONTROLS (Only in Workstation View) -->
       <div id="header-workstation-controls" class="hidden items-center gap-2">
-        <!-- MODE SWITCHER: WORKSTATION VS SCANNER VIEW -->
-        <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-1 text-xs">
-          <button id="btn-mode-desktop" class="px-3 py-1 rounded-lg font-medium transition bg-indigo-600 text-white shadow-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-desktop"></i> Workstation
-          </button>
-          <button id="btn-mode-scanner" class="px-3 py-1 rounded-lg font-medium transition text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-mobile-screen-button text-amber-500"></i> Scanner
-          </button>
+        <!-- LIVE SAP ERP STATUS INDICATOR -->
+        <div class="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>SAP NetWeaver RFC Ready</span>
         </div>
 
+        <!-- VERSION BADGE (Click to View Release History & Rollback Info) -->
+        <button onclick="openVersionModal()" title="View Version & Release History" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-sm">
+          <i class="fa-solid fa-code-branch text-[11px] text-indigo-500"></i>
+          <span id="app-version-badge">v2.0.0</span>
+        </button>
+
         <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
-        <button id="btn-view-scans" onclick="openScansModal()" class="px-3 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+        <button id="btn-view-scans" onclick="openScansModal()" class="px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
           <i class="fa-solid fa-images text-indigo-500"></i> Scan Logs (<span class="scans-count-badge">0</span>)
         </button>
 
@@ -527,57 +529,10 @@
   <!-- ======================================================== -->
   <section id="view-workstation" class="app-view hidden flex-1">
     
-    <div id="app-viewport-wrapper">
+    <div id="app-viewport-wrapper" class="w-full">
       
-      <!-- HARDWARE FRAME (Active only in Scanner View) -->
-      <div id="scanner-hardware-bezel" class="hidden">
-        <!-- TOP HARDWARE NOTCH -->
-        <div class="zebra-hardware-top">
-          <div class="zebra-speaker-slit"></div>
-          <div class="zebra-camera-dot"></div>
-        </div>
-
-        <!-- ANDROID STATUS BAR -->
-        <div class="android-status-bar select-none">
-          <div class="flex items-center gap-2">
-            <span id="android-clock" class="font-bold text-white">06:45</span>
-            <i class="fa-solid fa-barcode text-[10px] text-amber-400" title="Zebra DataWedge Active"></i>
-          </div>
-          <div class="flex items-center gap-2.5 text-xs">
-            <span class="text-[10px] text-slate-400">5G</span>
-            <i class="fa-solid fa-wifi text-[10px]"></i>
-            <span class="text-[10px] text-slate-300">98%</span>
-            <i class="fa-solid fa-battery-three-quarters text-emerald-400"></i>
-          </div>
-        </div>
-
-        <!-- ANDROID TOP APP BAR -->
-        <div class="bg-slate-900 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
-              <i class="fa-solid fa-barcode"></i>
-            </div>
-            <div>
-              <div class="font-bold text-xs text-white">Zebra OCR Scanner</div>
-              <div class="text-[10px] text-emerald-400 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online &bull; SAP Connected
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button id="btn-scanner-torch" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs" title="Toggle Flashlight">
-              <i class="fa-solid fa-bolt"></i>
-            </button>
-            <button onclick="document.getElementById('camera-input').click()" class="w-7 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 flex items-center justify-center text-xs" title="Open Native Camera">
-              <i class="fa-solid fa-camera"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- MAIN CONTENT CONTAINER -->
-      <main class="max-w-7xl mx-auto p-4 sm:p-6 transition-all duration-300" id="main-layout">
+      <!-- MAIN CONTENT CONTAINER (Fully Adaptive: Desktop, Tablet & Zebra Rugged Scanners) -->
+      <main class="max-w-7xl mx-auto p-3 sm:p-5 lg:p-6 transition-all duration-200 w-full" id="main-layout">
         
         <!-- ============================================== -->
         <!-- CONTROLS & MACHINE SELECTOR SECTION           -->
@@ -592,7 +547,7 @@
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-8" id="selector-subtext">Select one of the 8 production stages or capture/upload a machine screen</p>
             </div>
 
-            <!-- DYNAMIC ACTION BUTTONS -->
+            <!-- UNIFIED ACTION BUTTONS: CAMERA + UPLOAD + CONTROLS -->
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end" id="action-buttons-group">
               
               <!-- DEPARTMENT SELECTOR -->
@@ -622,14 +577,16 @@
                 </select>
               </div>
 
-              <!-- BUTTON: CAMERA PHOTO CAPTURE (Only in Scanner View) -->
-              <button id="btn-camera-capture" class="hidden px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-500/20 active:scale-95">
-                <i class="fa-solid fa-camera"></i> Camera Capture
+              <!-- BUTTON 1: CAMERA CAPTURE -->
+              <button id="btn-camera-capture" onclick="triggerScannerCameraModal()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-500/20 active:scale-95">
+                <i class="fa-solid fa-camera"></i>
+                <span>Camera Capture</span>
               </button>
 
-              <!-- BUTTON: UPLOAD PHOTO -->
+              <!-- BUTTON 2: UPLOAD PHOTO -->
               <button id="btn-upload-photo" onclick="document.getElementById('file-input').click()" class="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-500/20 active:scale-95">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Upload Photo</span>
               </button>
             </div>
           </div>
@@ -702,18 +659,6 @@
               </div>
             </div>
 
-            <!-- IN-SCANNER HARDWARE TRIGGER BAR (Only visible in Scanner View) -->
-            <div id="scanner-trigger-bar" class="hidden mt-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
-              <button onclick="triggerScannerCameraModal()" class="flex-1 py-3 px-4 zebra-trigger-btn rounded-xl text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2">
-                <i class="fa-solid fa-barcode text-base"></i> Tap Hardware Scan Trigger
-              </button>
-              <button onclick="document.getElementById('camera-input').click()" class="py-3 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 text-amber-500 rounded-xl text-xs font-bold flex items-center gap-1.5" title="Take Snap with Native Camera">
-                <i class="fa-solid fa-camera"></i>
-              </button>
-              <button onclick="document.getElementById('file-input').click()" class="py-3 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center gap-1.5" title="Pick from Gallery">
-                <i class="fa-solid fa-folder-open"></i>
-              </button>
-            </div>
 
             <div class="mt-2.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
               <span class="flex items-center gap-1.5">
@@ -880,14 +825,7 @@
         </div>
       </main>
 
-      <!-- ANDROID BOTTOM NAVIGATION BAR (Only visible in Scanner View) -->
-      <div id="android-bottom-nav" class="hidden">
-        <div class="android-nav-bar select-none">
-          <button class="hover:text-white transition px-4 py-1" onclick="history.back()"><i class="fa-solid fa-caret-left text-lg"></i></button>
-          <button class="hover:text-white transition px-4 py-1" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i class="fa-regular fa-circle text-sm"></i></button>
-          <button class="hover:text-white transition px-4 py-1" onclick="document.getElementById('btn-view-audit').click()"><i class="fa-regular fa-square text-xs"></i></button>
-        </div>
-      </div>
+
 
     </div> <!-- End #app-viewport-wrapper -->
 
@@ -1341,6 +1279,63 @@
         </div>
         <button onclick="closeScanDetailModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition">
           Close Inspector
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: VERSION MANAGEMENT & ROLLBACK MODAL     -->
+  <!-- ============================================== -->
+  <div id="version-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all animate-[fadeIn_0.2s_ease-out]">
+      
+      <!-- MODAL HEADER -->
+      <div class="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/40">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 text-white flex items-center justify-center text-lg shadow-md shadow-indigo-500/20">
+            <i class="fa-solid fa-code-branch"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Version Control &amp; Rollback</h2>
+              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.0.0 Active</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Track release milestones or roll back to any historical version anytime</p>
+          </div>
+        </div>
+        <button onclick="closeVersionModal()" class="w-9 h-9 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- ROLLBACK INSTRUCTION BANNER -->
+      <div class="px-5 sm:px-6 pt-4 pb-2">
+        <div class="p-3.5 rounded-2xl bg-indigo-500/5 dark:bg-indigo-950/30 border border-indigo-500/20 text-xs text-indigo-700 dark:text-indigo-300 flex items-start gap-3">
+          <i class="fa-solid fa-circle-info text-indigo-500 mt-0.5 text-sm shrink-0"></i>
+          <div class="space-y-1">
+            <span class="font-bold block">How to revert or inspect any version anytime:</span>
+            <p class="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
+              Every milestone is tagged in Git. You can jump directly to any version by copying the checkout command below into your terminal.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- VERSION TIMELINE LIST -->
+      <div id="version-timeline-container" class="p-5 sm:p-6 space-y-4 max-h-[55vh] overflow-y-auto">
+        <!-- Dynamically injected via JS -->
+      </div>
+
+      <!-- MODAL FOOTER -->
+      <div class="px-5 sm:px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs">
+        <div class="text-slate-500 dark:text-slate-400 flex items-center gap-2 font-mono text-[11px]">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Git Branch: <strong class="text-slate-800 dark:text-slate-200">main</strong></span>
+        </div>
+        <button onclick="closeVersionModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition text-xs">
+          Close Window
         </button>
       </div>
 

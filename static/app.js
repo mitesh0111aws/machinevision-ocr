@@ -61,17 +61,18 @@ const tooltipLabel = document.getElementById("tooltip-label");
 const tooltipValue = document.getElementById("tooltip-value");
 const tooltipConf = document.getElementById("tooltip-conf");
 
-// View Mode Toggles & Containers
-const btnModeDesktop = document.getElementById("btn-mode-desktop");
-const btnModeScanner = document.getElementById("btn-mode-scanner");
+// Unified Responsive Controls
 const btnCameraCapture = document.getElementById("btn-camera-capture");
 const btnUploadPhoto = document.getElementById("btn-upload-photo");
 const mainLayout = document.getElementById("main-layout");
 const appViewportWrapper = document.getElementById("app-viewport-wrapper");
-const scannerHardwareBezel = document.getElementById("scanner-hardware-bezel");
-const androidBottomNav = document.getElementById("android-bottom-nav");
-const scannerTriggerBar = document.getElementById("scanner-trigger-bar");
 const splitContainer = document.getElementById("split-container");
+
+// Version Control Elements
+const appVersionBadge = document.getElementById("app-version-badge");
+const versionModal = document.getElementById("version-modal");
+const versionTimelineContainer = document.getElementById("version-timeline-container");
+const modalActiveVersion = document.getElementById("modal-active-version");
 
 // Modals & Extras
 const btnViewAudit = document.getElementById("btn-view-audit");
@@ -114,12 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateAndroidClock();
   setInterval(updateAndroidClock, 30000);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("mode") === "scanner") {
-    setViewMode("scanner");
-  } else {
-    setViewMode("desktop");
-  }
+  loadVersionInfo();
 });
 
 // ================================================================
@@ -434,6 +430,9 @@ window.resetScansFilters = resetScansFilters;
 window.fetchScans = fetchScans;
 window.openScanDetailModal = openScanDetailModal;
 window.closeScanDetailModal = closeScanDetailModal;
+window.openVersionModal = openVersionModal;
+window.closeVersionModal = closeVersionModal;
+window.copyRollbackCommand = copyRollbackCommand;
 
 // Update Android Clock
 function updateAndroidClock() {
@@ -527,9 +526,10 @@ function setupEventListeners() {
   // Submit to SAP
   if (btnSubmitSap) btnSubmitSap.addEventListener("click", submitConfirmationToSAP);
 
-  // View Mode Toggles
-  if (btnModeDesktop) btnModeDesktop.addEventListener("click", () => setViewMode("desktop"));
-  if (btnModeScanner) btnModeScanner.addEventListener("click", () => setViewMode("scanner"));
+  // Version Control Modal
+  if (appVersionBadge) {
+    appVersionBadge.addEventListener("click", openVersionModal);
+  }
 
   // Modals
   if (btnViewAudit) {
@@ -1532,56 +1532,121 @@ function debounce(func, delay) {
 }
 
 // ================================================================
-// VIEW MODE TOGGLING: WORKSTATION VIEW VS SCANNER VIEW
+// ENTERPRISE VERSION CONTROL & ROLLBACK SYSTEM
 // ================================================================
-function setViewMode(mode) {
-  currentViewMode = mode;
+let currentVersionData = null;
 
-  if (mode === "scanner") {
-    btnModeScanner.className = "px-3 py-1.5 rounded-lg font-bold transition bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 flex items-center gap-1.5";
-    btnModeDesktop.className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
+async function loadVersionInfo() {
+  try {
+    const res = await fetch("/api/version");
+    const data = await res.json();
+    currentVersionData = data;
 
-    appViewportWrapper.className = "android-scanner-frame";
-    scannerHardwareBezel.classList.remove("hidden");
-    androidBottomNav.classList.remove("hidden");
-    scannerTriggerBar.classList.remove("hidden");
-    
-    mainLayout.className = "w-full p-3.5 space-y-4";
-    splitContainer.className = "flex flex-col gap-4";
-    samplesContainer.className = "grid grid-cols-2 gap-2";
-
-    btnCameraCapture.classList.remove("hidden");
-    btnUploadPhoto.classList.remove("hidden");
-    document.getElementById("selector-subtext").textContent = "Zebra Rugged Scanner &bull; Tap Camera or Upload to extract screen";
-  } else {
-    btnModeDesktop.className = "px-3 py-1.5 rounded-lg font-bold transition bg-blue-600 text-white shadow-md shadow-blue-500/20 flex items-center gap-1.5";
-    btnModeScanner.className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
-
-    appViewportWrapper.className = "";
-    scannerHardwareBezel.classList.add("hidden");
-    androidBottomNav.classList.add("hidden");
-    scannerTriggerBar.classList.add("hidden");
-
-    mainLayout.className = "max-w-7xl mx-auto p-4 sm:p-6 transition-all duration-300";
-    splitContainer.className = "grid grid-cols-1 lg:grid-cols-12 gap-5 items-start";
-    samplesContainer.className = "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2";
-
-    btnCameraCapture.classList.add("hidden");
-    btnUploadPhoto.classList.remove("hidden");
-    document.getElementById("selector-subtext").textContent = "Select one of the 8 production stages or upload a screen photo";
-  }
-
-  if (currentData) {
-    const card = document.getElementById(`sample-card-${currentData.template_id}`);
-    if (card) {
-      document.querySelectorAll(".sample-card").forEach(el => {
-        el.classList.remove("border-blue-500", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
-        el.classList.add("border-slate-800");
-      });
-      const highlight = mode === "scanner" ? "border-amber-500 shadow-md shadow-amber-500/20" : "border-blue-500 shadow-md shadow-blue-500/20";
-      card.className = `sample-card cursor-pointer bg-slate-950 ${highlight} rounded-xl p-2.5 transition flex flex-col justify-between group`;
+    const versionStr = `v${data.current_version || "2.0.0"}`;
+    if (appVersionBadge) {
+      appVersionBadge.textContent = versionStr;
     }
+    if (modalActiveVersion) {
+      modalActiveVersion.textContent = `${versionStr} Active`;
+    }
+
+    renderVersionTimeline(data);
+  } catch (err) {
+    console.warn("Could not load version metadata:", err);
   }
+}
+
+function renderVersionTimeline(data) {
+  if (!versionTimelineContainer || !data || !data.releases) return;
+
+  function safeEscape(str) {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  versionTimelineContainer.innerHTML = data.releases.map((rel) => {
+    const isCurrent = rel.version === data.current_version;
+    const badgeColor = isCurrent 
+      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold" 
+      : "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
+    const statusPill = isCurrent 
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950">CURRENT LIVE</span>` 
+      : "";
+
+    const changesList = (rel.changes || []).map(ch => 
+      `<li class="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+        <i class="fa-solid fa-check text-[10px] text-emerald-500 mt-1 shrink-0"></i>
+        <span>${safeEscape(ch)}</span>
+      </li>`
+    ).join("");
+
+    const cmd = rel.revert_command || `git checkout v${rel.version}`;
+
+    return `
+      <div class="p-4 sm:p-5 rounded-2xl border ${isCurrent ? 'border-indigo-500/40 bg-indigo-500/[0.03] dark:bg-indigo-950/20 shadow-sm' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'} transition">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg border ${badgeColor}">v${safeEscape(rel.version)}</span>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">${safeEscape(rel.title)}</h3>
+            ${statusPill}
+          </div>
+          <span class="text-[11px] font-mono text-slate-400 shrink-0">${safeEscape(rel.date)}</span>
+        </div>
+
+        <ul class="space-y-1.5 mb-3.5 pl-1">
+          ${changesList}
+        </ul>
+
+        <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-400 overflow-x-auto max-w-full">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 shrink-0">Revert Command:</span>
+            <code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700 select-all font-semibold whitespace-nowrap">${safeEscape(cmd)}</code>
+          </div>
+          <button onclick="copyRollbackCommand('${safeEscape(cmd)}', this)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium flex items-center gap-1.5 transition shrink-0">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy Rollback</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openVersionModal() {
+  if (versionModal) {
+    versionModal.classList.remove("hidden");
+    versionModal.classList.add("flex");
+    loadVersionInfo();
+  }
+}
+
+function closeVersionModal() {
+  if (versionModal) {
+    versionModal.classList.add("hidden");
+    versionModal.classList.remove("flex");
+  }
+}
+
+function copyRollbackCommand(cmd, btn) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(cmd).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Copied!`;
+      setTimeout(() => {
+        btn.innerHTML = orig;
+      }, 1800);
+    });
+  }
+}
+
+function setViewMode(mode) {
+  // Seamless unified responsive workstation - adaptive across all desktop and handheld scanner viewports
+  currentViewMode = mode || "responsive";
 }
 
 // ================================================================
