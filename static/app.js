@@ -627,6 +627,19 @@ function setupEventListeners() {
 }
 
 // ================================================================
+// Helper to format concise machine highlight metrics
+function formatSampleCardSubtitle(subtitle) {
+  if (!subtitle) return "";
+  const parts = subtitle.split("•").map(p => p.trim());
+  const kgs = parts.find(p => p.toLowerCase().includes("kg"));
+  const eff = parts.find(p => p.toLowerCase().includes("eff"));
+  const doffs = parts.find(p => p.toLowerCase().includes("doff"));
+  if (kgs && eff) return `${kgs} • ${eff}`;
+  if (kgs && doffs) return `${kgs} • ${doffs}`;
+  if (kgs) return kgs;
+  return parts.slice(1, 3).join(" • ") || parts[0];
+}
+
 // LOAD SAMPLES & EXTRACTION
 // ================================================================
 async function loadSamples() {
@@ -638,18 +651,18 @@ async function loadSamples() {
     samplesContainer.innerHTML = samples.map((s, idx) => `
       <div onclick="selectSample('${s.filename}', '${s.template_id}')" 
            id="sample-card-${s.template_id}"
-           class="sample-card cursor-pointer bg-slate-950 border ${idx === 0 ? 'border-blue-500 shadow-md shadow-blue-500/20' : 'border-slate-800'} hover:border-slate-600 rounded-xl p-2.5 transition flex flex-col justify-between group">
+           class="sample-card cursor-pointer bg-white dark:bg-slate-900 border ${idx === 0 ? 'border-indigo-600 dark:border-indigo-500 shadow-md shadow-indigo-500/15 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800'} hover:border-indigo-400 dark:hover:border-slate-600 rounded-xl p-2.5 transition flex flex-col justify-between group shadow-sm">
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-[9px] uppercase font-bold text-blue-400 tracking-wider truncate">${s.category}</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[9px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">STAGE ${idx + 1}</span>
+            <span class="status-dot w-2 h-2 rounded-full ${idx === 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}"></span>
           </div>
-          <h4 class="font-bold text-xs text-white truncate">${s.title}</h4>
-          <p class="text-[10px] text-slate-400 mt-0.5 line-clamp-2 leading-tight">${s.subtitle}</p>
+          <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate" title="${s.title}">${s.title.replace(/^\d+\.\s*/, '')}</h4>
+          <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-1 truncate">${formatSampleCardSubtitle(s.subtitle)}</p>
         </div>
-        <div class="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
-          <span class="font-mono text-slate-500 text-[9px]">${s.template_id}</span>
-          <span class="text-blue-400 group-hover:translate-x-0.5 transition font-semibold text-[10px]">&rarr;</span>
+        <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
+          <span class="font-mono text-slate-400 text-[9px] uppercase truncate max-w-[85px]">${s.template_id.replace(/_/g, ' ')}</span>
+          <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition shrink-0"></i>
         </div>
       </div>
     `).join("");
@@ -683,14 +696,21 @@ function selectSample(filename, templateId) {
 
   // 3. Highlight selected card
   document.querySelectorAll(".sample-card").forEach(el => {
-    el.classList.remove("border-blue-500", "shadow-md", "shadow-blue-500/20", "border-amber-500", "shadow-amber-500/20");
-    el.classList.add("border-slate-800");
+    el.classList.remove(
+      "border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30",
+      "border-blue-500", "border-amber-500", "shadow-amber-500/20"
+    );
+    el.classList.add("border-slate-200", "dark:border-slate-800");
+    const dot = el.querySelector(".status-dot");
+    if (dot) dot.className = "status-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700";
   });
   
   const activeCard = document.getElementById(`sample-card-${templateId}`);
   if (activeCard) {
-    const highlightColor = currentViewMode === "scanner" ? "border-amber-500 shadow-md shadow-amber-500/20" : "border-blue-500 shadow-md shadow-blue-500/20";
-    activeCard.className = `sample-card cursor-pointer bg-slate-950 ${highlightColor} rounded-xl p-2.5 transition flex flex-col justify-between group`;
+    activeCard.classList.remove("border-slate-200", "dark:border-slate-800");
+    activeCard.classList.add("border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30");
+    const dot = activeCard.querySelector(".status-dot");
+    if (dot) dot.className = "status-dot w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
   }
 
   if (templateSelect) {

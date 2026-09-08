@@ -1,14 +1,28 @@
 {
   "app_name": "MachineVision OCR & SAP Floor Portal",
-  "current_version": "2.1.0",
+  "current_version": "2.1.1",
   "release_date": "2026-09-08",
-  "git_tag": "v2.1.0",
+  "git_tag": "v2.1.1",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.1.1",
+      "date": "2026-09-08",
+      "title": "Screen Alignment Overhaul & Symmetrical Workstation Layout",
+      "tag": "v2.1.1",
+      "revert_command": "git checkout v2.1.1",
+      "changes": [
+        "Eliminated header wrapping: all controls, user badge, and actions stay on a single sleek row.",
+        "Unified header and main workstation containers to shared max-w-[1536px] width for perfect left/right vertical alignment.",
+        "Fixed Card 1 capture toolbar: Camera Capture and Upload Photo are locked side-by-side in a non-wrapping flex container.",
+        "Redesigned 8 machine stage carousel cards: responsive 8-column layout with clean stage badges and primary production metrics.",
+        "Aligned Card 2 (Image Overlay) and Card 3 (Operator Verification Form) with identical header heights and matching status ribbons."
+      ]
+    },
     {
       "version": "2.1.0",
       "date": "2026-09-08",
