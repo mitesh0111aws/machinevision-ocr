@@ -437,7 +437,7 @@ OLD_SPINNING_CATALOG = [
     {
         "filename": "old_speed_frame.jpg",
         "title": "6. Speed Frame (Old Spinning)",
-        "subtitle": "Electro-Jet Rovematic ADR Working Screen",
+        "subtitle": "Zinser EasySpin • 448.2 Kg • 80.9% Eff • Saurer",
         "template_id": "old_speed_frame",
         "department_id": "old_spinning",
         "department_name": "Old Spinning",
@@ -445,8 +445,8 @@ OLD_SPINNING_CATALOG = [
         "work_center": "OLD-SP-FR-01",
         "qr_code": "OLD-SP-FR-01",
         "machine_image": "/static/img/machines/speed_frame.svg",
-        "manufacturer": "Electro-Jet",
-        "manufacturer_logo": "/static/img/manufacturers/electro_jet.svg"
+        "manufacturer": "Zinser | Saurer",
+        "manufacturer_logo": "/static/img/manufacturers/saurer.svg"
     },
     {
         "filename": "old_ring_frame_p1.jpg",

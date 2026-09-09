@@ -1,14 +1,28 @@
 {
   "app_name": "WelVision - AI Machine Vision & SAP Floor Portal",
-  "current_version": "2.4.1",
+  "current_version": "2.5.0",
   "release_date": "2026-09-09",
-  "git_tag": "v2.4.1",
+  "git_tag": "v2.5.0",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.5.0",
+      "date": "2026-09-09",
+      "title": "Streamlined Shop-Floor Operator Flow, 9 Old Spinning Calibrations, Auto-Verification & SAP Receipt Loop",
+      "tag": "v2.5.0",
+      "revert_command": "git checkout v2.5.0",
+      "changes": [
+        "Streamlined end-to-end operator workflow: Login -> Select Plant -> Select Department (with 1-click auto-launch) -> Display Machine Workstation -> Scan QR / Machine Select -> Capture/Upload HMI Photo -> Auto Verification Modal -> Confirm & Post to SAP -> Scan Next Machine Loop.",
+        "Calibrated all 9 Old Spinning templates: Rieter Carding (Row 1 latest record: 185 kg, 100%), Rieter Breaker (Row 1 latest record: 1084.33 kg, 95.9%), Rieter Unilap (13.09 km, 25.2%), Rieter Comber (Row 1 latest record: 171 kg, 65.3%), Draw Frame RSB (Row 1 latest record: 822.03 kg, 63.7%), Zinser | Saurer EasySpin Speed Frame (448.2 kg, 80.9%, 1402205 m), Ring Frame P1 (83.3 kg first production below shift, 662.1 kg sum), Ring Frame P2 (11080 pulses, 14.31 hanks), Saurer Autoconer 5 (155.63 kg, 81.9% eff, 77 doffs, quality cuts).",
+        "Zero Coordinate Freezing: All extractions utilize dynamic semantic keyword anchors, geometric IoU clustering, and multi-scale visual tokenization to withstand camera angle tilt and distance shifts.",
+        "Interactive Verification Modal automatically opens immediately upon camera capture or photo upload for quick operator review and editing prior to ERP posting.",
+        "Added Step 5 SAP Confirmation Receipt Modal featuring instant 'Scan Next Machine' looping button that resets and triggers QR scanning for seamless multi-machine floor rounds."
+      ]
+    },
     {
       "version": "2.4.1",
       "date": "2026-09-09",

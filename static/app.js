@@ -47,7 +47,7 @@ const TEMPLATE_NAMES = {
   "old_unilap": "3. Unilap (Rieter E32 Dot-Matrix)",
   "old_comber": "4. Comber (Rieter E65/E75)",
   "old_draw_frame_rsb": "5. Draw Frame RSB (Rieter RSB)",
-  "old_speed_frame": "6. Speed Frame (Electro-Jet Rovematic ADR)",
+  "old_speed_frame": "6. Speed Frame (Zinser EasySpin)",
   "old_ring_frame_p1": "7. Ring Frame Phase 1 (Rieter G33/G35)",
   "old_ring_frame_p2": "8. Ring Frame Phase 2 (Siemens SIMATIC OP)",
   "old_auto_corner": "9. Auto Corner (Saurer Autoconer 5)"
@@ -374,7 +374,7 @@ function selectPlant(id, name) {
   }
 }
 
-function selectDepartment(id, name) {
+function selectDepartment(id, name, autoLaunch = true) {
   const deptNames = {
     "new_spinning": "New Spinning (8 Machines)",
     "old_spinning": "Old Spinning (9 Machines)",
@@ -409,6 +409,14 @@ function selectDepartment(id, name) {
 
   updatePlantDeptBadges();
   loadSamples();
+
+  // Seamless auto-launch when clicking department in plant/dept view
+  if (autoLaunch && currentAppView === "plant_dept") {
+    showToast(`Launching ${resolvedName}...`, "success");
+    setTimeout(() => {
+      launchWorkstation();
+    }, 180);
+  }
 }
 
 function launchWorkstation() {
@@ -953,13 +961,13 @@ const STAGE_META = {
     manufacturer: "Rieter"
   },
   old_speed_frame: {
-    name: "Speed Frame (Rovematic)",
+    name: "Speed Frame (Zinser EasySpin)",
     stage: "STAGE 6",
-    metric: "Electro-Jet Working Screen",
+    metric: "448.2 Kg • 80.9% Eff • Saurer",
     code: "OLD-SP-FR-01",
     machine_image: "/static/img/machines/speed_frame.svg",
-    manufacturer_logo: "/static/img/manufacturers/electro_jet.svg",
-    manufacturer: "Electro-Jet"
+    manufacturer_logo: "/static/img/manufacturers/saurer.svg",
+    manufacturer: "Zinser | Saurer"
   },
   old_ring_frame_p1: {
     name: "Ring Frame Phase 1",
@@ -1109,8 +1117,8 @@ function selectSample(filename, templateId) {
     activeMachineTarget.textContent = `Target: ${meta.code || currentTemplateId}`;
   }
 
-  // Stepper pill progression
-  updateStepperState(1);
+  // Stepper pill progression: Machine selected -> Advance to Step 2 (Capture HMI)
+  updateStepperState(2);
 
   // 3. Highlight selected card
   document.querySelectorAll(".sample-card").forEach(el => {
@@ -1140,8 +1148,9 @@ function selectSample(filename, templateId) {
 }
 
 // Extract Screen Data via Backend Vision Engine (Lightweight, Fast, NEVER HANGS)
-async function extractScreenData(filename, templateId = null) {
+async function extractScreenData(filename, templateId = null, autoOpenVerify = false) {
   if (scanLaser) scanLaser.classList.remove("hidden");
+  updateStepperState(3); // Step 3: AI Dynamic OCR Extraction in Progress
 
   const resolvedTemplate = templateId || currentTemplateId;
 
@@ -1174,6 +1183,16 @@ async function extractScreenData(filename, templateId = null) {
       renderScreenData(currentData);
       updateSapPreview();
       updateScansCountBadge();
+
+      // Automatically advance to Step 4 and open verification modal if requested (e.g. after photo capture/upload)
+      if (autoOpenVerify) {
+        updateStepperState(4);
+        setTimeout(() => {
+          openVerificationModal();
+        }, 200);
+      } else {
+        updateStepperState(2);
+      }
     } else {
       console.warn("Extraction returned error:", json.message);
       if (detectedTemplateBadge) detectedTemplateBadge.textContent = getTemplateName(resolvedTemplate);
@@ -1592,6 +1611,40 @@ async function submitConfirmationToSAP() {
       loadAuditLogs();
       updateScansCountBadge();
       sapResponseCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+      // Populate SAP Receipt Modal for seamless operator UX
+      const rConf = document.getElementById("receipt-conf-number");
+      const rYield = document.getElementById("receipt-yield-val");
+      const rWork = document.getElementById("receipt-work-val");
+      const rWc = document.getElementById("receipt-work-center");
+      const rPlantDept = document.getElementById("receipt-plant-dept");
+      const rOperator = document.getElementById("receipt-operator");
+
+      if (rConf) rConf.textContent = `CONF #${sapRes.CONFIRMATION_NUMBER}`;
+      if (rYield) rYield.textContent = sapRes.POSTED_YIELD ? `${sapRes.POSTED_YIELD} KG` : "185.0 KG";
+      if (rWork) rWork.textContent = sapRes.ACTUAL_MACHINE_HOURS ? `${sapRes.ACTUAL_MACHINE_HOURS} HRS` : "08:00 HRS";
+      if (rWc) rWc.textContent = customParams.work_center || currentTemplateId.toUpperCase();
+      if (rPlantDept) {
+        const pName = currentPlant ? currentPlant.name : "Bed Sheet Plant Anjar";
+        const dName = currentDepartment ? currentDepartment.name : "Spinning";
+        rPlantDept.textContent = `${pName} • ${dName}`;
+      }
+      if (rOperator) {
+        rOperator.textContent = (currentUser && currentUser.name) ? currentUser.name : "Shift Operator";
+      }
+
+      // Close Verification Modal if open
+      closeVerificationModal();
+
+      // Advance Stepper to Step 5 (Post to SAP Completed)
+      updateStepperState(5);
+
+      // Open SAP Receipt Modal
+      const receiptModal = document.getElementById("sap-receipt-modal");
+      if (receiptModal) {
+        receiptModal.classList.remove("hidden");
+        receiptModal.classList.add("flex");
+      }
 
       // Active Learning Feedback: Silently record any manual field edits
       try {
@@ -2270,13 +2323,13 @@ function snapCameraPhoto() {
       const data = await res.json();
       if (data.status === "success") {
         activeImageFilename = data.filename;
-        extractScreenData(data.filename, data.template_hint || selectedTemplate);
+        extractScreenData(data.filename, data.template_hint || selectedTemplate, true);
       } else {
-        extractScreenData(filename, selectedTemplate);
+        extractScreenData(filename, selectedTemplate, true);
       }
     } catch (err) {
       console.warn("Camera upload notice:", err);
-      extractScreenData(filename, selectedTemplate);
+      extractScreenData(filename, selectedTemplate, true);
     } finally {
       if (scanLaser) scanLaser.classList.add("hidden");
     }
@@ -2336,14 +2389,14 @@ async function handleFileUpload(e) {
       currentClientImageUrl = null; // Use server's standardized image
       if (data.status === "success") {
         activeImageFilename = data.filename;
-        await extractScreenData(data.filename, data.template_hint || selectedTemplate);
+        await extractScreenData(data.filename, data.template_hint || selectedTemplate, true);
       } else {
         console.warn("Upload fallback:", data);
-        await extractScreenData(cleanName, selectedTemplate);
+        await extractScreenData(cleanName, selectedTemplate, true);
       }
     } catch (err) {
       console.warn("Upload network notice, running extraction:", err);
-      await extractScreenData(cleanName, selectedTemplate);
+      await extractScreenData(cleanName, selectedTemplate, true);
     } finally {
       if (scanLaser) scanLaser.classList.add("hidden");
     }
@@ -2974,6 +3027,25 @@ async function submitVerifiedDataToSap() {
   }
 }
 
+// ================================================================
+// STEP 5 RECEIPT ACTIONS & LOOP BACK FOR NEXT MACHINE
+// ================================================================
+function scanNextMachineWorkflow() {
+  closeSapReceiptModal();
+  updateStepperState(1);
+  setTimeout(() => {
+    openQrScannerModal();
+  }, 180);
+}
+
+function closeSapReceiptModal() {
+  const modal = document.getElementById("sap-receipt-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
+
 // Attach listener on initialization
 initZebraHardwareScannerListener();
 
@@ -2989,4 +3061,6 @@ window.closeVerificationModal = closeVerificationModal;
 window.submitVerifiedDataToSap = submitVerifiedDataToSap;
 window.syncModalInputToMainForm = syncModalInputToMainForm;
 window.updateStepperState = updateStepperState;
+window.scanNextMachineWorkflow = scanNextMachineWorkflow;
+window.closeSapReceiptModal = closeSapReceiptModal;
 

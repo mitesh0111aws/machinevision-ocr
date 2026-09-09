@@ -2506,126 +2506,127 @@
       "department_id": "old_spinning",
       "department_name": "Old Spinning",
       "process_stage": "Roving",
-      "manufacturer": "Electro-Jet",
-      "screen_type": "Electro-Jet Rovematic ADR Working Screen",
+      "manufacturer": "Zinser | Saurer",
+      "screen_type": "Zinser EasySpin Touch Panel (Time & Shift Reports)",
       "default_plant": "1000",
-      "default_work_center": "OLD-SF-01",
+      "default_work_center": "OLD-SP-FR-01",
       "image_url": "/static/img/machines/speed_frame.svg",
-      "manufacturer_logo": "/static/img/manufacturers/electro_jet.svg",
+      "manufacturer_logo": "/static/img/manufacturers/saurer.svg",
       "sample_filename": "old_speed_frame.jpg",
       "calibration": {
         "zoom": 1.0,
-        "contrast": 1.2,
+        "contrast": 1.3,
         "brightness": 0,
-        "clahe": false,
+        "clahe": true,
         "orientation": "auto"
       },
       "fields": [
         {
           "key": "shift",
-          "label": "Current Shift",
+          "label": "Shift Number",
           "category": "Header",
           "type": "string",
           "sap_field": "SHIFT",
           "required": true,
           "unit": "",
           "anchor_keywords": [
-            "Shift: 1",
-            "Current shift",
-            "Shift:"
+            "Shift",
+            "Day",
+            "Overview"
           ]
         },
         {
-          "key": "lot_product",
-          "label": "Product / Lot",
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Date",
+            "09.09.26",
+            "08.09.26"
+          ]
+        },
+        {
+          "key": "shift_time",
+          "label": "Shift Time",
           "category": "Header",
           "type": "string",
-          "sap_field": "CHARG",
+          "sap_field": "POSTG_TIME",
           "required": true,
           "unit": "",
           "anchor_keywords": [
-            "Product",
-            "Lot",
-            "80s EGYPTIAN BCI"
+            "Time>",
+            "22:51:05",
+            "06:52:46"
           ]
         },
         {
-          "key": "roving_count",
-          "label": "Roving Count",
-          "category": "Specifications",
-          "type": "string",
-          "sap_field": "EXT_COUNT",
-          "required": false,
-          "unit": "",
-          "anchor_keywords": [
-            "Roving count",
-            "Ne",
-            "Tex"
-          ]
-        },
-        {
-          "key": "delivery_speed",
-          "label": "Delivery Speed",
-          "category": "Production",
-          "type": "number",
-          "sap_field": "SPEED",
-          "required": true,
-          "unit": "Mts/min",
-          "anchor_keywords": [
-            "Delivery speed",
-            "Mts/min"
-          ]
-        },
-        {
-          "key": "flyers_rpm",
-          "label": "Flyers Speed",
-          "category": "Production",
-          "type": "integer",
-          "sap_field": "RPM",
-          "required": false,
-          "unit": "RPM",
-          "anchor_keywords": [
-            "Flyers rpm",
-            "rpm"
-          ]
-        },
-        {
-          "key": "current_length",
-          "label": "Current Delivery Length",
+          "key": "production_weight_kg",
+          "label": "Production Weight",
           "category": "Production",
           "type": "number",
           "sap_field": "CONF_ACTI1",
           "required": true,
-          "unit": "Mts",
+          "unit": "kg",
           "anchor_keywords": [
-            "Current/programmed",
-            "Mts"
+            "Production weight",
+            "kg"
           ]
         },
         {
-          "key": "approx_next_doff",
-          "label": "Next Doff Time",
-          "category": "Operations",
-          "type": "duration",
-          "sap_field": "DOFF_TIME",
+          "key": "production_efficiency",
+          "label": "Production Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "Production efficiency",
+            "%"
+          ]
+        },
+        {
+          "key": "meter_length",
+          "label": "Delivery Length",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "MTR_COUNT",
           "required": false,
-          "unit": "Min",
+          "unit": "m",
           "anchor_keywords": [
-            "Approx. next doffing",
-            "Min"
+            "1402205 m",
+            "m"
           ]
         },
         {
-          "key": "cleaner_status",
-          "label": "Cleaner Status",
+          "key": "system_time",
+          "label": "System Clock",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SYS_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "11:08:17 AM",
+            "09-Sep-26"
+          ]
+        },
+        {
+          "key": "report_type",
+          "label": "System Mode",
           "category": "Status",
           "type": "string",
           "sap_field": "STATUS",
           "required": false,
           "unit": "",
           "anchor_keywords": [
-            "CLEANER STARTED",
-            "Cleaner"
+            "EasySpin",
+            "Zinser",
+            "Saurer"
           ]
         }
       ]

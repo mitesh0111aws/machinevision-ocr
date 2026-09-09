@@ -196,9 +196,9 @@
           </div>
 
           <!-- VERSION BADGE (Read-only status for Operators, Management Modal for Admin) -->
-          <button id="btn-header-version" onclick="handleVersionBadgeClick()" title="Running Version: v2.4.1 (Live Production)" class="px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1 transition shadow-sm shrink-0 cursor-pointer">
+          <button id="btn-header-version" onclick="handleVersionBadgeClick()" title="Running Version: v2.5.0 (Live Production)" class="px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500/40 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold flex items-center gap-1 transition shadow-sm shrink-0 cursor-pointer">
             <i class="fa-solid fa-code-branch text-[11px] text-indigo-500"></i>
-            <span id="app-version-badge">v2.4.1</span>
+            <span id="app-version-badge">v2.5.0</span>
           </button>
 
           <!-- SCANNED DATA & IMAGE HISTORY EXPLORER BUTTON -->
@@ -352,7 +352,7 @@
                   <i class="fa-solid fa-code-branch text-indigo-500 text-xs"></i>
                   <span class="font-medium text-slate-600 dark:text-slate-300">Running Version:</span>
                 </div>
-                <span class="font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/60 px-2 py-0.5 rounded text-[10px] border border-indigo-200/50 dark:border-indigo-800/50">v2.4.1 Live</span>
+                <span class="font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/60 px-2 py-0.5 rounded text-[10px] border border-indigo-200/50 dark:border-indigo-800/50">v2.5.0 Live</span>
               </div>
             </div>
 
@@ -637,7 +637,7 @@
               <i class="fa-regular fa-circle text-slate-400 text-lg dept-check"></i>
             </div>
             <h4 class="font-bold text-slate-900 dark:text-white text-lg">Old Spinning</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">9 legacy stages: Rieter, Electro-Jet, Siemens &amp; Saurer Autoconer 5.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">9 legacy stages: Rieter, Zinser | Saurer, Siemens SIMATIC &amp; Autoconer 5.</p>
             
             <!-- STAGE BADGES -->
             <div class="space-y-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-300">
@@ -845,6 +845,12 @@
                 <button id="btn-upload-photo" onclick="document.getElementById('file-input').click()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-500/20 active:scale-95 shrink-0 cursor-pointer">
                   <i class="fa-solid fa-cloud-arrow-up"></i>
                   <span>Upload</span>
+                </button>
+
+                <!-- BUTTON 3: VERIFY & POST MODAL -->
+                <button id="btn-verify-modal-open" onclick="openVerificationModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-purple-600/20 active:scale-95 shrink-0 cursor-pointer">
+                  <i class="fa-solid fa-clipboard-check"></i>
+                  <span>Verify &amp; Post</span>
                 </button>
               </div>
 
@@ -1235,9 +1241,9 @@
                   <span class="font-bold block">OLD-RSB-01</span>
                   <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Draw Frame RSB</span>
                 </button>
-                <button onclick="simulateQrScan('OLD-SP-FR-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Electro-Jet Speed Frame">
+                <button onclick="simulateQrScan('OLD-SP-FR-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Zinser | Saurer Speed Frame EasySpin">
                   <span class="font-bold block">OLD-SP-FR-01</span>
-                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Speed Frame ADR</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Zinser EasySpin</span>
                 </button>
                 <button onclick="simulateQrScan('OLD-RING-P1')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Ring Frame P1">
                   <span class="font-bold block">OLD-RING-P1</span>
@@ -1393,6 +1399,75 @@
         <button onclick="submitVerifiedDataToSap()" id="btn-modal-confirm-sap" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition active:scale-95">
           <i class="fa-solid fa-paper-plane"></i>
           <span>Step 5: Confirm &amp; Post to SAP</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: STEP 5 SAP POSTING SUCCESS RECEIPT      -->
+  <!-- ============================================== -->
+  <div id="sap-receipt-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col my-auto transition-all animate-[fadeIn_0.2s_ease-out]">
+      
+      <!-- RECEIPT HEADER WITH PULSING BADGE -->
+      <div class="p-6 text-center border-b border-slate-200 dark:border-slate-800 bg-gradient-to-b from-emerald-500/10 via-slate-50/50 dark:via-slate-900/50 to-transparent">
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg shadow-emerald-500/30">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/20 mb-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SAP Confirmation Successful
+        </div>
+        <h3 class="text-xl font-black text-slate-900 dark:text-white" id="receipt-conf-number">CONF #10048291</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono" id="receipt-bapi-text">BAPI_PRODORDCONF_CREATE_TT &bull; NetWeaver CO11N</p>
+      </div>
+
+      <!-- RECEIPT BODY: SUMMARY OF POSTED VALUES -->
+      <div class="p-6 space-y-3.5">
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Posted Yield</span>
+            <span id="receipt-yield-val" class="text-base font-black text-emerald-600 dark:text-emerald-400 font-mono">185.0 KG</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Machine Run Time</span>
+            <span id="receipt-work-val" class="text-base font-black text-slate-900 dark:text-white font-mono">08:00 HRS</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs font-mono bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Machine / Work Center:</span>
+            <span id="receipt-work-center" class="font-bold text-slate-900 dark:text-white">OLD-CARD-01</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Plant &amp; Department:</span>
+            <span id="receipt-plant-dept" class="text-indigo-600 dark:text-indigo-400 font-bold">Plant 1000 &bull; Old Spinning</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Operator:</span>
+            <span id="receipt-operator" class="text-slate-700 dark:text-slate-300">Shift Operator</span>
+          </div>
+          <div class="flex items-center justify-between pt-1.5 border-t border-slate-200 dark:border-slate-700">
+            <span class="text-slate-500 dark:text-slate-400 font-sans">Audit Trail:</span>
+            <span class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-shield-check"></i> Recorded to SQLite DB
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECEIPT FOOTER: LOOP BACK FOR NEXT MACHINE -->
+      <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <button onclick="closeSapReceiptModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition text-xs order-2 sm:order-1">
+          Done / View Station
+        </button>
+
+        <button onclick="scanNextMachineWorkflow()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-95 order-1 sm:order-2">
+          <i class="fa-solid fa-qrcode text-sm"></i>
+          <span>Scan Next Machine</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
         </button>
       </div>
 
@@ -1868,7 +1943,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h2 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Version Control &amp; Rollback</h2>
-              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.4.1 Active</span>
+              <span id="modal-active-version" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">v2.5.0 Active</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">Track release milestones or roll back to any historical version anytime</p>
           </div>
