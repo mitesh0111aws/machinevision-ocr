@@ -1,14 +1,27 @@
 {
   "app_name": "WelVision - AI Machine Vision & SAP Floor Portal",
-  "current_version": "2.4.0",
-  "release_date": "2026-09-08",
-  "git_tag": "v2.4.0",
+  "current_version": "2.4.1",
+  "release_date": "2026-09-09",
+  "git_tag": "v2.4.1",
   "revert_guide": {
     "view_versions": "git tag -l -n",
     "switch_to_version": "git checkout <version_tag> (e.g. git checkout v2.0.0)",
     "return_to_latest": "git checkout main"
   },
   "releases": [
+    {
+      "version": "2.4.1",
+      "date": "2026-09-09",
+      "title": "Version Control & Rollback Admin RBAC & Operator Running Version Display",
+      "tag": "v2.4.1",
+      "revert_command": "git checkout v2.4.1",
+      "changes": [
+        "Restricted Version Control & Rollback modal and git rollback commands strictly to Admin login.",
+        "Shift Operator login now displays a clean, read-only Running Version indicator ('v2.4.1 Live') in the user dropdown and header.",
+        "Clicking the header version badge as an operator displays an informative live status toast rather than administrative rollback tools.",
+        "Added industrial floating toast notification system (showToast) for non-intrusive operator alerts."
+      ]
+    },
     {
       "version": "2.4.0",
       "date": "2026-09-08",

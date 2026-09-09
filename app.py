@@ -684,8 +684,8 @@ def get_version():
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
     return jsonify({
-        "current_version": "2.4.0",
-        "release_date": "2026-09-08",
+        "current_version": "2.4.1",
+        "release_date": "2026-09-09",
         "app_name": "WelVision - AI Machine Vision & SAP Floor Portal"
     })
 

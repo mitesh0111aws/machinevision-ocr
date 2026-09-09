@@ -485,6 +485,26 @@ function updateUserDisplayName() {
     }
   }
 
+  // RBAC for Version Control & Rollback: strictly Admin-only
+  const dropdownItemVersion = document.getElementById("dropdown-item-version");
+  const dropdownItemOpVersion = document.getElementById("dropdown-item-operator-version");
+  if (dropdownItemVersion) {
+    dropdownItemVersion.classList.toggle("hidden", !isAdmin);
+    if (isAdmin) {
+      dropdownItemVersion.classList.add("flex");
+    } else {
+      dropdownItemVersion.classList.remove("flex");
+    }
+  }
+  if (dropdownItemOpVersion) {
+    dropdownItemOpVersion.classList.toggle("hidden", isAdmin);
+    if (!isAdmin) {
+      dropdownItemOpVersion.classList.add("flex");
+    } else {
+      dropdownItemOpVersion.classList.remove("flex");
+    }
+  }
+
   if (dropdownActivePlantDept) {
     const plantName = currentPlant ? (PLANT_DISPLAY_NAMES[currentPlant.id] || currentPlant.name || `Plant ${currentPlant.id}`) : "Bed Sheet Plant Anjar";
     const deptName = currentDepartment ? (currentDepartment.id === "new_spinning" ? "New Spinning" : (currentDepartment.name || currentDepartment.id)) : "Warping";
@@ -555,6 +575,8 @@ window.openScanDetailModal = openScanDetailModal;
 window.closeScanDetailModal = closeScanDetailModal;
 window.openVersionModal = openVersionModal;
 window.closeVersionModal = closeVersionModal;
+window.handleVersionBadgeClick = handleVersionBadgeClick;
+window.showToast = showToast;
 window.copyRollbackCommand = copyRollbackCommand;
 window.openCalibrationStudio = openCalibrationStudio;
 window.closeCalibrationStudio = closeCalibrationStudio;
@@ -658,9 +680,9 @@ function setupEventListeners() {
   // Submit to SAP
   if (btnSubmitSap) btnSubmitSap.addEventListener("click", submitConfirmationToSAP);
 
-  // Version Control Modal
+  // Version Control & Rollback
   if (appVersionBadge) {
-    appVersionBadge.addEventListener("click", openVersionModal);
+    appVersionBadge.addEventListener("click", handleVersionBadgeClick);
   }
 
 function openAuditModal() {
@@ -1906,7 +1928,61 @@ function renderVersionTimeline(data) {
   }).join("");
 }
 
+function showToast(message, type = "info") {
+  let container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 max-w-sm pointer-events-none";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  const bgClass = type === "warning" ? "bg-amber-900/90 text-amber-100 border-amber-500" :
+                  type === "error" ? "bg-rose-900/90 text-rose-100 border-rose-500" :
+                  type === "success" ? "bg-emerald-900/90 text-emerald-100 border-emerald-500" :
+                  "bg-slate-900/90 text-slate-100 border-indigo-500";
+  const iconClass = type === "warning" ? "fa-solid fa-triangle-exclamation text-amber-400" :
+                    type === "error" ? "fa-solid fa-circle-exclamation text-rose-400" :
+                    type === "success" ? "fa-solid fa-circle-check text-emerald-400" :
+                    "fa-solid fa-circle-info text-cyan-400";
+
+  toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-xl backdrop-blur-md text-xs pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+  toast.innerHTML = `<i class="${iconClass} text-sm shrink-0"></i><span class="flex-1 font-medium leading-snug">${message}</span>`;
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.remove("translate-y-2", "opacity-0");
+  });
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "translate-y-2");
+    setTimeout(() => {
+      if (toast.parentElement) toast.remove();
+    }, 300);
+  }, 3200);
+}
+
+function handleVersionBadgeClick() {
+  const rawUsername = currentUser ? (currentUser.username || "operator") : "operator";
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "Administrator" || rawUsername.toLowerCase().includes("admin"));
+  if (isAdmin) {
+    openVersionModal();
+  } else {
+    const curVer = (appVersionBadge && appVersionBadge.textContent) ? appVersionBadge.textContent : "v2.4.1";
+    showToast(`Running WelVision ${curVer} (Live Production)`, "info");
+  }
+}
+
 function openVersionModal() {
+  const rawUsername = currentUser ? (currentUser.username || "operator") : "operator";
+  const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "Administrator" || rawUsername.toLowerCase().includes("admin"));
+  if (!isAdmin) {
+    const curVer = (appVersionBadge && appVersionBadge.textContent) ? appVersionBadge.textContent : "v2.4.1";
+    showToast(`Running WelVision ${curVer} (Live Production). Version Control & Rollback is restricted to Admin.`, "warning");
+    return;
+  }
+
   if (versionModal) {
     versionModal.classList.remove("hidden");
     versionModal.classList.add("flex");
