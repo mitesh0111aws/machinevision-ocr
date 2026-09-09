@@ -32,6 +32,24 @@
       "plant": "1000",
       "description": "Air-Jet & Rapier Terry & Bed Sheet Looms",
       "machine_ids": []
+    },
+    "old_spinning": {
+      "id": "old_spinning",
+      "name": "Old Spinning",
+      "code": "SPIN-OLD",
+      "plant": "1000",
+      "description": "9-Stage Value Chain (Rieter, Electro-Jet, Siemens, Saurer)",
+      "machine_ids": [
+        "old_carding",
+        "old_breaker",
+        "old_unilap",
+        "old_comber",
+        "old_draw_frame_rsb",
+        "old_speed_frame",
+        "old_ring_frame_p1",
+        "old_ring_frame_p2",
+        "old_auto_corner"
+      ]
     }
   },
   "templates": {
@@ -303,7 +321,9 @@
             "y": 880
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/carding.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "breaker_draw_frame": {
       "id": "breaker_draw_frame",
@@ -314,7 +334,7 @@
       "manufacturer": "LMW / Rieter",
       "screen_type": "Touch HMI (Stoppages & Speed)",
       "default_plant": "1000",
-      "default_work_center": "BR-DF-01",
+      "default_work_center": "BRK-01",
       "calibration": {
         "zoom": 1.0,
         "offset_x": 0,
@@ -529,7 +549,9 @@
             "y": 880
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/breaker.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "lap_former": {
       "id": "lap_former",
@@ -540,7 +562,7 @@
       "manufacturer": "LMW / Marzoli",
       "screen_type": "Amber Touch HMI (Creel & Calender)",
       "default_plant": "1000",
-      "default_work_center": "LAP-FORM-01",
+      "default_work_center": "LAP-01",
       "calibration": {
         "zoom": 1.0,
         "offset_x": 0,
@@ -815,7 +837,9 @@
             "y": 920
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/lap_former.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "comber": {
       "id": "comber",
@@ -1100,7 +1124,9 @@
         ],
         "screen_mount_type": "cyan_graphic_lcd",
         "tilt_angle_compensation": 0.0
-      }
+      },
+      "image_url": "/static/img/machines/comber.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "finisher_draw_frame": {
       "id": "finisher_draw_frame",
@@ -1111,7 +1137,7 @@
       "manufacturer": "LMW / Rieter",
       "screen_type": "Touch HMI (Stoppages & Breakdowns)",
       "default_plant": "1000",
-      "default_work_center": "FR-DF-01",
+      "default_work_center": "FIN-01",
       "calibration": {
         "zoom": 1.0,
         "offset_x": 0,
@@ -1326,7 +1352,9 @@
             "y": 880
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/finisher.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "speed_frame": {
       "id": "speed_frame",
@@ -1337,7 +1365,7 @@
       "manufacturer": "Electro-Jet / Marzoli",
       "screen_type": "Multi-Day Performance Table (ADR)",
       "default_plant": "1000",
-      "default_work_center": "SPD-FR-01",
+      "default_work_center": "SF-01",
       "is_table": true,
       "calibration": {
         "zoom": 1.0,
@@ -1536,7 +1564,9 @@
             "y": 940
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/speed_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "ring_frame": {
       "id": "ring_frame",
@@ -1547,7 +1577,7 @@
       "manufacturer": "Siemens Simatic Touch",
       "screen_type": "Touch Panel (Shift Production Grid)",
       "default_plant": "1000",
-      "default_work_center": "RING-FR-01",
+      "default_work_center": "RF-01",
       "calibration": {
         "zoom": 1.0,
         "offset_x": 0,
@@ -1747,7 +1777,9 @@
             "y": 770
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/ring_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
     },
     "link_conner": {
       "id": "link_conner",
@@ -1758,7 +1790,7 @@
       "manufacturer": "Saurer Schlafhorst",
       "screen_type": "Autoconer 6 Group Details HMI",
       "default_plant": "1000",
-      "default_work_center": "LINK-CON-01",
+      "default_work_center": "LC-01",
       "calibration": {
         "zoom": 1.0,
         "offset_x": 0,
@@ -1985,7 +2017,1005 @@
             "y": 960
           }
         ]
-      }
+      },
+      "image_url": "/static/img/machines/link_conner.svg",
+      "manufacturer_logo": "/static/img/manufacturers/saurer.svg"
+    },
+    "old_carding": {
+      "id": "old_carding",
+      "name": "1. Carding (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Carding",
+      "manufacturer": "Rieter",
+      "screen_type": "Rieter C-Series Panel (12.2 Production last shifts)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-CARD-01",
+      "image_url": "/static/img/machines/carding.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_carding.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.3,
+        "brightness": 5,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "No",
+            "Shift",
+            "12.2"
+          ]
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Begin Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Begin",
+            "Beginning"
+          ]
+        },
+        {
+          "key": "shift_time",
+          "label": "Shift Begin Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "06:30",
+            "14:30",
+            "22:30"
+          ]
+        },
+        {
+          "key": "production_kg",
+          "label": "Production Output",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production",
+            "kg"
+          ]
+        },
+        {
+          "key": "can_count",
+          "label": "Can Count",
+          "category": "Production",
+          "type": "integer",
+          "sap_field": "YIELD",
+          "required": false,
+          "unit": "Cans",
+          "anchor_keywords": [
+            "Can"
+          ]
+        },
+        {
+          "key": "delivery_eff",
+          "label": "Delivery Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "%",
+            "Delivery"
+          ]
+        },
+        {
+          "key": "machine_status",
+          "label": "Machine Status",
+          "category": "Status",
+          "type": "string",
+          "sap_field": "STATUS",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Delivery normal",
+            "115 Delivery normal"
+          ]
+        }
+      ]
+    },
+    "old_breaker": {
+      "id": "old_breaker",
+      "name": "2. Breaker Draw Frame (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Breaker",
+      "manufacturer": "Rieter",
+      "screen_type": "Rieter SB/RSB Panel (11.2 Previous shifts)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-BRK-01",
+      "image_url": "/static/img/machines/breaker.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_breaker.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.4,
+        "brightness": 8,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "3:",
+            "2:",
+            "1:",
+            "Shift"
+          ]
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Start Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Beginning:",
+            "Beginning"
+          ]
+        },
+        {
+          "key": "shift_time",
+          "label": "Shift Start Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "22:30",
+            "14:30",
+            "06:30"
+          ]
+        },
+        {
+          "key": "production_kg",
+          "label": "Production Output",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production:",
+            "Production",
+            "kg"
+          ]
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "Machine Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "%"
+          ]
+        },
+        {
+          "key": "stoppage_fault",
+          "label": "Fault / Status",
+          "category": "Status",
+          "type": "string",
+          "sap_field": "FAULT_TXT",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Spare can missing",
+            "550 S41"
+          ]
+        }
+      ]
+    },
+    "old_unilap": {
+      "id": "old_unilap",
+      "name": "3. Unilap (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Lap Preparation",
+      "manufacturer": "Rieter",
+      "screen_type": "Dot-Matrix VFD Display (10.2 Shift > 3 Production)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-UNI-01",
+      "image_url": "/static/img/machines/unilap.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_unilap.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.6,
+        "brightness": 12,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Shift >",
+            "Shift",
+            "10.2 Shift"
+          ]
+        },
+        {
+          "key": "production_km",
+          "label": "Production Length",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "km",
+          "anchor_keywords": [
+            "Production",
+            "km",
+            "Lkm"
+          ]
+        },
+        {
+          "key": "efficiency",
+          "label": "Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "efficiency",
+            "last efficiency",
+            "%"
+          ]
+        }
+      ]
+    },
+    "old_comber": {
+      "id": "old_comber",
+      "name": "4. Comber (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Combing",
+      "manufacturer": "Rieter",
+      "screen_type": "Rieter E65/E75 Panel (11.2 Shift overview)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-COMB-01",
+      "image_url": "/static/img/machines/comber.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_comber.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.4,
+        "brightness": 6,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Shift",
+            "S1",
+            "S2",
+            "S3",
+            "S1(Cur)"
+          ]
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Start Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Shift start",
+            "09.09.2026",
+            "08.09.2026"
+          ]
+        },
+        {
+          "key": "shift_time",
+          "label": "Shift Start Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "06:30",
+            "14:30",
+            "22:30"
+          ]
+        },
+        {
+          "key": "production_kg",
+          "label": "Production Output",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "kg",
+            "Production"
+          ]
+        },
+        {
+          "key": "efficiency",
+          "label": "Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "%"
+          ]
+        }
+      ]
+    },
+    "old_draw_frame_rsb": {
+      "id": "old_draw_frame_rsb",
+      "name": "5. Draw Frame RSB (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Draw Frame RSB",
+      "manufacturer": "Rieter",
+      "screen_type": "Rieter RSB Autoleveler Panel (11.2 Previous shifts)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-RSB-01",
+      "image_url": "/static/img/machines/draw_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_draw_frame_rsb.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.4,
+        "brightness": 6,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "3:",
+            "2:",
+            "1:",
+            "Shift"
+          ]
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Start Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Beginning:",
+            "Beginning"
+          ]
+        },
+        {
+          "key": "shift_time",
+          "label": "Shift Start Time",
+          "category": "Header",
+          "type": "time",
+          "sap_field": "TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "22:00",
+            "14:00",
+            "06:00"
+          ]
+        },
+        {
+          "key": "production_kg",
+          "label": "Production Output",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production:",
+            "kg"
+          ]
+        },
+        {
+          "key": "efficiency",
+          "label": "Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "%"
+          ]
+        },
+        {
+          "key": "stoppage_fault",
+          "label": "Fault / Status",
+          "category": "Status",
+          "type": "string",
+          "sap_field": "FAULT_TXT",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Spare can missing",
+            "550 S41"
+          ]
+        }
+      ]
+    },
+    "old_speed_frame": {
+      "id": "old_speed_frame",
+      "name": "6. Speed Frame (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Roving",
+      "manufacturer": "Electro-Jet",
+      "screen_type": "Electro-Jet Rovematic ADR Working Screen",
+      "default_plant": "1000",
+      "default_work_center": "OLD-SF-01",
+      "image_url": "/static/img/machines/speed_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/electro_jet.svg",
+      "sample_filename": "old_speed_frame.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.2,
+        "brightness": 0,
+        "clahe": false,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Current Shift",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Shift: 1",
+            "Current shift",
+            "Shift:"
+          ]
+        },
+        {
+          "key": "lot_product",
+          "label": "Product / Lot",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "CHARG",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Product",
+            "Lot",
+            "80s EGYPTIAN BCI"
+          ]
+        },
+        {
+          "key": "roving_count",
+          "label": "Roving Count",
+          "category": "Specifications",
+          "type": "string",
+          "sap_field": "EXT_COUNT",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Roving count",
+            "Ne",
+            "Tex"
+          ]
+        },
+        {
+          "key": "delivery_speed",
+          "label": "Delivery Speed",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "SPEED",
+          "required": true,
+          "unit": "Mts/min",
+          "anchor_keywords": [
+            "Delivery speed",
+            "Mts/min"
+          ]
+        },
+        {
+          "key": "flyers_rpm",
+          "label": "Flyers Speed",
+          "category": "Production",
+          "type": "integer",
+          "sap_field": "RPM",
+          "required": false,
+          "unit": "RPM",
+          "anchor_keywords": [
+            "Flyers rpm",
+            "rpm"
+          ]
+        },
+        {
+          "key": "current_length",
+          "label": "Current Delivery Length",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "Mts",
+          "anchor_keywords": [
+            "Current/programmed",
+            "Mts"
+          ]
+        },
+        {
+          "key": "approx_next_doff",
+          "label": "Next Doff Time",
+          "category": "Operations",
+          "type": "duration",
+          "sap_field": "DOFF_TIME",
+          "required": false,
+          "unit": "Min",
+          "anchor_keywords": [
+            "Approx. next doffing",
+            "Min"
+          ]
+        },
+        {
+          "key": "cleaner_status",
+          "label": "Cleaner Status",
+          "category": "Status",
+          "type": "string",
+          "sap_field": "STATUS",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "CLEANER STARTED",
+            "Cleaner"
+          ]
+        }
+      ]
+    },
+    "old_ring_frame_p1": {
+      "id": "old_ring_frame_p1",
+      "name": "7. Ring Frame Phase 1 (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Ring Spinning",
+      "manufacturer": "Rieter",
+      "screen_type": "Rieter G33/G35 Panel (10.2 Production previous shifts)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-RF1-01",
+      "image_url": "/static/img/machines/ring_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/rieter.svg",
+      "sample_filename": "old_ring_frame_p1.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.4,
+        "brightness": 8,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "shift",
+          "label": "Shift Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "SHIFT",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Shift number",
+            "Shift"
+          ]
+        },
+        {
+          "key": "production_kg",
+          "label": "Production Output",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production",
+            "kg"
+          ]
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "Machine Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "Machine efficien.:",
+            "Machine efficien"
+          ]
+        },
+        {
+          "key": "production_efficiency",
+          "label": "Production Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI3",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "Production efficien.:",
+            "Production efficien"
+          ]
+        },
+        {
+          "key": "production_sum_kg",
+          "label": "Total Production Sum",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "TOTAL_KG",
+          "required": false,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production sum",
+            "sum"
+          ]
+        },
+        {
+          "key": "shift_date",
+          "label": "Shift Date",
+          "category": "Header",
+          "type": "date",
+          "sap_field": "POSTG_DATE",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "deleted on:",
+            "date"
+          ]
+        }
+      ]
+    },
+    "old_ring_frame_p2": {
+      "id": "old_ring_frame_p2",
+      "name": "8. Ring Frame Phase 2 (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Ring Spinning",
+      "manufacturer": "Siemens",
+      "screen_type": "Siemens SIMATIC Panel OP RXI/SCD 4-Line",
+      "default_plant": "1000",
+      "default_work_center": "OLD-RF2-01",
+      "image_url": "/static/img/machines/ring_frame.svg",
+      "manufacturer_logo": "/static/img/manufacturers/siemens.svg",
+      "sample_filename": "old_ring_frame_p2.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.8,
+        "brightness": 15,
+        "clahe": true,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "pulse_count",
+          "label": "Pulse Counter",
+          "category": "Counter",
+          "type": "integer",
+          "sap_field": "PULSE",
+          "required": true,
+          "unit": "Pulse",
+          "anchor_keywords": [
+            "591Pulse",
+            "Pulse",
+            "11080"
+          ]
+        },
+        {
+          "key": "doff_run_time",
+          "label": "Doff Run Time",
+          "category": "Time",
+          "type": "duration",
+          "sap_field": "DOFF_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Doff run time",
+            "0h 31m"
+          ]
+        },
+        {
+          "key": "shift3_hanks",
+          "label": "Shift 3 Hanks",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "hk",
+          "anchor_keywords": [
+            "Shift 3",
+            "14.31 hk",
+            "14.31hk"
+          ]
+        },
+        {
+          "key": "shift3_run_time",
+          "label": "Shift 3 Run Time",
+          "category": "Time",
+          "type": "duration",
+          "sap_field": "RUN_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "7h 36m",
+            "7h36m"
+          ]
+        },
+        {
+          "key": "shift2_hanks",
+          "label": "Shift 2 Hanks",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI2",
+          "required": false,
+          "unit": "hk",
+          "anchor_keywords": [
+            "Shift 2",
+            "14.24 hk",
+            "14.24hk"
+          ]
+        },
+        {
+          "key": "shift2_run_time",
+          "label": "Shift 2 Run Time",
+          "category": "Time",
+          "type": "duration",
+          "sap_field": "IDLE_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "7h 30m",
+            "7h30m"
+          ]
+        }
+      ]
+    },
+    "old_auto_corner": {
+      "id": "old_auto_corner",
+      "name": "9. Auto Corner (Old Spinning)",
+      "department_id": "old_spinning",
+      "department_name": "Old Spinning",
+      "process_stage": "Winding",
+      "manufacturer": "Saurer",
+      "screen_type": "Autoconer 5 Data Display (Saurer / Schlafhorst)",
+      "default_plant": "1000",
+      "default_work_center": "OLD-AC-01",
+      "image_url": "/static/img/machines/autoconer.svg",
+      "manufacturer_logo": "/static/img/manufacturers/saurer.svg",
+      "sample_filename": "old_auto_corner.jpg",
+      "calibration": {
+        "zoom": 1.0,
+        "contrast": 1.2,
+        "brightness": 0,
+        "clahe": false,
+        "orientation": "auto"
+      },
+      "fields": [
+        {
+          "key": "production_weight_kg",
+          "label": "Production Weight",
+          "category": "Production",
+          "type": "number",
+          "sap_field": "CONF_ACTI1",
+          "required": true,
+          "unit": "kg",
+          "anchor_keywords": [
+            "Production weight",
+            "kg",
+            "155.63 kg"
+          ]
+        },
+        {
+          "key": "packages_doffed",
+          "label": "Packages Doffed",
+          "category": "Production",
+          "type": "integer",
+          "sap_field": "YIELD",
+          "required": true,
+          "unit": "Cones",
+          "anchor_keywords": [
+            "Packages doffed",
+            "77"
+          ]
+        },
+        {
+          "key": "machine_efficiency",
+          "label": "Machine Efficiency",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI2",
+          "required": true,
+          "unit": "%",
+          "anchor_keywords": [
+            "Machine efficiency",
+            "%",
+            "81.9 %"
+          ]
+        },
+        {
+          "key": "production_time",
+          "label": "Production Time",
+          "category": "Time",
+          "type": "duration",
+          "sap_field": "RUN_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Production time",
+            "06:21:55"
+          ]
+        },
+        {
+          "key": "time_span",
+          "label": "Total Time Span",
+          "category": "Time",
+          "type": "duration",
+          "sap_field": "TOTAL_TIME",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Time span",
+            "07:59:59"
+          ]
+        },
+        {
+          "key": "red_lights_pct",
+          "label": "Red Lights (Stoppage)",
+          "category": "Efficiency",
+          "type": "percentage",
+          "sap_field": "CONF_ACTI3",
+          "required": false,
+          "unit": "%",
+          "anchor_keywords": [
+            "Red lights",
+            "%",
+            "1.1 %"
+          ]
+        },
+        {
+          "key": "yarn_joints",
+          "label": "Yarn Joints",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "JOINTS",
+          "required": false,
+          "unit": "/100km",
+          "anchor_keywords": [
+            "Yarn joints",
+            "/100 km"
+          ]
+        },
+        {
+          "key": "yarn_breaks",
+          "label": "Yarn Breaks",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "BREAKS",
+          "required": false,
+          "unit": "/100km",
+          "anchor_keywords": [
+            "Yarn breaks",
+            "/100 km"
+          ]
+        },
+        {
+          "key": "clearer_cuts",
+          "label": "Clearer Cuts",
+          "category": "Quality",
+          "type": "number",
+          "sap_field": "CUTS",
+          "required": false,
+          "unit": "/100km",
+          "anchor_keywords": [
+            "Clearer cuts",
+            "/100 km"
+          ]
+        },
+        {
+          "key": "lot_name",
+          "label": "Lot Name",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "CHARG",
+          "required": true,
+          "unit": "",
+          "anchor_keywords": [
+            "Lot name",
+            "60 CC TURKISH"
+          ]
+        },
+        {
+          "key": "lot_number",
+          "label": "Lot Number",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "BATCH",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Lot number",
+            "G126071"
+          ]
+        },
+        {
+          "key": "winding_unit",
+          "label": "Winding Unit",
+          "category": "Header",
+          "type": "string",
+          "sap_field": "UNITS",
+          "required": false,
+          "unit": "",
+          "anchor_keywords": [
+            "Winding unit",
+            "26 - 60"
+          ]
+        }
+      ]
     }
   }
 }

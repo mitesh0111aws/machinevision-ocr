@@ -31,6 +31,7 @@ let currentAppView = "login";
 
 // Machine Names Map
 const TEMPLATE_NAMES = {
+  // New Spinning (8 Stages)
   "carding": "1. Carding Machine",
   "breaker_draw_frame": "2. Breaker Draw Frame (Br. DF)",
   "lap_former": "3. Lap Former",
@@ -38,7 +39,18 @@ const TEMPLATE_NAMES = {
   "finisher_draw_frame": "5. Finisher Draw Frame (Fr. DF)",
   "speed_frame": "6. Speed Frame (Roving Frame)",
   "ring_frame": "7. Ring Frame (Spinning)",
-  "link_conner": "8. Link Conner (Autoconer 6)"
+  "link_conner": "8. Link Conner (Autoconer 6)",
+  
+  // Old Spinning (9 Stages)
+  "old_carding": "1. Carding (Rieter C-Series)",
+  "old_breaker": "2. Breaker (Rieter SB/RSB)",
+  "old_unilap": "3. Unilap (Rieter E32 Dot-Matrix)",
+  "old_comber": "4. Comber (Rieter E65/E75)",
+  "old_draw_frame_rsb": "5. Draw Frame RSB (Rieter RSB)",
+  "old_speed_frame": "6. Speed Frame (Electro-Jet Rovematic ADR)",
+  "old_ring_frame_p1": "7. Ring Frame Phase 1 (Rieter G33/G35)",
+  "old_ring_frame_p2": "8. Ring Frame Phase 2 (Siemens SIMATIC OP)",
+  "old_auto_corner": "9. Auto Corner (Saurer Autoconer 5)"
 };
 
 function getTemplateName(id) {
@@ -365,6 +377,7 @@ function selectPlant(id, name) {
 function selectDepartment(id, name) {
   const deptNames = {
     "new_spinning": "New Spinning (8 Machines)",
+    "old_spinning": "Old Spinning (9 Machines)",
     "warping": "Warping",
     "weaving": "Weaving"
   };
@@ -393,6 +406,9 @@ function selectDepartment(id, name) {
   if (departmentSelect) {
     departmentSelect.value = id;
   }
+
+  updatePlantDeptBadges();
+  loadSamples();
 }
 
 function launchWorkstation() {
@@ -816,86 +832,238 @@ window.closeAuditModal = closeAuditModal;
 // ================================================================
 // Stage metadata dictionary for clean, high-density machine cards
 const STAGE_META = {
+  // New Spinning Stages (8 Machines)
   carding: {
     name: "Carding Machine",
     stage: "STAGE 1",
     metric: "172.18 Kg • 88.5% Eff",
-    code: "CARD-01"
+    code: "CARD-01",
+    machine_image: "/static/img/machines/carding.svg",
+    manufacturer_logo: "/static/img/manufacturers/trutzschler.svg",
+    manufacturer: "Trutzschler / LMW"
   },
   breaker_draw_frame: {
     name: "Breaker Draw Frame",
     stage: "STAGE 2",
     metric: "489.5 Kg • 10 Doffs",
-    code: "BR-DF"
+    code: "BR-DF",
+    machine_image: "/static/img/machines/breaker.svg",
+    manufacturer_logo: "/static/img/manufacturers/lmw.svg",
+    manufacturer: "LMW"
   },
   lap_former: {
     name: "Lap Former",
     stage: "STAGE 3",
     metric: "612.8 Kg • 42.9% Eff",
-    code: "LAP-01"
+    code: "LAP-01",
+    machine_image: "/static/img/machines/lap_former.svg",
+    manufacturer_logo: "/static/img/manufacturers/lmw.svg",
+    manufacturer: "LMW"
   },
   comber: {
     name: "Comber Machine",
     stage: "STAGE 4",
     metric: "197.05 Kg • 95.4% Eff",
-    code: "COMB-01"
+    code: "COMB-01",
+    machine_image: "/static/img/machines/comber.svg",
+    manufacturer_logo: "/static/img/manufacturers/lmw.svg",
+    manufacturer: "LMW"
   },
   finisher_draw_frame: {
     name: "Finisher Draw Frame",
     stage: "STAGE 5",
     metric: "432.4 Kg • 23 Doffs",
-    code: "FR-DF"
+    code: "FR-DF",
+    machine_image: "/static/img/machines/finisher.svg",
+    manufacturer_logo: "/static/img/manufacturers/lmw.svg",
+    manufacturer: "LMW"
   },
   speed_frame: {
     name: "Speed Frame (Roving)",
     stage: "STAGE 6",
     metric: "8 Shifts ADR Matrix",
-    code: "SP-FR"
+    code: "SP-FR",
+    machine_image: "/static/img/machines/speed_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/electro_jet.svg",
+    manufacturer: "Electro-Jet"
   },
   ring_frame: {
     name: "Ring Frame (Spinning)",
     stage: "STAGE 7",
     metric: "6.0 Hanks • 5.1 hrs",
-    code: "RING-01"
+    code: "RING-01",
+    machine_image: "/static/img/machines/ring_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/siemens.svg",
+    manufacturer: "Siemens"
   },
   link_conner: {
     name: "Link Conner (Autoconer)",
     stage: "STAGE 8",
     metric: "81.50 Kg • 68.7% Eff",
-    code: "AUTOCONER"
+    code: "AUTOCONER",
+    machine_image: "/static/img/machines/link_conner.svg",
+    manufacturer_logo: "/static/img/manufacturers/saurer.svg",
+    manufacturer: "Saurer"
+  },
+
+  // Old Spinning Stages (9 Machines)
+  old_carding: {
+    name: "Carding (Rieter C-Series)",
+    stage: "STAGE 1",
+    metric: "Rieter 12.2 • 99.8% Eff",
+    code: "OLD-CARD-01",
+    machine_image: "/static/img/machines/carding.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_breaker: {
+    name: "Breaker (Rieter SB/RSB)",
+    stage: "STAGE 2",
+    metric: "Rieter 11.2 • Shift 1",
+    code: "OLD-BRK-01",
+    machine_image: "/static/img/machines/breaker.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_unilap: {
+    name: "Unilap E32 (Dot-Matrix)",
+    stage: "STAGE 3",
+    metric: "13.09 km • 25.2% Eff",
+    code: "OLD-UNILAP-01",
+    machine_image: "/static/img/machines/unilap.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_comber: {
+    name: "Comber E65/E75",
+    stage: "STAGE 4",
+    metric: "Rieter 11.2 • 91.5% Eff",
+    code: "OLD-COMB-01",
+    machine_image: "/static/img/machines/comber.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_draw_frame_rsb: {
+    name: "Draw Frame RSB",
+    stage: "STAGE 5",
+    metric: "Rieter RSB • 82.2% Eff",
+    code: "OLD-RSB-01",
+    machine_image: "/static/img/machines/draw_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_speed_frame: {
+    name: "Speed Frame (Rovematic)",
+    stage: "STAGE 6",
+    metric: "Electro-Jet Working Screen",
+    code: "OLD-SP-FR-01",
+    machine_image: "/static/img/machines/speed_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/electro_jet.svg",
+    manufacturer: "Electro-Jet"
+  },
+  old_ring_frame_p1: {
+    name: "Ring Frame Phase 1",
+    stage: "STAGE 7",
+    metric: "Rieter G33 • 23.47 hrs",
+    code: "OLD-RING-P1",
+    machine_image: "/static/img/machines/ring_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/rieter.svg",
+    manufacturer: "Rieter"
+  },
+  old_ring_frame_p2: {
+    name: "Ring Frame Phase 2",
+    stage: "STAGE 8",
+    metric: "Siemens SIMATIC OP 4-Line",
+    code: "OLD-RING-P2",
+    machine_image: "/static/img/machines/ring_frame.svg",
+    manufacturer_logo: "/static/img/manufacturers/siemens.svg",
+    manufacturer: "Siemens"
+  },
+  old_auto_corner: {
+    name: "Auto Corner (Autoconer 5)",
+    stage: "STAGE 9",
+    metric: "Saurer Display • 14:00",
+    code: "OLD-AUTOCONER",
+    machine_image: "/static/img/machines/autoconer.svg",
+    manufacturer_logo: "/static/img/manufacturers/saurer.svg",
+    manufacturer: "Saurer"
   }
 };
 
 // LOAD SAMPLES & EXTRACTION
 // ================================================================
 async function loadSamples() {
+  const deptId = (currentDepartment && currentDepartment.id) ? currentDepartment.id : "new_spinning";
   try {
-    const res = await fetch("/api/samples");
+    const res = await fetch(`/api/samples?dept=${encodeURIComponent(deptId)}`);
     const data = await res.json();
     const samples = data.samples || [];
 
+    // Update subtext
+    const subtext = document.getElementById("selector-subtext");
+    if (subtext) {
+      const count = samples.length;
+      const deptLabel = deptId === "old_spinning" ? "Old Spinning" : "New Spinning";
+      subtext.textContent = `Select one of the ${count} ${deptLabel} production stages or scan machine QR code`;
+    }
+
+    // Populate template selector dropdown dynamically
+    if (templateSelect) {
+      templateSelect.innerHTML = `<option value="auto">Auto-Detect (Smart AI)</option>` + 
+        samples.map(s => `<option value="${s.template_id}">${s.title}</option>`).join("");
+      if (currentTemplateId && samples.some(s => s.template_id === currentTemplateId)) {
+        templateSelect.value = currentTemplateId;
+      } else if (samples.length > 0) {
+        templateSelect.value = samples[0].template_id;
+      }
+    }
+
+    // Render high-density machine cards with machine photo & manufacturer badge
     samplesContainer.innerHTML = samples.map((s, idx) => {
       const meta = STAGE_META[s.template_id] || {
         name: s.title.replace(/^\d+\.\s*/, ''),
         stage: `STAGE ${idx + 1}`,
         metric: s.subtitle || '',
-        code: s.template_id.toUpperCase()
+        code: s.work_center || s.template_id.toUpperCase(),
+        machine_image: s.machine_image || "/static/img/machines/carding.svg",
+        manufacturer_logo: s.manufacturer_logo || "/static/img/manufacturers/rieter.svg",
+        manufacturer: s.manufacturer || ""
       };
+
+      const machineImg = s.machine_image || meta.machine_image || "/static/img/machines/carding.svg";
+      const mfrLogo = s.manufacturer_logo || meta.manufacturer_logo || "";
 
       return `
         <div onclick="selectSample('${s.filename}', '${s.template_id}')" 
              id="sample-card-${s.template_id}"
-             class="sample-card cursor-pointer bg-white dark:bg-slate-900 border ${idx === 0 ? 'border-indigo-600 dark:border-indigo-500 shadow-md shadow-indigo-500/15 ring-1 ring-indigo-500/30' : 'border-slate-200 dark:border-slate-800'} hover:border-indigo-400 dark:hover:border-slate-600 rounded-xl p-3 transition flex flex-col justify-between group shadow-sm min-h-[92px]">
+             class="sample-card cursor-pointer bg-white dark:bg-slate-900 border ${idx === 0 ? 'border-indigo-600 dark:border-indigo-500 shadow-md shadow-indigo-500/15 ring-2 ring-indigo-500/40' : 'border-slate-200 dark:border-slate-800'} hover:border-indigo-400 dark:hover:border-slate-600 rounded-2xl p-2.5 sm:p-3 transition-all duration-200 flex flex-col justify-between group shadow-sm min-h-[140px] select-none">
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[10px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">${meta.stage}</span>
+            <!-- Top Bar: Stage Badge + Status Dot -->
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[9px] sm:text-[10px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider font-mono">${meta.stage}</span>
               <span class="status-dot w-2 h-2 rounded-full ${idx === 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}"></span>
             </div>
-            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate" title="${meta.name}">${meta.name}</h4>
-            <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-1 truncate">${meta.metric}</p>
+
+            <!-- Machine Graphic + Manufacturer Logo -->
+            <div class="relative w-full h-14 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800/80 p-1 flex items-center justify-center mb-2 overflow-hidden group-hover:bg-indigo-50/40 dark:group-hover:bg-slate-800/60 transition">
+              <img src="${machineImg}" alt="${meta.name}" class="h-full max-w-[85%] object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200">
+              ${mfrLogo ? `
+                <div class="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-1" title="${meta.manufacturer || ''}">
+                  <img src="${mfrLogo}" alt="Mfr" class="h-3 w-auto max-w-[32px] object-contain">
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Machine Name & Metrics -->
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate leading-tight" title="${meta.name}">${meta.name}</h4>
+            <p class="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium mt-0.5 truncate">${meta.metric}</p>
           </div>
-          <div class="mt-2.5 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
-            <span class="font-mono text-slate-400 text-[10px] uppercase font-semibold">${meta.code}</span>
+
+          <!-- Bottom Bar: Work Center QR Tag + Arrow -->
+          <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
+            <span class="font-mono text-slate-500 dark:text-slate-400 text-[9.5px] uppercase font-bold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700/60 flex items-center gap-1">
+              <i class="fa-solid fa-qrcode text-[8px] text-indigo-500"></i> ${meta.code}
+            </span>
             <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition shrink-0"></i>
           </div>
         </div>
@@ -903,7 +1071,13 @@ async function loadSamples() {
     }).join("");
 
     if (samples.length > 0) {
-      selectSample(samples[0].filename, samples[0].template_id);
+      // If currentTemplateId exists in the current department, select it; otherwise select first
+      const match = samples.find(s => s.template_id === currentTemplateId);
+      if (match) {
+        selectSample(match.filename, match.template_id);
+      } else {
+        selectSample(samples[0].filename, samples[0].template_id);
+      }
     }
   } catch (err) {
     console.error("Error loading samples:", err);
@@ -929,10 +1103,19 @@ function selectSample(filename, templateId) {
     overallConfidence.textContent = "98% Conf.";
   }
 
+  const meta = STAGE_META[currentTemplateId];
+  const activeMachineTarget = document.getElementById("active-machine-target-badge");
+  if (activeMachineTarget && meta) {
+    activeMachineTarget.textContent = `Target: ${meta.code || currentTemplateId}`;
+  }
+
+  // Stepper pill progression
+  updateStepperState(1);
+
   // 3. Highlight selected card
   document.querySelectorAll(".sample-card").forEach(el => {
     el.classList.remove(
-      "border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30",
+      "border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-2", "ring-indigo-500/40",
       "border-blue-500", "border-amber-500", "shadow-amber-500/20"
     );
     el.classList.add("border-slate-200", "dark:border-slate-800");
@@ -943,7 +1126,7 @@ function selectSample(filename, templateId) {
   const activeCard = document.getElementById(`sample-card-${templateId}`);
   if (activeCard) {
     activeCard.classList.remove("border-slate-200", "dark:border-slate-800");
-    activeCard.classList.add("border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-1", "ring-indigo-500/30");
+    activeCard.classList.add("border-indigo-600", "dark:border-indigo-500", "shadow-md", "shadow-indigo-500/15", "ring-2", "ring-indigo-500/40");
     const dot = activeCard.querySelector(".status-dot");
     if (dot) dot.className = "status-dot w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
   }
@@ -1088,6 +1271,14 @@ function renderScreenData(data) {
     validationWarnings.classList.remove("hidden");
   } else {
     validationWarnings.classList.add("hidden");
+  }
+
+  // Populate Step 4 Verification Modal fields and update workflow stepper
+  if (typeof populateVerificationModalFields === "function") {
+    populateVerificationModalFields(data);
+  }
+  if (typeof updateStepperState === "function") {
+    updateStepperState(3);
   }
 }
 
@@ -2416,3 +2607,386 @@ async function loadCalibrationInsights() {
     console.warn("Insights load error:", e);
   }
 }
+
+// ================================================================
+// 5-STEP OPERATOR SHOP-FLOOR WORKFLOW STEPPER
+// ================================================================
+function updateStepperState(activeStep) {
+  for (let i = 1; i <= 5; i++) {
+    const pill = document.getElementById(`step-pill-${i}`);
+    if (!pill) continue;
+    const badge = pill.querySelector("span");
+    if (i < activeStep) {
+      pill.className = "step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-bold transition text-center sm:text-left cursor-pointer";
+      if (badge) {
+        badge.className = "w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] shrink-0 font-bold";
+        badge.innerHTML = `<i class="fa-solid fa-check text-[9px]"></i>`;
+      }
+    } else if (i === activeStep) {
+      pill.className = "step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border-2 border-indigo-600 dark:border-indigo-400 text-indigo-700 dark:text-indigo-300 font-bold transition text-center sm:text-left ring-2 ring-indigo-500/30 cursor-pointer";
+      if (badge) {
+        badge.className = "w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0 font-bold animate-pulse";
+        badge.textContent = `${i}`;
+      }
+    } else {
+      pill.className = "step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-400 font-semibold transition text-center sm:text-left cursor-pointer";
+      if (badge) {
+        badge.className = "w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-[10px] shrink-0 font-bold";
+        badge.textContent = `${i}`;
+      }
+    }
+  }
+}
+
+// ================================================================
+// STEP 1: MACHINE QR CODE SCANNER (CAMERA, HARDWARE, MANUAL)
+// ================================================================
+let qrCameraStream = null;
+let qrScanInterval = null;
+
+async function openQrScannerModal() {
+  const modal = document.getElementById("qr-scan-modal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  const recognitionCard = document.getElementById("qr-recognition-card");
+  if (recognitionCard) recognitionCard.classList.add("hidden");
+
+  const qrInput = document.getElementById("qr-manual-input");
+  if (qrInput) {
+    qrInput.value = "";
+    setTimeout(() => qrInput.focus(), 200);
+  }
+
+  // Attempt WebRTC Camera Feed
+  const video = document.getElementById("qr-camera-stream");
+  if (video && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      qrCameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } }
+      });
+      video.srcObject = qrCameraStream;
+
+      // Start BarcodeDetector if natively supported
+      if ("BarcodeDetector" in window) {
+        try {
+          const barcodeDetector = new BarcodeDetector({ formats: ["qr_code", "data_matrix", "code_128", "ean_13"] });
+          qrScanInterval = setInterval(async () => {
+            if (video.readyState >= 2) {
+              try {
+                const barcodes = await barcodeDetector.detect(video);
+                if (barcodes && barcodes.length > 0) {
+                  const rawValue = barcodes[0].rawValue;
+                  clearInterval(qrScanInterval);
+                  processQrCode(rawValue);
+                }
+              } catch (detectErr) {}
+            }
+          }, 400);
+        } catch (detectorInitErr) {
+          console.warn("BarcodeDetector init notice:", detectorInitErr);
+        }
+      }
+    } catch (camErr) {
+      console.warn("QR scanner camera notice:", camErr);
+    }
+  }
+}
+
+function closeQrScannerModal() {
+  if (qrScanInterval) {
+    clearInterval(qrScanInterval);
+    qrScanInterval = null;
+  }
+  if (qrCameraStream) {
+    qrCameraStream.getTracks().forEach(t => t.stop());
+    qrCameraStream = null;
+  }
+  const modal = document.getElementById("qr-scan-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
+
+function handleManualQrSubmit() {
+  const input = document.getElementById("qr-manual-input");
+  if (!input) return;
+  const code = input.value.trim();
+  if (code) {
+    processQrCode(code);
+  } else {
+    showToast("Please enter a Machine QR or Work Center code", "error");
+  }
+}
+
+function simulateQrScan(code) {
+  const input = document.getElementById("qr-manual-input");
+  if (input) input.value = code;
+  processQrCode(code);
+}
+
+let lastScannedMachine = null;
+
+async function processQrCode(code) {
+  if (!code) return;
+  const cleanCode = String(code).trim().toUpperCase();
+
+  try {
+    const res = await fetch(`/api/qr/lookup?code=${encodeURIComponent(cleanCode)}`);
+    const data = await res.json();
+
+    if (res.ok && data.status === "success" && data.machine) {
+      const m = data.machine;
+      lastScannedMachine = m;
+
+      // Update QR recognition feedback card in modal
+      const recognitionCard = document.getElementById("qr-recognition-card");
+      const matchTitle = document.getElementById("qr-match-title");
+      const matchDept = document.getElementById("qr-match-dept");
+      const matchWc = document.getElementById("qr-match-wc");
+      const matchMfr = document.getElementById("qr-match-mfr");
+      const machineImg = document.getElementById("qr-machine-img");
+
+      if (matchTitle) matchTitle.textContent = m.title;
+      if (matchDept) matchDept.textContent = m.department_name;
+      if (matchWc) matchWc.textContent = m.work_center;
+      if (matchMfr) matchMfr.textContent = `Manufacturer: ${m.manufacturer || 'Standard'}`;
+      if (machineImg) machineImg.src = m.machine_image || '/static/img/machines/carding.svg';
+      if (recognitionCard) recognitionCard.classList.remove("hidden");
+
+      // Auto-switch department if different
+      if (currentDepartment.id !== m.department_id) {
+        selectDepartment(m.department_id, m.department_name);
+      }
+
+      // Automatically select this machine
+      selectSample(m.filename, m.template_id);
+
+      // Update Target Badge
+      const activeMachineTarget = document.getElementById("active-machine-target-badge");
+      if (activeMachineTarget) {
+        activeMachineTarget.textContent = `Target: ${m.work_center}`;
+      }
+
+      // Update Stepper
+      updateStepperState(2);
+
+      showToast(`Machine QR Verified: ${m.title} (${m.work_center})`, "success");
+    } else {
+      showToast(data.message || `Unrecognized QR: ${cleanCode}`, "error");
+    }
+  } catch (err) {
+    console.error("QR lookup error:", err);
+    showToast("QR verification network error", "error");
+  }
+}
+
+function proceedFromQrToCapture() {
+  closeQrScannerModal();
+  setTimeout(() => {
+    triggerScannerCameraModal();
+  }, 250);
+}
+
+// ================================================================
+// ZEBRA TC22 & TC5X HARDWARE SCANNER INTEGRATION
+// ================================================================
+function initZebraHardwareScannerListener() {
+  // 1. DataWedge Web Intent / JS API callback
+  window.handleZebraHardwareScan = function(barcodeData) {
+    console.log("Hardware Zebra DataWedge received:", barcodeData);
+    processQrCode(barcodeData);
+  };
+
+  // 2. Window Message event listener (Zebra Enterprise Browser Broadcast)
+  window.addEventListener("message", (event) => {
+    if (event.data && (event.data.barcode || event.data.scanData || event.data.data)) {
+      const barcode = event.data.barcode || event.data.scanData || event.data.data;
+      processQrCode(barcode);
+    }
+  });
+
+  // 3. Hardware Barcode Wedge Keystroke listener (Rapid scanner buffer)
+  let barcodeBuffer = "";
+  let lastKeyTime = Date.now();
+
+  document.addEventListener("keydown", (e) => {
+    // Ignore input if user is actively typing in a standard text field
+    const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+    const activeType = document.activeElement ? (document.activeElement.type || "").toLowerCase() : "";
+    const isTextInput = (activeTag === "input" && activeType !== "file" && document.activeElement.id !== "qr-manual-input") || activeTag === "textarea";
+
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastKeyTime;
+    lastKeyTime = currentTime;
+
+    if (e.key === "Enter") {
+      if (barcodeBuffer.length >= 3 && !isTextInput) {
+        const scannedCode = barcodeBuffer;
+        barcodeBuffer = "";
+        e.preventDefault();
+        processQrCode(scannedCode);
+      } else {
+        barcodeBuffer = "";
+      }
+      return;
+    }
+
+    if (e.key.length === 1) {
+      // Scanners typically send characters in rapid succession (<50ms)
+      if (timeDiff > 120) {
+        barcodeBuffer = e.key;
+      } else {
+        barcodeBuffer += e.key;
+      }
+    }
+  });
+}
+
+// ================================================================
+// STEP 4: OPERATOR VERIFICATION MODAL (REVIEW & EDIT BEFORE SAP)
+// ================================================================
+function openVerificationModal() {
+  const modal = document.getElementById("verification-modal");
+  if (!modal) return;
+
+  if (currentData) {
+    populateVerificationModalFields(currentData);
+  }
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+}
+
+function closeVerificationModal() {
+  const modal = document.getElementById("verification-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+}
+
+function populateVerificationModalFields(data) {
+  if (!data) return;
+
+  // Title, Work Center, Confidence, Image
+  const titleEl = document.getElementById("modal-verify-machine-title");
+  const wcBadge = document.getElementById("modal-verify-wc-badge");
+  const mfrBadge = document.getElementById("modal-verify-mfr-badge");
+  const confBadge = document.getElementById("modal-verify-conf-badge");
+  const screenImg = document.getElementById("modal-verify-screen-img");
+  const machineSvg = document.getElementById("modal-verify-machine-svg");
+  const orderDisplay = document.getElementById("modal-verify-order-display");
+
+  const meta = STAGE_META[data.template_id] || {};
+
+  if (titleEl) titleEl.textContent = data.template_name || getTemplateName(data.template_id);
+  if (wcBadge) wcBadge.textContent = document.getElementById("sap-work-center")?.value || meta.code || data.template_id;
+  if (mfrBadge) mfrBadge.textContent = meta.manufacturer || (data.department_id === "old_spinning" ? "Rieter / Siemens" : "Trutzschler / LMW");
+  if (confBadge) confBadge.textContent = `${Math.round((data.overall_confidence || 0.98) * 100)}% Conf.`;
+  if (screenImg) {
+    screenImg.src = currentClientImageUrl || data.image_url || `/samples/${activeImageFilename}`;
+  }
+  if (machineSvg) {
+    machineSvg.src = meta.machine_image || "/static/img/machines/carding.svg";
+  }
+  if (orderDisplay) {
+    orderDisplay.textContent = `Order #${document.getElementById("sap-order-id")?.value || '000010049281'}`;
+  }
+
+  // Render editable fields
+  const container = document.getElementById("modal-verify-fields-container");
+  if (!container || !data.fields) return;
+
+  container.innerHTML = data.fields.map(f => {
+    const val = (f.value !== undefined && f.value !== null) ? f.value : "";
+    const confPct = Math.round((f.confidence || 0.95) * 100);
+    return `
+      <div class="p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <label for="modal-input-${f.key}" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate cursor-pointer">${escapeHtml(f.label)}</label>
+            <span class="text-[9.5px] font-mono px-1.5 py-0.2 rounded ${confPct >= 90 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'} border border-emerald-500/20 font-bold">${confPct}%</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
+            <span>SAP: ${f.sap_field || f.key}</span>
+            ${f.unit ? `<span class="px-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold">${f.unit}</span>` : ''}
+          </div>
+        </div>
+        <div class="w-36 sm:w-44 shrink-0">
+          <input type="text" id="modal-input-${f.key}" data-key="${f.key}" value="${escapeHtml(String(val))}" 
+                 onchange="syncModalInputToMainForm('${f.key}', this.value)"
+                 class="modal-field-input w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white font-mono font-bold text-xs text-right focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none">
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function syncModalInputToMainForm(key, value) {
+  // Sync to currentData model
+  if (currentData && currentData.fields) {
+    const field = currentData.fields.find(f => f.key === key);
+    if (field) {
+      field.value = value;
+      const num = parseFloat(value);
+      if (!isNaN(num)) field.numeric_value = num;
+    }
+  }
+
+  // Sync to form input on main desktop view
+  const mainInput = document.getElementById(`field-input-${key}`);
+  if (mainInput) {
+    mainInput.value = value;
+  }
+
+  updateSapPreview();
+}
+
+async function submitVerifiedDataToSap() {
+  const btn = document.getElementById("btn-modal-confirm-sap");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Posting to SAP NetWeaver...`;
+  }
+
+  // Read latest edits from modal inputs
+  document.querySelectorAll(".modal-field-input").forEach(input => {
+    const key = input.dataset.key;
+    const val = input.value;
+    syncModalInputToMainForm(key, val);
+  });
+
+  try {
+    await submitConfirmationToSAP();
+    closeVerificationModal();
+    updateStepperState(5);
+    showToast("Verified Data Successfully Posted to SAP ERP!", "success");
+  } catch (err) {
+    showToast("SAP Submission Notice: " + err.message, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>Step 5: Confirm &amp; Post to SAP</span>`;
+    }
+  }
+}
+
+// Attach listener on initialization
+initZebraHardwareScannerListener();
+
+// Expose all workflow functions globally
+window.openQrScannerModal = openQrScannerModal;
+window.closeQrScannerModal = closeQrScannerModal;
+window.handleManualQrSubmit = handleManualQrSubmit;
+window.simulateQrScan = simulateQrScan;
+window.processQrCode = processQrCode;
+window.proceedFromQrToCapture = proceedFromQrToCapture;
+window.openVerificationModal = openVerificationModal;
+window.closeVerificationModal = closeVerificationModal;
+window.submitVerifiedDataToSap = submitVerifiedDataToSap;
+window.syncModalInputToMainForm = syncModalInputToMainForm;
+window.updateStepperState = updateStepperState;
+

@@ -248,82 +248,259 @@ def get_templates():
         "templates": engine.templates
     })
 
+NEW_SPINNING_CATALOG = [
+    {
+        "filename": "carding.jpg",
+        "title": "1. Carding Machine",
+        "subtitle": "Shift 1 • 172.18 Kg • 53.14 Hanks • 88.52% Eff",
+        "template_id": "carding",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 1: Carding",
+        "work_center": "CARD-01",
+        "qr_code": "CARD-01",
+        "machine_image": "/static/img/machines/carding.svg",
+        "manufacturer": "Trutzschler / LMW",
+        "manufacturer_logo": "/static/img/manufacturers/trutzschler.svg"
+    },
+    {
+        "filename": "breaker_br._draw_frame.jpg",
+        "title": "2. Breaker Draw Frame (Br. DF)",
+        "subtitle": "Shift 1 • 489.5 Kg • 151.1 Hanks • 10 Doffs",
+        "template_id": "breaker_draw_frame",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 2: Breaker DF",
+        "work_center": "BR-DF",
+        "qr_code": "BR-DF",
+        "machine_image": "/static/img/machines/breaker.svg",
+        "manufacturer": "LMW",
+        "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
+    },
+    {
+        "filename": "lap_former.jpg",
+        "title": "3. Lap Former",
+        "subtitle": "Shift 1 • 612.8 Kg • 36 Doffs • 42.94% Eff",
+        "template_id": "lap_former",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 3: Lap Former",
+        "work_center": "LAP-01",
+        "qr_code": "LAP-01",
+        "machine_image": "/static/img/machines/lap_former.svg",
+        "manufacturer": "LMW",
+        "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
+    },
+    {
+        "filename": "comber.jpg",
+        "title": "4. Comber",
+        "subtitle": "Shift 1 • 197.05 Kg • 60.8 Hanks • 95.38% Eff",
+        "template_id": "comber",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 4: Combing",
+        "work_center": "COMB-01",
+        "qr_code": "COMB-01",
+        "machine_image": "/static/img/machines/comber.svg",
+        "manufacturer": "LMW",
+        "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
+    },
+    {
+        "filename": "finisher_fr._draw_frame.jpg",
+        "title": "5. Finisher Draw Frame (Fr. DF)",
+        "subtitle": "Shift 1 • 432.4 Kg • 119.17 Hanks • 23 Doffs",
+        "template_id": "finisher_draw_frame",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 5: Finisher DF",
+        "work_center": "FR-DF",
+        "qr_code": "FR-DF",
+        "machine_image": "/static/img/machines/finisher.svg",
+        "manufacturer": "LMW",
+        "manufacturer_logo": "/static/img/manufacturers/lmw.svg"
+    },
+    {
+        "filename": "speed_frame.jpg",
+        "title": "6. Speed Frame (Roving Frame)",
+        "subtitle": "Roving Frame Multi-Day Matrix (8 Shifts)",
+        "template_id": "speed_frame",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 6: Roving Frame",
+        "work_center": "SP-FR",
+        "qr_code": "SP-FR",
+        "machine_image": "/static/img/machines/speed_frame.svg",
+        "manufacturer": "Electro-Jet",
+        "manufacturer_logo": "/static/img/manufacturers/electro_jet.svg"
+    },
+    {
+        "filename": "ring_frame.jpg",
+        "title": "7. Ring Frame (Spinning)",
+        "subtitle": "Shift 1 • 6.0 Hanks • 5.14 hrs • 34.0g/spindle",
+        "template_id": "ring_frame",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 7: Ring Spinning",
+        "work_center": "RING-01",
+        "qr_code": "RING-01",
+        "machine_image": "/static/img/machines/ring_frame.svg",
+        "manufacturer": "Siemens SIMATIC",
+        "manufacturer_logo": "/static/img/manufacturers/siemens.svg"
+    },
+    {
+        "filename": "link_conner.jpg",
+        "title": "8. Link Conner (Autoconer 6)",
+        "subtitle": "81.50 Kg • 44 Doffs • 68.7% Eff • Saurer",
+        "template_id": "link_conner",
+        "department_id": "new_spinning",
+        "department_name": "New Spinning",
+        "category": "Stage 8: Autoconer",
+        "work_center": "AUTOCONER",
+        "qr_code": "AUTOCONER",
+        "machine_image": "/static/img/machines/link_conner.svg",
+        "manufacturer": "Saurer",
+        "manufacturer_logo": "/static/img/manufacturers/saurer.svg"
+    }
+]
+
+OLD_SPINNING_CATALOG = [
+    {
+        "filename": "old_carding.jpg",
+        "title": "1. Carding (Old Spinning)",
+        "subtitle": "Rieter C-Series • 12.2 Production Shifts • 99.8% Eff",
+        "template_id": "old_carding",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 1: Carding",
+        "work_center": "OLD-CARD-01",
+        "qr_code": "OLD-CARD-01",
+        "machine_image": "/static/img/machines/carding.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_breaker.jpg",
+        "title": "2. Breaker (Old Spinning)",
+        "subtitle": "Rieter SB/RSB • 11.2 Previous Shifts • Shift 1",
+        "template_id": "old_breaker",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 2: Breaker",
+        "work_center": "OLD-BRK-01",
+        "qr_code": "OLD-BRK-01",
+        "machine_image": "/static/img/machines/breaker.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_unilap.jpg",
+        "title": "3. Unilap (Old Spinning)",
+        "subtitle": "Rieter E32 Dot-Matrix • 13.09 km • 25.2% Eff",
+        "template_id": "old_unilap",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 3: Unilap",
+        "work_center": "OLD-UNILAP-01",
+        "qr_code": "OLD-UNILAP-01",
+        "machine_image": "/static/img/machines/unilap.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_comber.jpg",
+        "title": "4. Comber (Old Spinning)",
+        "subtitle": "Rieter E65/E75 • 11.2 Shift Overview • 91.5% Eff",
+        "template_id": "old_comber",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 4: Comber",
+        "work_center": "OLD-COMB-01",
+        "qr_code": "OLD-COMB-01",
+        "machine_image": "/static/img/machines/comber.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_draw_frame_rsb.jpg",
+        "title": "5. Draw Frame RSB (Old Spinning)",
+        "subtitle": "Rieter RSB Autoleveler • 11.2 Shifts • 82.2% Eff",
+        "template_id": "old_draw_frame_rsb",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 5: Draw Frame RSB",
+        "work_center": "OLD-RSB-01",
+        "qr_code": "OLD-RSB-01",
+        "machine_image": "/static/img/machines/draw_frame.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_speed_frame.jpg",
+        "title": "6. Speed Frame (Old Spinning)",
+        "subtitle": "Electro-Jet Rovematic ADR Working Screen",
+        "template_id": "old_speed_frame",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 6: Speed Frame",
+        "work_center": "OLD-SP-FR-01",
+        "qr_code": "OLD-SP-FR-01",
+        "machine_image": "/static/img/machines/speed_frame.svg",
+        "manufacturer": "Electro-Jet",
+        "manufacturer_logo": "/static/img/manufacturers/electro_jet.svg"
+    },
+    {
+        "filename": "old_ring_frame_p1.jpg",
+        "title": "7. Ring Frame Phase 1 (Old Spinning)",
+        "subtitle": "Rieter G33/G35 • 10.2 Production Shifts • 23.47 hrs",
+        "template_id": "old_ring_frame_p1",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 7: Ring Frame P1",
+        "work_center": "OLD-RING-P1",
+        "qr_code": "OLD-RING-P1",
+        "machine_image": "/static/img/machines/ring_frame.svg",
+        "manufacturer": "Rieter",
+        "manufacturer_logo": "/static/img/manufacturers/rieter.svg"
+    },
+    {
+        "filename": "old_ring_frame_p2.jpg",
+        "title": "8. Ring Frame Phase 2 (Old Spinning)",
+        "subtitle": "Siemens SIMATIC OP RXI 4-Line Display",
+        "template_id": "old_ring_frame_p2",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 8: Ring Frame P2",
+        "work_center": "OLD-RING-P2",
+        "qr_code": "OLD-RING-P2",
+        "machine_image": "/static/img/machines/ring_frame.svg",
+        "manufacturer": "Siemens",
+        "manufacturer_logo": "/static/img/manufacturers/siemens.svg"
+    },
+    {
+        "filename": "old_auto_corner.jpg",
+        "title": "9. Auto Corner (Old Spinning)",
+        "subtitle": "Saurer Autoconer 5 Data Display • 14:00",
+        "template_id": "old_auto_corner",
+        "department_id": "old_spinning",
+        "department_name": "Old Spinning",
+        "category": "Stage 9: Auto Corner",
+        "work_center": "OLD-AUTOCONER",
+        "qr_code": "OLD-AUTOCONER",
+        "machine_image": "/static/img/machines/autoconer.svg",
+        "manufacturer": "Saurer",
+        "manufacturer_logo": "/static/img/manufacturers/saurer.svg"
+    }
+]
+
 @app.route("/api/samples", methods=["GET"])
 def get_samples():
-    catalog = [
-        {
-            "filename": "carding.jpg",
-            "title": "1. Carding Machine",
-            "subtitle": "Shift 1 • 172.18 Kg • 53.14 Hanks • 88.52% Eff",
-            "template_id": "carding",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 1: Carding"
-        },
-        {
-            "filename": "breaker_br._draw_frame.jpg",
-            "title": "2. Breaker Draw Frame (Br. DF)",
-            "subtitle": "Shift 1 • 489.5 Kg • 151.1 Hanks • 10 Doffs",
-            "template_id": "breaker_draw_frame",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 2: Breaker DF"
-        },
-        {
-            "filename": "lap_former.jpg",
-            "title": "3. Lap Former",
-            "subtitle": "Shift 1 • 612.8 Kg • 36 Doffs • 42.94% Eff",
-            "template_id": "lap_former",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 3: Lap Former"
-        },
-        {
-            "filename": "comber.jpg",
-            "title": "4. Comber",
-            "subtitle": "Shift 1 • 197.05 Kg • 60.8 Hanks • 95.38% Eff",
-            "template_id": "comber",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 4: Combing"
-        },
-        {
-            "filename": "finisher_fr._draw_frame.jpg",
-            "title": "5. Finisher Draw Frame (Fr. DF)",
-            "subtitle": "Shift 1 • 432.4 Kg • 119.17 Hanks • 23 Doffs",
-            "template_id": "finisher_draw_frame",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 5: Finisher DF"
-        },
-        {
-            "filename": "speed_frame.jpg",
-            "title": "6. Speed Frame (Roving Frame)",
-            "subtitle": "Roving Frame Multi-Day Matrix (8 Shifts)",
-            "template_id": "speed_frame",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 6: Roving Frame"
-        },
-        {
-            "filename": "ring_frame.jpg",
-            "title": "7. Ring Frame (Spinning)",
-            "subtitle": "Shift 1 • 6.0 Hanks • 5.14 hrs • 34.0g/spindle",
-            "template_id": "ring_frame",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 7: Ring Spinning"
-        },
-        {
-            "filename": "link_conner.jpg",
-            "title": "8. Link Conner (Autoconer 6)",
-            "subtitle": "81.50 Kg • 44 Doffs • 68.7% Eff • Saurer",
-            "template_id": "link_conner",
-            "department_id": "new_spinning",
-            "department_name": "New Spinning",
-            "category": "Stage 8: Autoconer"
-        }
-    ]
+    dept = (request.args.get("department_id") or request.args.get("dept") or "new_spinning").strip().lower()
+    if dept == "old_spinning":
+        catalog = OLD_SPINNING_CATALOG
+    elif dept == "all":
+        catalog = NEW_SPINNING_CATALOG + OLD_SPINNING_CATALOG
+    else:
+        catalog = NEW_SPINNING_CATALOG
     
     sample_files = []
     for item in catalog:
@@ -335,9 +512,90 @@ def get_samples():
             })
     return jsonify({
         "status": "success",
-        "current_department": "new_spinning",
+        "current_department": dept,
         "samples": sample_files
     })
+
+@app.route("/api/qr/lookup", methods=["GET", "POST"])
+def lookup_machine_by_qr():
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        code = str(data.get("code") or data.get("qr") or data.get("qr_code") or "").strip().upper()
+    else:
+        code = str(request.args.get("code") or request.args.get("qr") or request.args.get("qr_code") or "").strip().upper()
+
+    all_machines = NEW_SPINNING_CATALOG + OLD_SPINNING_CATALOG
+
+    # Normalization map for common QR / barcode variations
+    clean_code = re.sub(r'[^A-Z0-9_-]', '', code)
+    matched = None
+
+    # Pass 1: Exact match on qr_code, work_center, or template_id
+    for m in all_machines:
+        m_qr = m.get("qr_code", "").upper()
+        m_wc = m.get("work_center", "").upper()
+        m_tid = m.get("template_id", "").upper().replace("_", "-")
+        if clean_code in (m_qr, m_wc, m_tid):
+            matched = m
+            break
+
+    # Pass 2: Prefix / Suffix boundary match
+    if not matched:
+        for m in all_machines:
+            m_qr = m.get("qr_code", "").upper()
+            m_wc = m.get("work_center", "").upper()
+            if clean_code.endswith("-" + m_qr) or clean_code.startswith(m_qr + "-"):
+                matched = m
+                break
+
+    if not matched:
+        # Check partial keywords
+        for m in all_machines:
+            tid = m["template_id"].lower()
+            if "unilap" in clean_code.lower() and "unilap" in tid:
+                matched = m
+                break
+            elif "rsb" in clean_code.lower() and "rsb" in tid:
+                matched = m
+                break
+            elif "phase" in clean_code.lower() and "p1" in clean_code.lower() and "p1" in tid:
+                matched = m
+                break
+            elif "phase" in clean_code.lower() and "p2" in clean_code.lower() and "p2" in tid:
+                matched = m
+                break
+            elif "speed" in clean_code.lower() and "speed" in tid:
+                matched = m
+                break
+            elif "comber" in clean_code.lower() and "comber" in tid:
+                matched = m
+                break
+            elif "card" in clean_code.lower() and "card" in tid:
+                matched = m
+                break
+            elif "breaker" in clean_code.lower() and "breaker" in tid:
+                matched = m
+                break
+            elif "corner" in clean_code.lower() or "coner" in clean_code.lower():
+                if "old" in clean_code.lower() and "old_auto_corner" in tid:
+                    matched = m
+                    break
+                elif "link_conner" in tid:
+                    matched = m
+                    break
+
+    if matched:
+        return jsonify({
+            "status": "success",
+            "matched": True,
+            "machine": matched
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "matched": False,
+            "message": f"QR Code '{code}' not recognized. Please scan a valid Welspun Machine QR Code."
+        }), 404
 
 @app.route("/samples/<path:filename>")
 def serve_sample(filename):

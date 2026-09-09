@@ -599,7 +599,7 @@
           <h3 class="font-bold text-base text-slate-900 dark:text-white">Select Production Department</h3>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="dept-cards-container">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4" id="dept-cards-container">
           
           <!-- DEPT 1: NEW SPINNING (ACTIVE) -->
           <div onclick="selectDepartment('new_spinning', 'New Spinning (8 Machines)')" 
@@ -626,7 +626,32 @@
             </div>
           </div>
 
-          <!-- DEPT 2: WARPING -->
+          <!-- DEPT 2: OLD SPINNING (NEW - 9 MACHINES) -->
+          <div onclick="selectDepartment('old_spinning', 'Old Spinning (9 Machines)')" 
+               id="card-dept-old_spinning" 
+               class="dept-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                Active &bull; 9 Machines
+              </span>
+              <i class="fa-regular fa-circle text-slate-400 text-lg dept-check"></i>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-lg">Old Spinning</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-3">9 legacy stages: Rieter, Electro-Jet, Siemens &amp; Saurer Autoconer 5.</p>
+            
+            <!-- STAGE BADGES -->
+            <div class="space-y-1.5 text-[11px] font-mono text-slate-600 dark:text-slate-300">
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px] text-amber-500"></i> Carding &bull; Breaker &bull; Unilap E32</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px] text-amber-500"></i> Comber E65 &bull; Draw Frame RSB &bull; Speed Frame</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle text-[6px] text-amber-500"></i> Ring Frame P1 &bull; Ring Frame P2 &bull; Auto Corner</div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-microchip text-indigo-500"></i> Dynamic Semantic OCR Active
+            </div>
+          </div>
+
+          <!-- DEPT 3: WARPING -->
           <div onclick="selectDepartment('warping', 'Warping')" 
                id="card-dept-warping" 
                class="dept-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
@@ -643,7 +668,7 @@
             </div>
           </div>
 
-          <!-- DEPT 3: WEAVING -->
+          <!-- DEPT 4: WEAVING -->
           <div onclick="selectDepartment('weaving', 'Weaving')" 
                id="card-dept-weaving" 
                class="dept-card cursor-pointer rounded-2xl p-5 border-2 transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600">
@@ -695,6 +720,75 @@
       <main class="max-w-[1536px] mx-auto p-3 sm:p-5 lg:p-6 transition-all duration-200 w-full" id="main-layout">
         
         <!-- ============================================== -->
+        <!-- 5-STEP SHOP-FLOOR OPERATOR WORKFLOW STEPPER    -->
+        <!-- ============================================== -->
+        <div class="mb-4 bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider border border-indigo-500/20">
+                <i class="fa-solid fa-layer-group text-[10px]"></i> Floor Standard SOP
+              </span>
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 hidden sm:inline">5-Step Machine Vision &amp; SAP Posting Flow</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span id="active-machine-target-badge" class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                Target: CARD-01
+              </span>
+            </div>
+          </div>
+
+          <!-- Stepper Steps -->
+          <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-[10px] sm:text-xs">
+            
+            <!-- Step 1: Scan QR Code -->
+            <button onclick="openQrScannerModal()" id="step-pill-1" class="step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-bold transition hover:bg-indigo-100 text-center sm:text-left">
+              <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] shrink-0 font-bold">1</span>
+              <div class="min-w-0">
+                <div class="leading-tight truncate">Scan Machine QR</div>
+                <div class="text-[9px] font-normal text-slate-500 dark:text-slate-400 hidden sm:block">Unique Machine ID</div>
+              </div>
+            </button>
+
+            <!-- Step 2: Capture Photo -->
+            <button onclick="triggerScannerCameraModal()" id="step-pill-2" class="step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition hover:bg-slate-100 text-center sm:text-left">
+              <span class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center text-[10px] shrink-0 font-bold">2</span>
+              <div class="min-w-0">
+                <div class="leading-tight truncate">Capture HMI</div>
+                <div class="text-[9px] font-normal text-slate-500 dark:text-slate-400 hidden sm:block">Camera / Upload</div>
+              </div>
+            </button>
+
+            <!-- Step 3: AI Dynamic OCR -->
+            <div id="step-pill-3" class="step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-center sm:text-left">
+              <span class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center text-[10px] shrink-0 font-bold">3</span>
+              <div class="min-w-0">
+                <div class="leading-tight truncate">AI Dynamic OCR</div>
+                <div class="text-[9px] font-normal text-slate-500 dark:text-slate-400 hidden sm:block">Angle &amp; Tilt Invariant</div>
+              </div>
+            </div>
+
+            <!-- Step 4: Verification Modal -->
+            <button onclick="openVerificationModal()" id="step-pill-4" class="step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition hover:bg-slate-100 text-center sm:text-left">
+              <span class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center text-[10px] shrink-0 font-bold">4</span>
+              <div class="min-w-0">
+                <div class="leading-tight truncate">Verify Data</div>
+                <div class="text-[9px] font-normal text-slate-500 dark:text-slate-400 hidden sm:block">Review &amp; Edit</div>
+              </div>
+            </button>
+
+            <!-- Step 5: Post to SAP -->
+            <button onclick="submitConfirmationToSAP()" id="step-pill-5" class="step-pill flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition hover:bg-slate-100 text-center sm:text-left">
+              <span class="w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center text-[10px] shrink-0 font-bold">5</span>
+              <div class="min-w-0">
+                <div class="leading-tight truncate">Post to SAP</div>
+                <div class="text-[9px] font-normal text-slate-500 dark:text-slate-400 hidden sm:block">CO11N Confirmation</div>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- ============================================== -->
         <!-- CONTROLS & MACHINE SELECTOR SECTION           -->
         <!-- ============================================== -->
         <section class="mb-5 bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-md shadow-slate-200/40 dark:shadow-black/20" id="selector-card">
@@ -702,12 +796,12 @@
             <div>
               <div class="flex items-center gap-2">
                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold text-white shrink-0">1</span>
-                <h2 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white">Production Machine Screen</h2>
+                <h2 class="font-semibold text-sm sm:text-base text-slate-900 dark:text-white" id="selector-heading">Production Machine Screen</h2>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-8" id="selector-subtext">Select one of the 8 production stages or capture/upload a machine screen</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-8" id="selector-subtext">Scan machine QR code, select machine card, or capture HMI screen</p>
             </div>
 
-            <!-- UNIFIED ACTION BUTTONS: CAMERA + UPLOAD + CONTROLS -->
+            <!-- UNIFIED ACTION BUTTONS: SCAN QR + CAMERA + UPLOAD + CONTROLS -->
             <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end" id="action-buttons-group">
               
               <!-- SELECTORS GROUP -->
@@ -718,6 +812,7 @@
                   <label for="department-select" class="font-medium text-slate-500 dark:text-slate-400">Dept:</label>
                   <select id="department-select" class="bg-transparent text-indigo-600 dark:text-indigo-300 font-bold outline-none cursor-pointer">
                     <option value="new_spinning">New Spinning (8 Machines)</option>
+                    <option value="old_spinning">Old Spinning (9 Machines)</option>
                     <option value="warping">Warping</option>
                     <option value="weaving">Weaving</option>
                   </select>
@@ -728,38 +823,36 @@
                   <label for="template-select" class="font-medium text-slate-500 dark:text-slate-400">Template:</label>
                   <select id="template-select" class="bg-transparent text-indigo-600 dark:text-indigo-400 font-semibold outline-none cursor-pointer">
                     <option value="auto">Auto-Detect (Smart AI)</option>
-                    <option value="carding">1. Carding Machine</option>
-                    <option value="breaker_draw_frame">2. Breaker Draw Frame (Br. DF)</option>
-                    <option value="lap_former">3. Lap Former</option>
-                    <option value="comber">4. Comber</option>
-                    <option value="finisher_draw_frame">5. Finisher Draw Frame (Fr. DF)</option>
-                    <option value="speed_frame">6. Speed Frame (Roving Frame)</option>
-                    <option value="ring_frame">7. Ring Frame (Spinning)</option>
-                    <option value="link_conner">8. Link Conner (Autoconer 6)</option>
                   </select>
                 </div>
               </div>
 
               <!-- CAPTURE ACTION BUTTONS GROUP (NEVER WRAPS ACROSS EACH OTHER) -->
               <div class="flex items-center gap-2 shrink-0">
+                <!-- BUTTON 0: SCAN QR CODE -->
+                <button id="btn-scan-qr" onclick="openQrScannerModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-emerald-600/20 active:scale-95 shrink-0 cursor-pointer">
+                  <i class="fa-solid fa-qrcode"></i>
+                  <span>Scan QR</span>
+                </button>
+
                 <!-- BUTTON 1: CAMERA CAPTURE -->
-                <button id="btn-camera-capture" onclick="triggerScannerCameraModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-500/20 active:scale-95 shrink-0">
+                <button id="btn-camera-capture" onclick="triggerScannerCameraModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-500/20 active:scale-95 shrink-0 cursor-pointer">
                   <i class="fa-solid fa-camera"></i>
-                  <span>Camera Capture</span>
+                  <span>Camera</span>
                 </button>
 
                 <!-- BUTTON 2: UPLOAD PHOTO -->
-                <button id="btn-upload-photo" onclick="document.getElementById('file-input').click()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-500/20 active:scale-95 shrink-0">
+                <button id="btn-upload-photo" onclick="document.getElementById('file-input').click()" class="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-500/20 active:scale-95 shrink-0 cursor-pointer">
                   <i class="fa-solid fa-cloud-arrow-up"></i>
-                  <span>Upload Photo</span>
+                  <span>Upload</span>
                 </button>
               </div>
 
             </div>
           </div>
 
-          <!-- 8-STAGE HORIZONTAL MACHINE GRID -->
-          <div class="grid grid-cols-2 md:grid-cols-4 2xl:grid-cols-8 gap-3" id="samples-container">
+          <!-- 8 OR 9 STAGE HORIZONTAL MACHINE GRID (RESPONSIVE: WORKSTATION / TABLET / ZEBRA TC22) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-9 gap-2.5 sm:gap-3" id="samples-container">
             <!-- Dynamically populated via JS -->
           </div>
         </section>
@@ -1006,11 +1099,305 @@
         </div>
       </main>
 
-
+      <!-- STICKY BOTTOM ACTION BAR FOR ZEBRA SCANNERS & MOBILE PHONES -->
+      <div id="mobile-scanner-bar" class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 p-2.5 z-40 shadow-2xl flex items-center justify-between gap-2">
+        <button onclick="openQrScannerModal()" class="flex-1 py-2.5 px-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition">
+          <i class="fa-solid fa-qrcode text-sm"></i>
+          <span>1. Scan QR</span>
+        </button>
+        <button onclick="triggerScannerCameraModal()" class="flex-1 py-2.5 px-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition">
+          <i class="fa-solid fa-camera text-sm"></i>
+          <span>2. Photo</span>
+        </button>
+        <button onclick="openVerificationModal()" class="flex-1 py-2.5 px-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition">
+          <i class="fa-solid fa-clipboard-check text-sm"></i>
+          <span>4. Verify</span>
+        </button>
+      </div>
 
     </div> <!-- End #app-viewport-wrapper -->
 
   </section>
+
+  <!-- ============================================== -->
+  <!-- MODAL: MACHINE QR CODE SCANNER (STEP 1)        -->
+  <!-- ============================================== -->
+  <div id="qr-scan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col my-auto transition-all animate-[fadeIn_0.2s_ease-out]">
+      
+      <!-- HEADER -->
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-lg shadow-md shadow-emerald-500/20">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-base text-slate-900 dark:text-white">Scan Machine QR Code</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Step 1 of 5</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Point scanner at machine asset QR tag or select machine below</p>
+          </div>
+        </div>
+        <button onclick="closeQrScannerModal()" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- CAMERA / SCAN VIEWFINDER -->
+      <div class="p-5 space-y-4">
+        
+        <!-- Live Camera Viewfinder Box -->
+        <div class="relative bg-black rounded-2xl aspect-[16/9] flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+          <video id="qr-camera-stream" autoplay playsinline class="w-full h-full object-cover"></video>
+          
+          <!-- Targeting Reticle -->
+          <div class="absolute inset-6 border-2 border-dashed border-emerald-400/80 rounded-2xl pointer-events-none flex flex-col items-center justify-center bg-emerald-500/5">
+            <div class="w-12 h-12 border-2 border-emerald-400 rounded-lg flex items-center justify-center animate-pulse">
+              <i class="fa-solid fa-qrcode text-emerald-400 text-xl"></i>
+            </div>
+            <span class="text-emerald-300 text-xs font-mono bg-black/70 px-3 py-1 rounded-full mt-2">Center QR Code in Reticle</span>
+          </div>
+
+          <!-- Laser Scan Line -->
+          <div class="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-[bounce_2s_infinite]"></div>
+        </div>
+
+        <!-- MANUAL INPUT OR ZEBRA DATAWEDGE BROADCAST -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+            <span>Machine QR / Work Center ID:</span>
+            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono"><i class="fa-solid fa-barcode"></i> Zebra DataWedge Auto-Listening</span>
+          </label>
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                <i class="fa-solid fa-tag"></i>
+              </div>
+              <input type="text" id="qr-manual-input" placeholder="e.g. OLD-CARD-01 or CARD-01" class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button onclick="handleManualQrSubmit()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition active:scale-95 shrink-0 flex items-center gap-1.5">
+              <i class="fa-solid fa-check"></i> Verify QR
+            </button>
+          </div>
+        </div>
+
+        <!-- RECOGNITION STATUS CARD (DYNAMIC) -->
+        <div id="qr-recognition-card" class="hidden p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 p-1.5 border border-emerald-500/30 shrink-0 flex items-center justify-center">
+              <img id="qr-machine-img" src="/static/img/machines/carding.svg" alt="Machine" class="w-full h-full object-contain">
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="qr-match-dept" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">Old Spinning</span>
+                <span id="qr-match-wc" class="font-mono text-xs font-bold text-slate-900 dark:text-white">OLD-CARD-01</span>
+              </div>
+              <h4 id="qr-match-title" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate mt-0.5">1. Carding (Old Spinning)</h4>
+              <p id="qr-match-mfr" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Manufacturer: Rieter</p>
+            </div>
+            <button onclick="proceedFromQrToCapture()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs shadow-md shrink-0 flex items-center gap-1">
+              <span>Next: Photo</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1-CLICK QUICK TEST BUTTONS (OLD & NEW SPINNING) -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+            <span>Instant 1-Click Machine QR Simulation:</span>
+            <span class="text-[10px] text-slate-400">Tap any machine to test</span>
+          </div>
+
+          <!-- Tabs for Old Spinning / New Spinning -->
+          <div class="space-y-2">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-amber-600 dark:text-amber-400 block mb-1">Old Spinning (9 Machines):</span>
+              <div class="grid grid-cols-3 gap-1.5 text-[11px] font-mono">
+                <button onclick="simulateQrScan('OLD-CARD-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Carding">
+                  <span class="font-bold block">OLD-CARD-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Rieter Carding</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-BRK-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Breaker">
+                  <span class="font-bold block">OLD-BRK-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Rieter Breaker</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-UNILAP-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Unilap">
+                  <span class="font-bold block">OLD-UNILAP-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Rieter Unilap E32</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-COMB-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Comber">
+                  <span class="font-bold block">OLD-COMB-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Rieter Comber</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-RSB-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter RSB">
+                  <span class="font-bold block">OLD-RSB-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Draw Frame RSB</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-SP-FR-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Electro-Jet Speed Frame">
+                  <span class="font-bold block">OLD-SP-FR-01</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Speed Frame ADR</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-RING-P1')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Rieter Ring Frame P1">
+                  <span class="font-bold block">OLD-RING-P1</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Ring Frame Phase 1</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-RING-P2')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Siemens SIMATIC Ring Frame P2">
+                  <span class="font-bold block">OLD-RING-P2</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Ring Frame Phase 2</span>
+                </button>
+                <button onclick="simulateQrScan('OLD-AUTOCONER')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-left border border-slate-200 dark:border-slate-700 transition truncate" title="Saurer Autoconer 5">
+                  <span class="font-bold block">OLD-AUTOCONER</span>
+                  <span class="text-[9px] text-slate-500 dark:text-slate-400 font-sans block truncate">Auto Corner (Saurer)</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <span class="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400 block mb-1">New Spinning (8 Machines):</span>
+              <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono">
+                <button onclick="simulateQrScan('CARD-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">CARD-01</span>
+                </button>
+                <button onclick="simulateQrScan('BR-DF')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">BR-DF</span>
+                </button>
+                <button onclick="simulateQrScan('LAP-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">LAP-01</span>
+                </button>
+                <button onclick="simulateQrScan('COMB-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">COMB-01</span>
+                </button>
+                <button onclick="simulateQrScan('FR-DF')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">FR-DF</span>
+                </button>
+                <button onclick="simulateQrScan('SP-FR')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">SP-FR</span>
+                </button>
+                <button onclick="simulateQrScan('RING-01')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">RING-01</span>
+                </button>
+                <button onclick="simulateQrScan('AUTOCONER')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 text-left border border-slate-200 dark:border-slate-700 transition truncate">
+                  <span class="font-bold block">AUTOCONER</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between text-xs">
+        <span class="text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+          <i class="fa-solid fa-barcode text-emerald-500"></i> Zebra TC22 Scanner Ready
+        </span>
+        <button onclick="closeQrScannerModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: STEP 4 OPERATOR VERIFICATION MODAL      -->
+  <!-- ============================================== -->
+  <div id="verification-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl max-h-[92vh] shadow-2xl overflow-hidden flex flex-col my-auto transition-all animate-[fadeIn_0.2s_ease-out]">
+      
+      <!-- HEADER -->
+      <div class="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-950/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center text-lg shadow-md shadow-indigo-500/20">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-bold text-base text-slate-900 dark:text-white" id="modal-verify-machine-title">Operator Verification Form</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">Step 4 of 5</span>
+              <span id="modal-verify-conf-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">98% Conf.</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Review AI detected values against screen photo. Edit any number before posting to SAP.</p>
+          </div>
+        </div>
+        <button onclick="closeVerificationModal()" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- BODY: IMAGE ON LEFT / FORM ON RIGHT -->
+      <div class="p-5 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- LEFT: CAPTURED HMI PHOTO WITH BADGES -->
+        <div class="lg:col-span-6 flex flex-col space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-image text-indigo-500"></i> Machine Screen Photo
+            </span>
+            <button onclick="triggerScannerCameraModal(); closeVerificationModal();" class="text-amber-600 dark:text-amber-400 hover:underline font-semibold text-xs flex items-center gap-1">
+              <i class="fa-solid fa-camera"></i> Retake Photo
+            </button>
+          </div>
+
+          <div class="relative rounded-2xl bg-black border border-slate-200 dark:border-slate-800 p-2 flex items-center justify-center min-h-[220px] max-h-[340px] overflow-hidden shadow-inner">
+            <img id="modal-verify-screen-img" src="/samples/carding.jpg" alt="Captured Screen" class="max-h-[320px] w-auto max-w-full object-contain rounded-xl">
+          </div>
+
+          <!-- MACHINE INFO CHIP -->
+          <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <img id="modal-verify-machine-svg" src="/static/img/machines/carding.svg" alt="Machine" class="w-8 h-8 object-contain">
+              <div>
+                <span id="modal-verify-wc-badge" class="font-mono font-bold text-slate-900 dark:text-white block">CARD-01</span>
+                <span id="modal-verify-mfr-badge" class="text-[10px] text-slate-500 dark:text-slate-400">Trutzschler / LMW</span>
+              </div>
+            </div>
+            <div class="text-right font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
+              <span class="block font-bold">Dynamic Semantic OCR</span>
+              <span class="text-slate-400">No Frozen Coordinates</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: EDITABLE DATA FORM -->
+        <div class="lg:col-span-6 flex flex-col space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-pen-to-square text-emerald-500"></i> Verify &amp; Edit Captured Numbers
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Tap any field to correct</span>
+          </div>
+
+          <!-- Scrollable Fields Container -->
+          <div id="modal-verify-fields-container" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
+            <!-- Dynamically populated fields via JS -->
+          </div>
+
+          <!-- SAP Target Info -->
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between font-mono">
+            <span>Target: SAP NetWeaver CO11N</span>
+            <span id="modal-verify-order-display">Order #000010049281</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER: CONFIRM & SUBMIT TO SAP -->
+      <div class="px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between gap-3 text-xs">
+        <button onclick="closeVerificationModal()" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition">
+          Back / Edit Later
+        </button>
+
+        <button onclick="submitVerifiedDataToSap()" id="btn-modal-confirm-sap" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-600/25 flex items-center gap-2 transition active:scale-95">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Step 5: Confirm &amp; Post to SAP</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ============================================== -->
   <!-- MODAL: LIVE CAMERA VIEWFINDER MODAL            -->
