@@ -1,4 +1,4 @@
-package com.industrial.machineocr.vision
+package com.welspun.welvision
 
 import android.graphics.Rect
 import androidx.annotation.OptIn

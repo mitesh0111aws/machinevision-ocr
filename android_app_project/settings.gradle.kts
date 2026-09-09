@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "MachineVisionZebra"
+rootProject.name = "WelVision"
 include(":app")

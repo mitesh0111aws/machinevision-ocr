@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.industrial.machinevision"
+    namespace = "com.welspun.welvision"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.industrial.machinevision"
+        applicationId = "com.welspun.welvision"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "2.4.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

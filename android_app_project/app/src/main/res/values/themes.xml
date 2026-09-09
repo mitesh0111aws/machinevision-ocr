@@ -1,7 +1,7 @@
 <resources>
     <style name="Theme.MachineVisionZebra" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#2563EB</item>
-        <item name="colorPrimaryVariant">#1D4ED8</item>
+        <item name="colorPrimary">#160A8A</item>
+        <item name="colorPrimaryVariant">#0F075E</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="android:statusBarColor">#0F172A</item>
     </style>
